@@ -59,7 +59,7 @@ To check that your environment follows the gym interface, please use:
 
 .. code-block:: python
 
-	from stable_baselines3.common.env_checker import check_env
+	from hmlf.common.env_checker import check_env
 
 	env = CustomEnv(arg1, ...)
 	# It will check your custom environment and output additional warnings if needed

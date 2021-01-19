@@ -6,14 +6,14 @@ import numpy as np
 import pytest
 import torch as th
 
-from stable_baselines3 import A2C, PPO
-from stable_baselines3.common.atari_wrappers import ClipRewardEnv
-from stable_baselines3.common.env_util import is_wrapped, make_atari_env, make_vec_env, unwrap_wrapper
-from stable_baselines3.common.evaluation import evaluate_policy
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.noise import ActionNoise, OrnsteinUhlenbeckActionNoise, VectorizedActionNoise
-from stable_baselines3.common.utils import polyak_update, zip_strict
-from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
+from hmlf import A2C, PPO
+from hmlf.common.atari_wrappers import ClipRewardEnv
+from hmlf.common.env_util import is_wrapped, make_atari_env, make_vec_env, unwrap_wrapper
+from hmlf.common.evaluation import evaluate_policy
+from hmlf.common.monitor import Monitor
+from hmlf.common.noise import ActionNoise, OrnsteinUhlenbeckActionNoise, VectorizedActionNoise
+from hmlf.common.utils import polyak_update, zip_strict
+from hmlf.common.vec_env import DummyVecEnv, SubprocVecEnv
 
 
 @pytest.mark.parametrize("env_id", ["CartPole-v1", lambda: gym.make("CartPole-v1")])
@@ -324,7 +324,7 @@ def test_zip_strict():
 def test_cmd_util_rename():
     """Test that importing cmd_util still works but raises warning"""
     with pytest.warns(FutureWarning):
-        from stable_baselines3.common.cmd_util import make_vec_env  # noqa: F401
+        from hmlf.common.cmd_util import make_vec_env  # noqa: F401
 
 
 def test_is_wrapped():

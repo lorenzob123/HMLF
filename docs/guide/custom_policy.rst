@@ -25,7 +25,7 @@ using ``policy_kwargs`` parameter:
   import gym
   import torch as th
 
-  from stable_baselines3 import PPO
+  from hmlf import PPO
 
   # Custom MLP policy of two layers of size 32 each with Relu activation function
   policy_kwargs = dict(activation_fn=th.nn.ReLU, net_arch=[32, 32])
@@ -64,8 +64,8 @@ that derives from ``BaseFeaturesExtractor`` and then pass it to the model when t
   import torch as th
   import torch.nn as nn
 
-  from stable_baselines3 import PPO
-  from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
+  from hmlf import PPO
+  from hmlf.common.torch_layers import BaseFeaturesExtractor
 
 
   class CustomCNN(BaseFeaturesExtractor):
@@ -186,8 +186,8 @@ If your task requires even more granular control over the policy/value architect
   import torch as th
   from torch import nn
 
-  from stable_baselines3 import PPO
-  from stable_baselines3.common.policies import ActorCriticPolicy
+  from hmlf import PPO
+  from hmlf.common.policies import ActorCriticPolicy
 
 
   class CustomNetwork(nn.Module):
@@ -285,7 +285,7 @@ you only need to specify ``net_arch=[256, 256]`` (here, two hidden layers of 256
 
 .. code-block:: python
 
-  from stable_baselines3 import SAC
+  from hmlf import SAC
 
   # Custom actor architecture with two layers of 64 units each
   # Custom critic architecture with two layers of 400 and 300 units

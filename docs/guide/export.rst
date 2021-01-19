@@ -56,7 +56,7 @@ You can also manually export required parameters (weights) and construct the
 network in your desired framework.
 
 You can access parameters of the model via agents'
-:func:`get_parameters <stable_baselines3.common.base_class.BaseAlgorithm.get_parameters>` function.
+:func:`get_parameters <hmlf.common.base_class.BaseAlgorithm.get_parameters>` function.
 As policies are also PyTorch modules, you can also access ``model.policy.state_dict()`` directly.
 To find the architecture of the networks for each algorithm, best is to check the ``policies.py`` file located
 in their respective folders.

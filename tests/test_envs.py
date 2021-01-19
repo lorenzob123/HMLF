@@ -3,9 +3,9 @@ import numpy as np
 import pytest
 from gym import spaces
 
-from stable_baselines3.common.bit_flipping_env import BitFlippingEnv
-from stable_baselines3.common.env_checker import check_env
-from stable_baselines3.common.identity_env import (
+from hmlf.common.bit_flipping_env import BitFlippingEnv
+from hmlf.common.env_checker import check_env
+from hmlf.common.identity_env import (
     FakeImageEnv,
     IdentityEnv,
     IdentityEnvBox,

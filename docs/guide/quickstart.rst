@@ -12,7 +12,7 @@ Here is a quick example of how to train and run A2C on a CartPole environment:
 
   import gym
 
-  from stable_baselines3 import A2C
+  from hmlf import A2C
 
   env = gym.make('CartPole-v1')
 
@@ -34,6 +34,6 @@ the policy is registered:
 
 .. code-block:: python
 
-    from stable_baselines3 import A2C
+    from hmlf import A2C
 
     model = A2C('MlpPolicy', 'CartPole-v1').learn(10000)

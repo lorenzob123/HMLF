@@ -20,7 +20,7 @@ You can find two examples of custom callbacks in the documentation: one for savi
 
 .. code-block:: python
 
-    from stable_baselines3.common.callbacks import BaseCallback
+    from hmlf.common.callbacks import BaseCallback
 
 
     class CustomCallback(BaseCallback):
@@ -44,7 +44,7 @@ You can find two examples of custom callbacks in the documentation: one for savi
             # self.locals = None  # type: Dict[str, Any]
             # self.globals = None  # type: Dict[str, Any]
             # The logger object, used to report things in the terminal
-            # self.logger = None  # stable_baselines3.common.logger
+            # self.logger = None  # hmlf.common.logger
             # # Sometimes, for event callback, it is useful
             # # to have access to the parent object
             # self.parent = None  # type: Optional[BaseCallback]
@@ -161,8 +161,8 @@ and optionally a prefix for the checkpoints (``rl_model`` by default).
 
 .. code-block:: python
 
-    from stable_baselines3 import SAC
-    from stable_baselines3.common.callbacks import CheckpointCallback
+    from hmlf import SAC
+    from hmlf.common.callbacks import CheckpointCallback
     # Save a checkpoint every 1000 steps
     checkpoint_callback = CheckpointCallback(save_freq=1000, save_path='./logs/',
                                              name_prefix='rl_model')
@@ -190,8 +190,8 @@ It will save the best model if ``best_model_save_path`` folder is specified and 
 
     import gym
 
-    from stable_baselines3 import SAC
-    from stable_baselines3.common.callbacks import EvalCallback
+    from hmlf import SAC
+    from hmlf.common.callbacks import EvalCallback
 
     # Separate evaluation env
     eval_env = gym.make('Pendulum-v0')
@@ -217,8 +217,8 @@ Alternatively, you can pass directly a list of callbacks to the `learn()` method
 
     import gym
 
-    from stable_baselines3 import SAC
-    from stable_baselines3.common.callbacks import CallbackList, CheckpointCallback, EvalCallback
+    from hmlf import SAC
+    from hmlf.common.callbacks import CallbackList, CheckpointCallback, EvalCallback
 
     checkpoint_callback = CheckpointCallback(save_freq=1000, save_path='./logs/')
     # Separate evaluation env
@@ -247,8 +247,8 @@ It must be used with the :ref:`EvalCallback` and use the event triggered by a ne
 
     import gym
 
-    from stable_baselines3 import SAC
-    from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
+    from hmlf import SAC
+    from hmlf.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 
     # Separate evaluation env
     eval_env = gym.make('Pendulum-v0')
@@ -279,8 +279,8 @@ An :ref:`EventCallback` that will trigger its child callback every ``n_steps`` t
 
   import gym
 
-  from stable_baselines3 import PPO
-  from stable_baselines3.common.callbacks import CheckpointCallback, EveryNTimesteps
+  from hmlf import PPO
+  from hmlf.common.callbacks import CheckpointCallback, EveryNTimesteps
 
   # this is equivalent to defining CheckpointCallback(save_freq=500)
   # checkpoint_callback will be triggered every 500 steps
@@ -310,8 +310,8 @@ and in total for ``max_episodes * n_envs`` episodes.
 
 .. code-block:: python
 
-    from stable_baselines3 import A2C
-    from stable_baselines3.common.callbacks import StopTrainingOnMaxEpisodes
+    from hmlf import A2C
+    from hmlf.common.callbacks import StopTrainingOnMaxEpisodes
 
     # Stops training when the model reaches the maximum number of episodes
     callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=5, verbose=1)
@@ -322,5 +322,5 @@ and in total for ``max_episodes * n_envs`` episodes.
     model.learn(int(1e10), callback=callback_max_episodes)
 
 
-.. automodule:: stable_baselines3.common.callbacks
+.. automodule:: hmlf.common.callbacks
   :members:

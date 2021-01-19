@@ -43,7 +43,7 @@ File structure:
   ├── *.optimizer.pth   PyTorch optimizers serialized
   ├── policy.pth        PyTorch state dictionary of the policy saved
   ├── pytorch_variables.pth Additional PyTorch variables
-  ├── _stable_baselines3_version contains the SB3 version with which the model was saved
+  ├── _hmlf_version contains the SB3 version with which the model was saved
 
 
 Pros:

@@ -5,9 +5,9 @@ import gym
 import numpy as np
 import pytest
 
-from stable_baselines3 import A2C, DDPG, DQN, HER, PPO, SAC, TD3
-from stable_baselines3.common.bit_flipping_env import BitFlippingEnv
-from stable_baselines3.common.callbacks import (
+from hmlf import A2C, DDPG, DQN, HER, PPO, SAC, TD3
+from hmlf.common.bit_flipping_env import BitFlippingEnv
+from hmlf.common.callbacks import (
     CallbackList,
     CheckpointCallback,
     EvalCallback,
@@ -15,9 +15,9 @@ from stable_baselines3.common.callbacks import (
     StopTrainingOnMaxEpisodes,
     StopTrainingOnRewardThreshold,
 )
-from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.vec_env import DummyVecEnv
-from stable_baselines3.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.common.env_util import make_vec_env
+from hmlf.common.vec_env import DummyVecEnv
+from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
 
 
 @pytest.mark.parametrize("model_class", [A2C, PPO, SAC, TD3, DQN, DDPG])

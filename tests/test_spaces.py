@@ -2,8 +2,8 @@ import gym
 import numpy as np
 import pytest
 
-from stable_baselines3 import A2C, DDPG, DQN, PPO, SAC, TD3
-from stable_baselines3.common.evaluation import evaluate_policy
+from hmlf import A2C, DDPG, DQN, PPO, SAC, TD3
+from hmlf.common.evaluation import evaluate_policy
 
 
 class DummyMultiDiscreteSpace(gym.Env):

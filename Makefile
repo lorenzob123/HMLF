@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-LINT_PATHS=stable_baselines3/ tests/ docs/conf.py setup.py
+LINT_PATHS=hmlf/ tests/ docs/conf.py setup.py
 
 pytest:
 	./scripts/run_tests.sh

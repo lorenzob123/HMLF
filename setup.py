@@ -2,7 +2,7 @@ import os
 
 from setuptools import find_packages, setup
 
-with open(os.path.join("stable_baselines3", "version.txt"), "r") as file_handler:
+with open(os.path.join("hmlf", "version.txt"), "r") as file_handler:
     __version__ = file_handler.read().strip()
 
 
@@ -41,7 +41,7 @@ Here is a quick example of how to train and run PPO on a cartpole environment:
 ```python
 import gym
 
-from stable_baselines3 import PPO
+from hmlf import PPO
 
 env = gym.make('CartPole-v1')
 
@@ -60,7 +60,7 @@ for i in range(1000):
 Or just train a model with a one liner if [the environment is registered in Gym](https://github.com/openai/gym/wiki/Environments) and if [the policy is registered](https://stable-baselines3.readthedocs.io/en/master/guide/custom_policy.html):
 
 ```python
-from stable_baselines3 import PPO
+from hmlf import PPO
 
 model = PPO('MlpPolicy', 'CartPole-v1').learn(10000)
 ```
@@ -69,9 +69,9 @@ model = PPO('MlpPolicy', 'CartPole-v1').learn(10000)
 
 
 setup(
-    name="stable_baselines3",
-    packages=[package for package in find_packages() if package.startswith("stable_baselines3")],
-    package_data={"stable_baselines3": ["py.typed", "version.txt"]},
+    name="hmlf",
+    packages=[package for package in find_packages() if package.startswith("hmlf")],
+    package_data={"hmlf": ["py.typed", "version.txt"]},
     install_requires=[
         "gym>=0.17",
         "numpy",

@@ -6,11 +6,11 @@ import pytest
 import torch as th
 from gym import spaces
 
-from stable_baselines3 import A2C, DQN, PPO, SAC, TD3
-from stable_baselines3.common.identity_env import FakeImageEnv
-from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
-from stable_baselines3.common.utils import zip_strict
-from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped
+from hmlf import A2C, DQN, PPO, SAC, TD3
+from hmlf.common.identity_env import FakeImageEnv
+from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
+from hmlf.common.utils import zip_strict
+from hmlf.common.vec_env import VecTransposeImage, is_vecenv_wrapped
 
 
 @pytest.mark.parametrize("model_class", [A2C, PPO, SAC, TD3, DQN])

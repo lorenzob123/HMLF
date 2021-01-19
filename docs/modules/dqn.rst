@@ -1,6 +1,6 @@
 .. _dqn:
 
-.. automodule:: stable_baselines3.dqn
+.. automodule:: hmlf.dqn
 
 
 DQN
@@ -55,8 +55,8 @@ Example
   import gym
   import numpy as np
 
-  from stable_baselines3 import DQN
-  from stable_baselines3.dqn import MlpPolicy
+  from hmlf import DQN
+  from hmlf.dqn import MlpPolicy
 
   env = gym.make('CartPole-v0')
 
@@ -128,7 +128,7 @@ DQN Policies
   :members:
   :inherited-members:
 
-.. autoclass:: stable_baselines3.dqn.policies.DQNPolicy
+.. autoclass:: hmlf.dqn.policies.DQNPolicy
   :members:
   :noindex:
 

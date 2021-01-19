@@ -3,5 +3,5 @@
 Utils
 =====
 
-.. automodule:: stable_baselines3.common.utils
+.. automodule:: hmlf.common.utils
   :members:

@@ -3,5 +3,5 @@
 Gym Environment Checker
 ========================
 
-.. automodule:: stable_baselines3.common.env_checker
+.. automodule:: hmlf.common.env_checker
   :members:

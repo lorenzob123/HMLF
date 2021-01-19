@@ -6,7 +6,7 @@ import torch as th
 from matplotlib import pyplot as plt
 from pandas.errors import EmptyDataError
 
-from stable_baselines3.common.logger import (
+from hmlf.common.logger import (
     DEBUG,
     Figure,
     FormatUnsupportedError,

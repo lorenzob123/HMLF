@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from stable_baselines3 import A2C, DDPG, DQN, PPO, SAC, TD3
-from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
+from hmlf import A2C, DDPG, DQN, PPO, SAC, TD3
+from hmlf.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
 normal_action_noise = NormalActionNoise(np.zeros(1), 0.1 * np.ones(1))
 

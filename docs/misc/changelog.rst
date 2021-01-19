@@ -126,12 +126,12 @@ Breaking Changes:
 - Removed ``device`` keyword argument of policies; use ``policy.to(device)`` instead. (@qxcv)
 - Rename ``BaseClass.get_torch_variables`` -> ``BaseClass._get_torch_save_params`` and ``BaseClass.excluded_save_params`` -> ``BaseClass._excluded_save_params``
 - Renamed saved items ``tensors`` to ``pytorch_variables`` for clarity
-- ``make_atari_env``, ``make_vec_env`` and ``set_random_seed`` must be imported with (and not directly from ``stable_baselines3.common``):
+- ``make_atari_env``, ``make_vec_env`` and ``set_random_seed`` must be imported with (and not directly from ``hmlf.common``):
 
 .. code-block:: python
 
-  from stable_baselines3.common.cmd_util import make_atari_env, make_vec_env
-  from stable_baselines3.common.utils import set_random_seed
+  from hmlf.common.cmd_util import make_atari_env, make_vec_env
+  from hmlf.common.utils import set_random_seed
 
 
 New Features:

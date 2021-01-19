@@ -104,8 +104,8 @@ It will monitor the actions, observations, and rewards, indicating what action o
   from gym import spaces
   import numpy as np
 
-  from stable_baselines3 import PPO
-  from stable_baselines3.common.vec_env import DummyVecEnv, VecCheckNan
+  from hmlf import PPO
+  from hmlf.common.vec_env import DummyVecEnv, VecCheckNan
 
   class NanAndInfEnv(gym.Env):
       """Custom Environment that raised NaNs and Infs"""

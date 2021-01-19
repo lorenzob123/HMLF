@@ -10,7 +10,7 @@ To use Tensorboard with stable baselines3, you simply need to pass the location 
 
 .. code-block:: python
 
-    from stable_baselines3 import A2C
+    from hmlf import A2C
 
     model = A2C('MlpPolicy', 'CartPole-v1', verbose=1, tensorboard_log="./a2c_cartpole_tensorboard/")
     model.learn(total_timesteps=10000)
@@ -20,7 +20,7 @@ You can also define custom logging name when training (by default it is the algo
 
 .. code-block:: python
 
-    from stable_baselines3 import A2C
+    from hmlf import A2C
 
     model = A2C('MlpPolicy', 'CartPole-v1', verbose=1, tensorboard_log="./a2c_cartpole_tensorboard/")
     model.learn(total_timesteps=10000, tb_log_name="first_run")
@@ -58,8 +58,8 @@ Here is a simple example on how to log both additional tensor or arbitrary scala
 
     import numpy as np
 
-    from stable_baselines3 import SAC
-    from stable_baselines3.common.callbacks import BaseCallback
+    from hmlf import SAC
+    from hmlf.common.callbacks import BaseCallback
 
     model = SAC("MlpPolicy", "Pendulum-v0", tensorboard_log="/tmp/sac/", verbose=1)
 
@@ -93,9 +93,9 @@ Here is an example of how to render an image to TensorBoard at regular intervals
 
 .. code-block:: python
 
-    from stable_baselines3 import SAC
-    from stable_baselines3.common.callbacks import BaseCallback
-    from stable_baselines3.common.logger import Image
+    from hmlf import SAC
+    from hmlf.common.callbacks import BaseCallback
+    from hmlf.common.logger import Image
 
     model = SAC("MlpPolicy", "Pendulum-v0", tensorboard_log="/tmp/sac/", verbose=1)
 
@@ -130,9 +130,9 @@ Here is an example of how to store a plot in TensorBoard at regular intervals:
     import numpy as np
     import matplotlib.pyplot as plt
 
-    from stable_baselines3 import SAC
-    from stable_baselines3.common.callbacks import BaseCallback
-    from stable_baselines3.common.logger import Figure
+    from hmlf import SAC
+    from hmlf.common.callbacks import BaseCallback
+    from hmlf.common.logger import Figure
 
     model = SAC("MlpPolicy", "Pendulum-v0", tensorboard_log="/tmp/sac/", verbose=1)
 
@@ -170,10 +170,10 @@ Here is an example of how to render an episode and log the resulting video to Te
     import gym
     import torch as th
 
-    from stable_baselines3 import A2C
-    from stable_baselines3.common.callbacks import BaseCallback
-    from stable_baselines3.common.evaluation import evaluate_policy
-    from stable_baselines3.common.logger import Video
+    from hmlf import A2C
+    from hmlf.common.callbacks import BaseCallback
+    from hmlf.common.evaluation import evaluate_policy
+    from hmlf.common.logger import Video
 
 
     class VideoRecorderCallback(BaseCallback):

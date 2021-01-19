@@ -1,6 +1,6 @@
 .. _td3:
 
-.. automodule:: stable_baselines3.td3
+.. automodule:: hmlf.td3
 
 
 TD3
@@ -60,9 +60,9 @@ Example
   import gym
   import numpy as np
 
-  from stable_baselines3 import TD3
-  from stable_baselines3.td3.policies import MlpPolicy
-  from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
+  from hmlf import TD3
+  from hmlf.td3.policies import MlpPolicy
+  from hmlf.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
   env = gym.make('Pendulum-v0')
 
@@ -160,7 +160,7 @@ TD3 Policies
   :members:
   :inherited-members:
 
-.. autoclass:: stable_baselines3.td3.policies.TD3Policy
+.. autoclass:: hmlf.td3.policies.TD3Policy
   :members:
   :noindex:
 

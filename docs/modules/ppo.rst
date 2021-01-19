@@ -1,6 +1,6 @@
 .. _ppo2:
 
-.. automodule:: stable_baselines3.ppo
+.. automodule:: hmlf.ppo
 
 PPO
 ===
@@ -53,9 +53,9 @@ Train a PPO agent on ``Pendulum-v0`` using 4 environments.
 
   import gym
 
-  from stable_baselines3 import PPO
-  from stable_baselines3.ppo import MlpPolicy
-  from stable_baselines3.common.env_util import make_vec_env
+  from hmlf import PPO
+  from hmlf.ppo import MlpPolicy
+  from hmlf.common.env_util import make_vec_env
 
   # Parallel environments
   env = make_vec_env('CartPole-v1', n_envs=4)
@@ -155,13 +155,13 @@ PPO Policies
   :members:
   :inherited-members:
 
-.. autoclass:: stable_baselines3.common.policies.ActorCriticPolicy
+.. autoclass:: hmlf.common.policies.ActorCriticPolicy
   :members:
   :noindex:
 
 .. autoclass:: CnnPolicy
   :members:
 
-.. autoclass:: stable_baselines3.common.policies.ActorCriticCnnPolicy
+.. autoclass:: hmlf.common.policies.ActorCriticCnnPolicy
   :members:
   :noindex:

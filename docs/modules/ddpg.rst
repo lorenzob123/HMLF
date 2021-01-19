@@ -1,6 +1,6 @@
 .. _ddpg:
 
-.. automodule:: stable_baselines3.ddpg
+.. automodule:: hmlf.ddpg
 
 
 DDPG
@@ -60,8 +60,8 @@ Example
   import gym
   import numpy as np
 
-  from stable_baselines3 import DDPG
-  from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
+  from hmlf import DDPG
+  from hmlf.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
   env = gym.make('Pendulum-v0')
 
@@ -161,7 +161,7 @@ DDPG Policies
   :members:
   :inherited-members:
 
-.. autoclass:: stable_baselines3.td3.policies.TD3Policy
+.. autoclass:: hmlf.td3.policies.TD3Policy
   :members:
   :noindex:
 

@@ -28,7 +28,7 @@ ENV CODE_DIR /root/code
 
 # Copy setup file only to install dependencies
 COPY ./setup.py ${CODE_DIR}/stable-baselines3/setup.py
-COPY ./stable_baselines3/version.txt ${CODE_DIR}/stable-baselines3/stable_baselines3/version.txt
+COPY ./hmlf/version.txt ${CODE_DIR}/stable-baselines3/hmlf/version.txt
 
 RUN \
     cd ${CODE_DIR}/stable-baselines3 3&& \

@@ -1,6 +1,6 @@
 .. _base_algo:
 
-.. automodule:: stable_baselines3.common.base_class
+.. automodule:: hmlf.common.base_class
 
 
 Base RL Class
@@ -12,7 +12,7 @@ Common interface for all the RL algorithms
   :members:
 
 
-.. automodule:: stable_baselines3.common.off_policy_algorithm
+.. automodule:: hmlf.common.off_policy_algorithm
 
 
 Base Off-Policy Class
@@ -24,7 +24,7 @@ The base RL algorithm for Off-Policy algorithm (ex: SAC/TD3)
   :members:
 
 
-.. automodule:: stable_baselines3.common.on_policy_algorithm
+.. automodule:: hmlf.common.on_policy_algorithm
 
 
 Base On-Policy Class

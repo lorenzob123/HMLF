@@ -3,5 +3,5 @@
 Action Noise
 =============
 
-.. automodule:: stable_baselines3.common.noise
+.. automodule:: hmlf.common.noise
   :members:

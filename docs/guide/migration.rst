@@ -25,7 +25,7 @@ so you should not expect performance drop when switching from SB2 to SB3.
 How to migrate?
 ===============
 
-In most cases, replacing ``from stable_baselines`` by ``from stable_baselines3`` will be sufficient.
+In most cases, replacing ``from stable_baselines`` by ``from hmlf`` will be sufficient.
 Some files were moved to the common folder (cf below) and could result to import errors.
 Some algorithms were removed because of their complexity to improve the maintainability of the project.
 We recommend reading this guide carefully to understand all the changes that were made.
@@ -65,10 +65,10 @@ Utility functions are no longer exported from ``common`` module, you should impo
 
 .. code-block:: python
 
-  from stable_baselines3.common.env_util import make_atari_env, make_vec_env
-  from stable_baselines3.common.utils import set_random_seed
+  from hmlf.common.env_util import make_atari_env, make_vec_env
+  from hmlf.common.utils import set_random_seed
 
-instead of ``from stable_baselines3.common import make_atari_env``
+instead of ``from hmlf.common import make_atari_env``
 
 
 
@@ -103,7 +103,7 @@ A2C
 
 	PyTorch implementation of RMSprop `differs from Tensorflow's <https://github.com/pytorch/pytorch/issues/23796>`_,
 	which leads to `different and potentially more unstable results <https://github.com/DLR-RM/stable-baselines3/pull/110#issuecomment-663255241>`_.
-	Use ``stable_baselines3.common.sb2_compat.rmsprop_tf_like.RMSpropTFLike`` optimizer to match the results
+	Use ``hmlf.common.sb2_compat.rmsprop_tf_like.RMSpropTFLike`` optimizer to match the results
 	with TensorFlow's implementation. This can be done through ``policy_kwargs``: ``A2C(policy_kwargs=dict(optimizer_class=RMSpropTFLike, eps=1e-5))``
 
 

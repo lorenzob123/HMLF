@@ -60,8 +60,8 @@ In the following example, we will train, save and load a DQN model on the Lunar 
 
   import gym
 
-  from stable_baselines3 import DQN
-  from stable_baselines3.common.evaluation import evaluate_policy
+  from hmlf import DQN
+  from hmlf.common.evaluation import evaluate_policy
 
 
   # Create environment
@@ -108,10 +108,10 @@ Multiprocessing: Unleashing the Power of Vectorized Environments
   import gym
   import numpy as np
 
-  from stable_baselines3 import PPO
-  from stable_baselines3.common.vec_env import SubprocVecEnv
-  from stable_baselines3.common.env_util import make_vec_env
-  from stable_baselines3.common.utils import set_random_seed
+  from hmlf import PPO
+  from hmlf.common.vec_env import SubprocVecEnv
+  from hmlf.common.env_util import make_vec_env
+  from hmlf.common.utils import set_random_seed
 
   def make_env(env_id, rank, seed=0):
       """
@@ -174,12 +174,12 @@ If your callback returns False, training is aborted early.
   import numpy as np
   import matplotlib.pyplot as plt
 
-  from stable_baselines3 import TD3
-  from stable_baselines3.common import results_plotter
-  from stable_baselines3.common.monitor import Monitor
-  from stable_baselines3.common.results_plotter import load_results, ts2xy, plot_results
-  from stable_baselines3.common.noise import NormalActionNoise
-  from stable_baselines3.common.callbacks import BaseCallback
+  from hmlf import TD3
+  from hmlf.common import results_plotter
+  from hmlf.common.monitor import Monitor
+  from hmlf.common.results_plotter import load_results, ts2xy, plot_results
+  from hmlf.common.noise import NormalActionNoise
+  from hmlf.common.callbacks import BaseCallback
 
 
   class SaveOnBestTrainingRewardCallback(BaseCallback):
@@ -271,9 +271,9 @@ and multiprocessing for you.
 
 .. code-block:: python
 
-  from stable_baselines3.common.env_util import make_atari_env
-  from stable_baselines3.common.vec_env import VecFrameStack
-  from stable_baselines3 import A2C
+  from hmlf.common.env_util import make_atari_env
+  from hmlf.common.vec_env import VecFrameStack
+  from hmlf import A2C
 
   # There already exists an environment generator
   # that will make and wrap atari environments correctly.
@@ -315,8 +315,8 @@ will compute a running average and standard deviation of input features (it can 
   import gym
   import pybullet_envs
 
-  from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
-  from stable_baselines3 import PPO
+  from hmlf.common.vec_env import DummyVecEnv, VecNormalize
+  from hmlf import PPO
 
   env = DummyVecEnv([lambda: gym.make("HalfCheetahBulletEnv-v0")])
   # Automatically normalize the input features and reward
@@ -374,8 +374,8 @@ The parking env is a goal-conditioned continuous control task, in which the vehi
   import highway_env
   import numpy as np
 
-  from stable_baselines3 import HER, SAC, DDPG, TD3
-  from stable_baselines3.common.noise import NormalActionNoise
+  from hmlf import HER, SAC, DDPG, TD3
+  from hmlf.common.noise import NormalActionNoise
 
   env = gym.make("parking-v0")
 
@@ -436,7 +436,7 @@ linear and constant schedules.
 
   from typing import Callable
 
-  from stable_baselines3 import PPO
+  from hmlf import PPO
 
 
   def linear_schedule(initial_value: float) -> Callable[[float], float]:
@@ -486,9 +486,9 @@ Behind the scene, SB3 uses an :ref:`EvalCallback <callbacks>`.
 
 .. code-block:: python
 
-  from stable_baselines3 import SAC
-  from stable_baselines3.common.evaluation import evaluate_policy
-  from stable_baselines3.sac.policies import MlpPolicy
+  from hmlf import SAC
+  from hmlf.common.evaluation import evaluate_policy
+  from hmlf.sac.policies import MlpPolicy
 
   # Create the model, the training environment
   # and the test environment (for evaluation)
@@ -565,8 +565,8 @@ A2C policy gradient updates on the model.
   import numpy as np
   import torch as th
 
-  from stable_baselines3 import A2C
-  from stable_baselines3.common.evaluation import evaluate_policy
+  from hmlf import A2C
+  from hmlf.common.evaluation import evaluate_policy
 
 
   def mutate(params: Dict[str, th.Tensor]) -> Dict[str, th.Tensor]:
@@ -643,7 +643,7 @@ Record a mp4 video (here using a random agent).
 .. code-block:: python
 
   import gym
-  from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
+  from hmlf.common.vec_env import VecVideoRecorder, DummyVecEnv
 
   env_id = 'CartPole-v1'
   video_folder = 'logs/videos/'
@@ -678,7 +678,7 @@ Bonus: Make a GIF of a Trained Agent
   import imageio
   import numpy as np
 
-  from stable_baselines3 import A2C
+  from hmlf import A2C
 
   model = A2C("MlpPolicy", "LunarLander-v2").learn(100000)
 

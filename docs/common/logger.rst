@@ -3,5 +3,5 @@
 Logger
 ======
 
-.. automodule:: stable_baselines3.common.logger
+.. automodule:: hmlf.common.logger
   :members:

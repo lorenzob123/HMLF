@@ -3,5 +3,5 @@
 Environments Utils
 =========================
 
-.. automodule:: stable_baselines3.common.env_util
+.. automodule:: hmlf.common.env_util
   :members:

@@ -3,5 +3,5 @@
 Evaluation Helper
 =================
 
-.. automodule:: stable_baselines3.common.evaluation
+.. automodule:: hmlf.common.evaluation
   :members:

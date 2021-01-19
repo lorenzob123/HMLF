@@ -1,6 +1,6 @@
 .. _her:
 
-.. automodule:: stable_baselines3.her
+.. automodule:: hmlf.her
 
 
 HER
@@ -52,11 +52,11 @@ Example
 
 .. code-block:: python
 
-    from stable_baselines3 import HER, DDPG, DQN, SAC, TD3
-    from stable_baselines3.her.goal_selection_strategy import GoalSelectionStrategy
-    from stable_baselines3.common.bit_flipping_env import BitFlippingEnv
-    from stable_baselines3.common.vec_env import DummyVecEnv
-    from stable_baselines3.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+    from hmlf import HER, DDPG, DQN, SAC, TD3
+    from hmlf.her.goal_selection_strategy import GoalSelectionStrategy
+    from hmlf.common.bit_flipping_env import BitFlippingEnv
+    from hmlf.common.vec_env import DummyVecEnv
+    from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
 
     model_class = DQN  # works also with SAC, DDPG and TD3
     N_BITS = 15

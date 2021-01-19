@@ -1,6 +1,6 @@
 .. _sac:
 
-.. automodule:: stable_baselines3.sac
+.. automodule:: hmlf.sac
 
 
 SAC
@@ -67,8 +67,8 @@ Example
   import gym
   import numpy as np
 
-  from stable_baselines3 import SAC
-  from stable_baselines3.sac import MlpPolicy
+  from hmlf import SAC
+  from hmlf.sac import MlpPolicy
 
   env = gym.make('Pendulum-v0')
 
@@ -164,7 +164,7 @@ SAC Policies
   :members:
   :inherited-members:
 
-.. autoclass:: stable_baselines3.sac.policies.SACPolicy
+.. autoclass:: hmlf.sac.policies.SACPolicy
   :members:
   :noindex:
 

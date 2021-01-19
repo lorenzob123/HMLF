@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from stable_baselines3 import A2C, PPO, SAC, TD3
+from hmlf import A2C, PPO, SAC, TD3
 
 MODEL_DICT = {
     "a2c": (A2C, "CartPole-v1"),
