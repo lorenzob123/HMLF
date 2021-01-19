@@ -8,7 +8,7 @@ import torch as th
 import numpy as np
 from gym import spaces
 from torch import nn
-from torch.distributions import Bernoulli, Categorical, Normal
+from torch.distributions import Bernoulli, Categorical, Normal, OneHotCategorical
 
 from hmlf.common.preprocessing import get_action_dim
 
@@ -324,26 +324,43 @@ class TupleDistribution(Distribution):
             of the policy network (before the action layer)
         :return:
         """
-        action_logits = nn.Linear(latent_dim, self.action_dim + self.action_param_dim)
-        log_std = nn.Parameter(th.ones(self.action_dim) * log_std_init, requires_grad=True)
+        action_logits_and_mean = nn.Linear(latent_dim, self.action_dim + self.action_param_dim)
+        log_std = nn.Parameter(th.ones(self.action_param_dim) * log_std_init, requires_grad=True)
 
-        return action_logits, log_std
+        return action_logits_and_mean, log_std
 
     def proba_distribution(self, action_logits: th.Tensor, log_std: th.Tensor) -> "CategoricalDistribution":
-        self.action_dist = OneHotCategorical(logits=action_logits[self.params]),
-        self.action_param_dist = Normal(action_logits[self.actions], action_std)
+
+
+        action_std = th.ones_like(action_logits[:, self.params]) * log_std.exp()
+        # print(action_logits, self.actions)
+        self.action_dist = OneHotCategorical(logits=action_logits[:, self.actions])
+        # print("self.action_dist.sample()", self.action_dist.sample())
+        self.action_param_dist = Normal(action_logits[:, self.params], action_std)
+        
+        # print("\nself.action_param_dist.sample()", self.action_param_dist.sample())
         return self
 
     def log_prob(self, actions: th.Tensor) -> th.Tensor:
-        log_prob_actions = self.action_dist.log_prob(actions[self.actions])
-        log_prob_param = sum_independent_dims(self.action_param_dist.log_prob(actions[self.param]))
-        return th.cat((log_prob_actions, log_prob_param))
+        # print("actions", actions)
+        # print("\nself.actions", self.actions)
+        log_prob_actions = self.action_dist.log_prob(actions[:, self.actions])
+
+
+        log_prob_param = sum_independent_dims(self.action_param_dist.log_prob(actions[:, self.params]))
+        # print("log_prob_param", log_prob_param)
+        # print("log_prob_actions", log_prob_actions)
+
+        return log_prob_actions + log_prob_param
 
     def entropy(self) -> th.Tensor:
-        return self.action_dist.entropy() + self.action_param_dist.entropy()
+
+        return self.action_dist.entropy() + sum_independent_dims(self.action_param_dist.entropy())
 
     def sample(self) -> th.Tensor:
-        return th.cat((self.action_dist.sample(), self.action_param_dim.sample()))
+        # print(self.action_dist.sample(), self.action_param_dist.sample())
+
+        return th.cat((self.action_dist.sample(), self.action_param_dist.sample()), dim=1)
 
     def mode(self) -> th.Tensor:
         hot = th.argmax(self.action_dist.probs, dim=1)

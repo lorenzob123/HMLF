@@ -514,7 +514,7 @@ class ActorCriticPolicy(BasePolicy):
         elif isinstance(self.action_dist, BernoulliDistribution):
             self.action_net = self.action_dist.proba_distribution_net(latent_dim=latent_dim_pi)
         elif isinstance(self.action_dist, TupleDistribution):
-            self.action_net =self.action_dist.proba_distribution_net(
+            self.action_net, self.log_std  = self.action_dist.proba_distribution_net(
                 latent_dim=latent_dim_pi, log_std_init=self.log_std_init
             )
         else:
@@ -598,6 +598,8 @@ class ActorCriticPolicy(BasePolicy):
             return self.action_dist.proba_distribution(action_logits=mean_actions)
         elif isinstance(self.action_dist, StateDependentNoiseDistribution):
             return self.action_dist.proba_distribution(mean_actions, self.log_std, latent_sde)
+        elif isinstance(self.action_dist, TupleDistribution):
+            return self.action_dist.proba_distribution(mean_actions, self.log_std)
         else:
             raise ValueError("Invalid action distribution")
 
