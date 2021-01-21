@@ -12,7 +12,7 @@ Please post your question on [reddit](https://www.reddit.com/r/reinforcementlear
 **Please check your environment first using**:
 
 ```python
-from stable_baselines3.common.env_checker import check_env
+from hmlf.common.env_checker import check_env
 
 env = CustomEnv(arg1, ...)
 # It will check your custom environment and output additional warnings if needed
@@ -37,8 +37,8 @@ for both code and stack traces.
 import gym
 import numpy as np
 
-from stable_baselines3 import A2C
-from stable_baselines3.common.env_checker import check_env
+from hmlf import A2C
+from hmlf.common.env_checker import check_env
 
 
 class CustomEnv(gym.Env):

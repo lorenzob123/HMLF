@@ -1,6 +1,8 @@
 import gym
 from gym import spaces
 import numpy as np
+from hmlf.common.vec_env import SubprocVecEnv
+
 
 class DummyEnv(gym.Env):
     """Custom Environment that follows gym interface"""
@@ -16,15 +18,14 @@ class DummyEnv(gym.Env):
         # The second one will be the parameters for skill1
         # The third will be the parameters for skill2
         self.action_space = spaces.Tuple((spaces.Discrete(2),
-                                            spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32),
-                                            spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32)))
+                                            spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32),
+                                            spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)))
         # self.action_space = spaces.Box(low=-1, high=1, shape=(1, ))
         # Example for using image as input:
         self.observation_space = spaces.Box(low=0, high=255,
                                             shape=(2,), dtype=np.float32)
 
     def step(self, action):
-        print(action)
         observation = np.random.random(size=2).astype(np.float32)
         reward = np.random.rand()
         done = False if reward < .9 else True
@@ -46,8 +47,9 @@ if __name__ == "__main__":
     from hmlf import PADDPG, DDPG, PPO
     
 
-    env = DummyEnv()
+    env = [lambda: DummyEnv() for ip in range(8)]
+    env = SubprocVecEnv(env)
     print(env.action_space.dtype)
 
     model = PPO('MlpPolicy', env, verbose=1, policy_kwargs={"ortho_init": False})
-    model.learn(total_timesteps=10000)
+    model.learn(total_timesteps=1000000)

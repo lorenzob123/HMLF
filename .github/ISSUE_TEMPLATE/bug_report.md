@@ -26,7 +26,7 @@ Please use the [markdown code blocks](https://help.github.com/en/articles/creati
 for both code and stack traces.
 
 ```python
-from stable_baselines3 import ...
+from hmlf import ...
 
 ```
 
