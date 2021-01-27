@@ -13,6 +13,7 @@ from hmlf.common.policies import ActorCriticPolicy
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import safe_mean
 from hmlf.common.vec_env import VecEnv
+from hmlf.common.hybrid_utils import to_hybrid_discrete
 
 
 class OnPolicyAlgorithm(BaseAlgorithm):
@@ -164,6 +165,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             # Clip the actions to avoid out of bound error
             if isinstance(self.action_space, gym.spaces.Box):
                 clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
+            if isinstance(self.action_space, gym.spaces.Tuple):
+                clipped_actions = to_hybrid_discrete(actions, self.action_space)
 
             new_obs, rewards, dones, infos = env.step(clipped_actions)
 

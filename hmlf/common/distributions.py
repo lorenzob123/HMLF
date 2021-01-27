@@ -366,7 +366,7 @@ class TupleDistribution(Distribution):
         hot = th.argmax(self.action_dist.probs, dim=1)
         mode_action = th.zeros_like(self.action_dist.probs)
         mode_action[th.arange(len(hot)), hot] = 1
-        return th.cat((mode_action, self.action_param_dist.mean))
+        return th.cat((mode_action, self.action_param_dist.mean), axis=1)
 
     def actions_from_params(self, action_logits: th.Tensor, deterministic: bool = False) -> th.Tensor:
         # Update the proba distribution

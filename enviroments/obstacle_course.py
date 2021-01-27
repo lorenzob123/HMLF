@@ -8,8 +8,6 @@ class ObstacleCourse(gym.Env):
     
     def __init__(self):
 
-        np.random.seed(1)
-
 
         self.max_move = .2
         self.max_jump = 0.05
@@ -48,11 +46,10 @@ class ObstacleCourse(gym.Env):
         move, jump = 0, 1
 
         if action[0] == move:
-            observation = self._move(action[1])
+            observation = self._move(action[1][0])
         elif action[0]== jump:
-            observation = self._jump(action[2])
+            observation = self._jump(action[2][0])
         r, done = self.compute_reward_done()
-
         return observation, r, done, {}
 
 
@@ -111,9 +108,14 @@ class ObstacleCourse(gym.Env):
 if __name__ == "__main__":
     from hmlf import PADDPG, DDPG, PPO
     from hmlf.common.vec_env import SubprocVecEnv
+    from hmlf.common.callbacks import EvalCallback
     from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
+    env = [lambda: ObstacleCourse() for ip in range(16)]
+    env = SubprocVecEnv(env)
 
+    model = PPO('MlpPolicy', env=env,  verbose=2)
 
-    model = PPO('MlpPolicy', env=ObstacleCourse(),  verbose=1)
-    model.learn(total_timesteps=1e6)
+    obs = ObstacleCourse().reset()
+
+    model.learn(total_timesteps=1e6, callback=EvalCallback(eval_env=ObstacleCourse(), eval_freq = 1000, n_eval_episodes=20))

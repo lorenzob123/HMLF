@@ -26,6 +26,7 @@ from hmlf.common.type_aliases import Schedule
 from hmlf.common.utils import get_device, is_vectorized_observation
 from hmlf.common.vec_env import VecTransposeImage
 from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.common.hybrid_utils import to_hybrid_discrete
 
 
 class BaseModel(nn.Module, ABC):
@@ -298,6 +299,8 @@ class BasePolicy(BaseModel):
                 # Actions could be on arbitrary scale, so clip the actions to avoid
                 # out of bound error (e.g. if sampling from a Gaussian distribution)
                 actions = np.clip(actions, self.action_space.low, self.action_space.high)
+        if isinstance(self.action_space, gym.spaces.Tuple):
+            actions = to_hybrid_discrete(actions, self.action_space)
 
         if not vectorized_env:
             if state is not None:
