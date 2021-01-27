@@ -143,7 +143,6 @@ class TD3(OffPolicyAlgorithm):
             with th.no_grad():
                 # Select action according to policy and add clipped noise
                 noise = replay_data.actions.clone().data.normal_(0, self.target_policy_noise)
-                print(replay_data.actions.clone())
                 noise = noise.clamp(-self.target_noise_clip, self.target_noise_clip)
                 next_actions = (self.actor_target(replay_data.next_observations) + noise).clamp(-1, 1)
                 # print(replay_data.next_observations, next_actions, noise)

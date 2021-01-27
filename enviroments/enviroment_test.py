@@ -6,7 +6,6 @@ from hmlf.common.vec_env import SubprocVecEnv
 
 class DummyEnv(gym.Env):
     """Custom Environment that follows gym interface"""
-    metadata = {'render.modes': ['human']}
 
     def __init__(self):
         super(DummyEnv, self).__init__()
@@ -18,8 +17,8 @@ class DummyEnv(gym.Env):
         # The second one will be the parameters for skill1
         # The third will be the parameters for skill2
         self.action_space = spaces.Tuple((spaces.Discrete(2),
-                                            spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32),
-                                            spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)))
+                                            spaces.Box(low=-1, high=1, shape=(4,), dtype=np.float32),
+                                            spaces.Box(low=-1, high=1, shape=(4,), dtype=np.float32)))
         # self.action_space = spaces.Box(low=-1, high=1, shape=(1, ))
         # Example for using image as input:
         self.observation_space = spaces.Box(low=0, high=255,
@@ -51,5 +50,5 @@ if __name__ == "__main__":
     env = SubprocVecEnv(env)
     print(env.action_space.dtype)
 
-    model = PPO('MlpPolicy', env, verbose=1, policy_kwargs={"ortho_init": False})
+    model = PADDPG('MlpPolicy', DummyEnv(), verbose=1)
     model.learn(total_timesteps=1000000)

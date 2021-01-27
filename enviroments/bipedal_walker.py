@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     env = [lambda: PaAcBipedalWalker(gym.make('BipedalWalker-v3')) for ip in range(4)]
     env = SubprocVecEnv(env)
-    print(env.action_space.dtype)
+    print(env.action_space)
 
-    model = DDPG(env=gym.make('BipedalWalker-v3'), **hyperparams,  verbose=1)
+    model = PADDPG(env=PaAcBipedalWalker(gym.make('BipedalWalker-v3')), **hyperparams,  verbose=1)
     model.learn(total_timesteps=1e6)
