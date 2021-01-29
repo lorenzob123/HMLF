@@ -1,3 +1,4 @@
+from hmlf.common.noise import ActionNoise
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import gym
@@ -9,11 +10,10 @@ from hmlf.common import logger
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import get_linear_fn, is_vectorized_observation, polyak_update
-from hmlf.dqn.policies import DQNPolicy
-from hmlf.dqn import DQN
+from hmlf.pdqn.policies import PDQNPolicy
 
 
-class PDQN(DQN):
+class PDQN(OffPolicyAlgorithm):
     """
     Deep Q-Network (DQN)
 
@@ -59,7 +59,7 @@ class PDQN(DQN):
 
     def __init__(
         self,
-        policy: Union[str, Type[DQNPolicy]],
+        policy: Union[str, Type[PDQNPolicy]],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule] = 1e-4,
         buffer_size: int = 1000000,
@@ -85,10 +85,10 @@ class PDQN(DQN):
         _init_setup_model: bool = True,
     ):
 
-        super(DQN, self).__init__(
+        super(PDQN, self).__init__(
             policy,
             env,
-            DQNPolicy,
+            PDQNPolicy,
             learning_rate,
             buffer_size,
             learning_starts,
@@ -107,7 +107,7 @@ class PDQN(DQN):
             seed=seed,
             sde_support=False,
             optimize_memory_usage=optimize_memory_usage,
-            supported_action_spaces=(gym.spaces.Discrete,),
+            supported_action_spaces=(gym.spaces.Tuple,),
         )
 
         self.exploration_initial_eps = exploration_initial_eps
@@ -120,12 +120,14 @@ class PDQN(DQN):
         # Linear schedule will be defined in `_setup_model()`
         self.exploration_schedule = None
         self.q_net, self.q_net_target = None, None
+        self.parameter_net, self.parameter_net_target = None, None
+
 
         if _init_setup_model:
             self._setup_model()
 
     def _setup_model(self) -> None:
-        super(DQN, self)._setup_model()
+        super(PDQN, self)._setup_model()
         self._create_aliases()
         self.exploration_schedule = get_linear_fn(
             self.exploration_initial_eps, self.exploration_final_eps, self.exploration_fraction
@@ -134,6 +136,8 @@ class PDQN(DQN):
     def _create_aliases(self) -> None:
         self.q_net = self.policy.q_net
         self.q_net_target = self.policy.q_net_target
+        self.parameter_net = self.policy.parameter_net
+        self.parameter_net_target = self.policy.parameter_net_target
 
     def _on_step(self) -> None:
         """
@@ -142,16 +146,17 @@ class PDQN(DQN):
         """
         if self.num_timesteps % self.target_update_interval == 0:
             polyak_update(self.q_net.parameters(), self.q_net_target.parameters(), self.tau)
+            polyak_update(self.parameter_net.parameters(), self.parameter_net_target.parameters())
 
         self.exploration_rate = self.exploration_schedule(self._current_progress_remaining)
         logger.record("rollout/exploration rate", self.exploration_rate)
 
     def train(self, gradient_steps: int, batch_size: int = 100) -> None:
         # Update learning rate according to schedule
-        self._update_learning_rate(self.policy.optimizer)
+        #self._update_learning_rate(self.policy.optimizer) #TODO: Uncomment
 
         losses = []
-        for gradient_step in range(gradient_steps):
+        for _ in range(gradient_steps):
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)
 
@@ -228,7 +233,7 @@ class PDQN(DQN):
         reset_num_timesteps: bool = True,
     ) -> OffPolicyAlgorithm:
 
-        return super(DQN, self).learn(
+        return super(PDQN, self).learn(
             total_timesteps=total_timesteps,
             callback=callback,
             log_interval=log_interval,
@@ -241,9 +246,53 @@ class PDQN(DQN):
         )
 
     def _excluded_save_params(self) -> List[str]:
-        return super(DQN, self)._excluded_save_params() + ["q_net", "q_net_target"]
+        return super(PDQN, self)._excluded_save_params() + ["q_net", "q_net_target"]
 
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
         state_dicts = ["policy", "policy.optimizer"]
 
         return state_dicts, []
+
+    def _sample_action(
+        self, learning_starts: int, action_noise: Optional[ActionNoise] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Sample an action according to the exploration policy.
+        This is either done by sampling the probability distribution of the policy,
+        or sampling a random action (from a uniform distribution over the action space)
+        or by adding noise to the deterministic output.
+
+        :param action_noise: Action noise that will be used for exploration
+            Required for deterministic policy (e.g. TD3). This can also be used
+            in addition to the stochastic policy for SAC.
+        :param learning_starts: Number of steps before learning for the warm-up phase.
+        :return: action to take in the environment
+            and scaled action that will be stored in the replay buffer.
+            The two differs when the action space is not normalized (bounds are not [-1, 1]).
+        """
+        # Select action randomly or according to policy
+        if self.num_timesteps < learning_starts and not (self.use_sde and self.use_sde_at_warmup):
+            # Warmup phase
+            unscaled_action = np.array([self.action_space.sample()])
+        else:
+            # Note: when using continuous actions,
+            # we assume that the policy uses tanh to scale the action
+            # We use non-deterministic action in the case of SAC, for TD3, it does not matter
+            unscaled_action, _ = self.predict(self._last_obs, deterministic=False)
+
+        # Rescale the action from [low, high] to [-1, 1]
+        if isinstance(self.action_space, gym.spaces.Box):
+            scaled_action = self.policy.scale_action(unscaled_action)
+
+            # Add noise to the action (improve exploration)
+            if action_noise is not None:
+                scaled_action = np.clip(scaled_action + action_noise(), -1, 1)
+
+            # We store the scaled action in the buffer
+            buffer_action = scaled_action
+            action = self.policy.unscale_action(scaled_action)
+        else:
+            # Discrete case, no need to normalize or clip
+            buffer_action = unscaled_action
+            action = buffer_action
+        return action, buffer_action

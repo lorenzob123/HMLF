@@ -1,85 +1,55 @@
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
 
 import gym
 import torch as th
 from torch import nn
+import numpy as np
+import copy
+
+from torch.nn.parameter import Parameter
+
 
 from hmlf.common.policies import BasePolicy, register_policy
-from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp
+from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
 
-
-class QNetwork(BasePolicy):
-    """
-    Action-Value (Q-Value) network for DQN
-
-    :param observation_space: Observation space
-    :param action_space: Action space
-    :param net_arch: The specification of the policy and value networks.
-    :param activation_fn: Activation function
-    :param normalize_images: Whether to normalize images or not,
-         dividing by 255.0 (True by default)
-    """
-
-    def __init__(
-        self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
-        features_extractor: nn.Module,
-        features_dim: int,
-        net_arch: Optional[List[int]] = None,
-        activation_fn: Type[nn.Module] = nn.ReLU,
-        normalize_images: bool = True,
-    ):
-        super(QNetwork, self).__init__(
-            observation_space,
-            action_space,
-            features_extractor=features_extractor,
-            normalize_images=normalize_images,
-        )
-
-        if net_arch is None:
-            net_arch = [64, 64]
-
-        self.net_arch = net_arch
-        self.activation_fn = activation_fn
-        self.features_extractor = features_extractor
-        self.features_dim = features_dim
-        self.normalize_images = normalize_images
-        action_dim = self.action_space.n  # number of actions
-        q_net = create_mlp(self.features_dim, action_dim, self.net_arch, self.activation_fn)
-        self.q_net = nn.Sequential(*q_net)
-
-    def forward(self, obs: th.Tensor) -> th.Tensor:
-        """
-        Predict the q-values.
-
-        :param obs: Observation
-        :return: The estimated Q-Value for each action.
-        """
-        return self.q_net(self.extract_features(obs))
-
-    def _predict(self, observation: th.Tensor, deterministic: bool = True) -> th.Tensor:
-        q_values = self.forward(observation)
-        # Greedy action
-        action = q_values.argmax(dim=1).reshape(-1)
-        return action
-
-    def _get_data(self) -> Dict[str, Any]:
-        data = super()._get_data()
-
-        data.update(
-            dict(
-                net_arch=self.net_arch,
-                features_dim=self.features_dim,
-                activation_fn=self.activation_fn,
-                features_extractor=self.features_extractor,
-            )
-        )
-        return data
+from hmlf.td3.policies import Actor
+from hmlf.dqn.policies import QNetwork
 
 
-class DQNPolicy(BasePolicy):
+# need Parameter (Actor) Network s -> parameters
+# Need Q Network (State + ParameterSpace)
+
+#TODO: Add assert or something similar to force standard Tuple structure [Discrete, Box, Box, ...]
+def build_simple_parameter_space(action_space: gym.spaces.Tuple) -> gym.spaces.Box:
+    lows = np.hstack([space.low for space in action_space[1:]])
+    highs = np.hstack([space.high for space in action_space[1:]])
+    print(f"{lows=}")
+    print(f"{highs=}")
+
+    return gym.spaces.Box(lows, highs)
+
+
+def build_state_parameter_space(observation_space: gym.spaces.Box, action_space: gym.spaces.Tuple) -> gym.spaces.Box:
+    lows = np.hstack([observation_space.low] + [space.low for space in action_space[1:]])
+    highs = np.hstack([observation_space.high] + [space.high for space in action_space[1:]])
+    print(f"{lows=}")
+    print(f"{highs=}")
+
+    return gym.spaces.Box(lows, highs)
+
+def build_action_space_q(action_space: gym.spaces.Tuple) -> gym.spaces.Discrete:
+    return copy.copy(action_space[0])
+
+
+def make_action(q_argmax: th.Tensor, parameters: th.Tensor, action_space: gym.spaces.Tuple) -> Tuple[th.Tensor]:
+    dims = [np.prod(action_space[i].shape) for i in range(1, len(action_space))]
+    sections = np.cumsum(dims)
+    action = tuple((q_argmax, *np.split(parameters[0], sections)[:-1])) #TODO: [:-1] always needed?
+    return action
+
+
+class PDQNPolicy(BasePolicy):
     """
     Policy class with Q-Value Net and target net for DQN
 
@@ -112,9 +82,13 @@ class DQNPolicy(BasePolicy):
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
     ):
-        super(DQNPolicy, self).__init__(
+        self.action_space_parameter = build_simple_parameter_space(action_space)
+        self.observation_space_q = build_state_parameter_space(observation_space, action_space)
+        self.action_space_q = build_action_space_q(action_space)
+
+        super(PDQNPolicy, self).__init__(
             observation_space,
-            action_space,
+            self.action_space_q,
             features_extractor_class,
             features_extractor_kwargs,
             optimizer_class=optimizer_class,
@@ -131,15 +105,24 @@ class DQNPolicy(BasePolicy):
         self.activation_fn = activation_fn
         self.normalize_images = normalize_images
 
-        self.net_args = {
+        self.net_args_q = {
+            "observation_space": self.observation_space_q,
+            "action_space": self.action_space_q,
+            "net_arch": self.net_arch,
+            "activation_fn": self.activation_fn,
+            "normalize_images": normalize_images,
+        }
+
+        self.net_args_parameter = {
             "observation_space": self.observation_space,
-            "action_space": self.action_space,
+            "action_space": self.action_space_parameter,
             "net_arch": self.net_arch,
             "activation_fn": self.activation_fn,
             "normalize_images": normalize_images,
         }
 
         self.q_net, self.q_net_target = None, None
+        self.parameter_net, self.parameter_net_target = None, None
         self._build(lr_schedule)
 
     def _build(self, lr_schedule: Schedule) -> None:
@@ -150,23 +133,45 @@ class DQNPolicy(BasePolicy):
             lr_schedule(1) is the initial learning rate
         """
 
-        self.q_net = self.make_q_net()
-        self.q_net_target = self.make_q_net()
+        self.q_net = self._make_q_net()
+        self.q_net_target = self._make_q_net()
         self.q_net_target.load_state_dict(self.q_net.state_dict())
 
-        # Setup optimizer with initial learning rate
-        self.optimizer = self.optimizer_class(self.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
+        self.parameter_net = self._make_parameter_net()
+        self.parameter_net_target = self._make_parameter_net()
+        self.parameter_net_target.load_state_dict(self.parameter_net.state_dict())
 
-    def make_q_net(self) -> QNetwork:
+
+        #TODO: Separater arguments for parameter net?
+        # Setup optimizer with initial learning rate
+        self.optimizer_q_net = self.optimizer_class(self.q_net.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
+        self.optimizer_parameter_net = self.optimizer_class(self.parameter_net.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
+
+    def _make_q_net(self) -> QNetwork:
         # Make sure we always have separate networks for features extractors etc
-        net_args = self._update_features_extractor(self.net_args, features_extractor=None)
+        net_args = self._update_features_extractor(self.net_args_q, self.observation_space_q, features_extractor=None)
         return QNetwork(**net_args).to(self.device)
 
+    def _make_parameter_net(self) -> Actor:
+        net_args = self._update_features_extractor(self.net_args_parameter, self.observation_space, features_extractor=None)
+        #TODO implement separate arguments
+        return Actor(**net_args).to(self.device)
+
+    def forward_parameters(self, obs: th.Tensor, deterministic: bool=True) -> th.Tensor:
+        parameters = self.parameter_net(obs)
+        return parameters
+
     def forward(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
-        return self._predict(obs, deterministic=deterministic)
+        #Calculates q_values
+        parameters = self.forward_parameters(obs)
+        obs_q = th.cat([obs, parameters], dim=1) # appends parameters to observation
+        q_values = self.q_net(obs_q)
+        return q_values
 
     def _predict(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
-        return self.q_net._predict(obs, deterministic=deterministic)
+        # Returns actions (index)
+        q_values = self.forward(obs)
+        return q_values.argmax(dim=1).reshape(-1)
 
     def _get_data(self) -> Dict[str, Any]:
         data = super()._get_data()
@@ -184,11 +189,39 @@ class DQNPolicy(BasePolicy):
         )
         return data
 
+    def _update_features_extractor(
+        self, 
+        net_kwargs: Dict[str, Any],
+        observation_space: gym.spaces.Space,
+        features_extractor: Optional[BaseFeaturesExtractor] = None
+    ) -> Dict[str, Any]:
+        """
+        Update the network keyword arguments and create a new features extractor object if needed.
+        If a ``features_extractor`` object is passed, then it will be shared.
 
-MlpPolicy = DQNPolicy
+        :param net_kwargs: the base network keyword arguments, without the ones
+            related to features extractor
+        :param features_extractor: a features extractor object.
+            If None, a new object will be created.
+        :return: The updated keyword arguments
+        """
+        net_kwargs = net_kwargs.copy()
+        if features_extractor is None:
+            # The features extractor is not shared, create a new one
+            features_extractor = self.make_features_extractor(observation_space)
+        net_kwargs.update(dict(features_extractor=features_extractor, features_dim=features_extractor.features_dim))
+        return net_kwargs
+
+    def make_features_extractor(self, observation_space: gym.spaces.Space) -> BaseFeaturesExtractor:
+        """ Helper method to create a features extractor."""
+        return self.features_extractor_class(observation_space, **self.features_extractor_kwargs)
 
 
-class CnnPolicy(DQNPolicy):
+
+MlpPolicy = PDQNPolicy
+
+
+class CnnPolicy(PDQNPolicy):
     """
     Policy class for DQN when using images as input.
 
@@ -231,7 +264,6 @@ class CnnPolicy(DQNPolicy):
             optimizer_class,
             optimizer_kwargs,
         )
-
 
 register_policy("MlpPolicy", MlpPolicy)
 register_policy("CnnPolicy", CnnPolicy)

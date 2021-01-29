@@ -299,8 +299,8 @@ class BasePolicy(BaseModel):
                 # Actions could be on arbitrary scale, so clip the actions to avoid
                 # out of bound error (e.g. if sampling from a Gaussian distribution)
                 actions = np.clip(actions, self.action_space.low, self.action_space.high)
-        if isinstance(self.action_space, gym.spaces.Tuple):
-            actions = to_hybrid_discrete(actions, self.action_space)
+        # if isinstance(self.action_space, gym.spaces.Tuple):
+        #     actions = to_hybrid_discrete(actions, self.action_space)
 
         if not vectorized_env:
             if state is not None:
