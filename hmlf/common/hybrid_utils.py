@@ -1,8 +1,8 @@
 import numpy as np
-import gym.spaces.Tuple
+from gym.spaces import Tuple
 
 
-def onehot_hybrid_2_tuple_hybrid(actions: np.ndarray, action_space: gym.spaces.Tuple) -> list: 
+def onehot_hybrid_2_tuple_hybrid(actions: np.ndarray, action_space: Tuple) -> list: 
     """ This function takes in actions array for tuple action spaces and processes it to
         output the clipped_actions that can be used in the env step function 
          (as in env.step(clipped_actions))
@@ -21,7 +21,7 @@ def onehot_hybrid_2_tuple_hybrid(actions: np.ndarray, action_space: gym.spaces.T
     N = action_space[0].n
 
     # task is a vector with the task value for each environment
-    _, task = np.where(actions[:, :N] == 1)
+    _, task = np.where(actions[:, :N] == np.max(actions[:, :N], axis=0).squeeze())
 
     # We clip thee actions according to action_space[i].low and  action_space[i].high and
     # the 0 and 1 are for the discrete actions in the onehot encoding.

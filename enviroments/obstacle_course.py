@@ -9,7 +9,7 @@ class ObstacleCourse(gym.Env):
     def __init__(self):
 
 
-        self.max_move = .2
+        self.max_move = np.float32(.2)
         self.max_jump = 0.05
         self.n_obstacles = 3
         self.goal_position = .95
@@ -18,8 +18,10 @@ class ObstacleCourse(gym.Env):
         self.max_timesteps = 30
         self.goal_threshold = 0.05
         tmp = np.ones(1)
-        self.action_space = Tuple((Discrete(2), Box(-self.max_move, self.max_move, (1,)), Box(0, 1, (1,))))
-        self.observation_space = Box(low=np.zeros(7), high=np.ones(7))
+        self.action_space = Tuple((Discrete(2),
+                                   Box(-self.max_move, self.max_move, (1,)),
+                                   Box(np.float32(0), np.float32(1), (1,))))
+        self.observation_space = Box(low=np.zeros(7, dtype=np.float32), high=np.ones(7, dtype=np.float32))
 
         self.position = 0
         self.time = 0
@@ -118,4 +120,4 @@ if __name__ == "__main__":
 
     obs = ObstacleCourse().reset()
 
-    model.learn(total_timesteps=1e6, callback=EvalCallback(eval_env=ObstacleCourse(), eval_freq = 1000, n_eval_episodes=20))
+    model.learn(total_timesteps=1e6, eval_freq = 1000, n_eval_episodes=20)
