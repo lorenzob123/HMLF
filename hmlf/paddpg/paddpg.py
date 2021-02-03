@@ -173,7 +173,14 @@ class PADDPG(TD3):
             # Note: when using continuous actions,
             # we assume that the policy uses tanh to scale the action
             # We use non-deterministic action in the case of SAC, for TD3, it does not matter
-            unscaled_action, _ = self.predict(self._last_obs, deterministic=False)
+            # Note: when using continuous actions,
+            # we assume that the policy uses tanh to scale the action
+            # We use non-deterministic action in the case of SAC, for TD3, it does not matter
+            observation = th.as_tensor(self._last_obs).to(self.device)
+            with th.no_grad():
+                actions = self.policy._predict(observation, deterministic=False)
+            # Convert to numpy
+            unscaled_action = actions.cpu().numpy()
             unscaled_action = unscaled_action[0]
 
         # # Rescale the action from [low, high] to [-1, 1]
