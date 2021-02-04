@@ -163,7 +163,7 @@ def get_action_dim(action_space: spaces.Space) -> int:
         # Check if the actions spaces is spaces.Tuple(spaces.Discrete, spaces.Box, ..., spaces.Box)    
         if isinstance(action_space[0], spaces.Discrete) and all_param_box:
             # We parametrize the action space as hot one encoding
-            dim = sum([np.prod(sub_space.shape) for sub_space in action_space[1:]]) + action_space[0].n
+            dim = sum([np.prod(sub_space.shape) for sub_space in action_space[1:]]) + 1
             return int(dim)
         else:
             raise NotImplementedError(f"{action_space} action space is not supported")

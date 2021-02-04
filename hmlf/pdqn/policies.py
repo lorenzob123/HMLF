@@ -24,8 +24,6 @@ from hmlf.dqn.policies import QNetwork
 def build_simple_parameter_space(action_space: gym.spaces.Tuple) -> gym.spaces.Box:
     lows = np.hstack([space.low for space in action_space[1:]])
     highs = np.hstack([space.high for space in action_space[1:]])
-    print(f"{lows=}")
-    print(f"{highs=}")
 
     return gym.spaces.Box(lows, highs)
 
@@ -33,8 +31,6 @@ def build_simple_parameter_space(action_space: gym.spaces.Tuple) -> gym.spaces.B
 def build_state_parameter_space(observation_space: gym.spaces.Box, action_space: gym.spaces.Tuple) -> gym.spaces.Box:
     lows = np.hstack([observation_space.low] + [space.low for space in action_space[1:]])
     highs = np.hstack([observation_space.high] + [space.high for space in action_space[1:]])
-    print(f"{lows=}")
-    print(f"{highs=}")
 
     return gym.spaces.Box(lows, highs)
 
@@ -144,6 +140,7 @@ class PDQNPolicy(BasePolicy):
 
         #TODO: Separater arguments for parameter net?
         # Setup optimizer with initial learning rate
+        print(self.optimizer_kwargs)
         self.optimizer_q_net = self.optimizer_class(self.q_net.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
         self.optimizer_parameter_net = self.optimizer_class(self.parameter_net.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
 
@@ -166,6 +163,12 @@ class PDQNPolicy(BasePolicy):
         parameters = self.forward_parameters(obs)
         obs_q = th.cat([obs, parameters], dim=1) # appends parameters to observation
         q_values = self.q_net(obs_q)
+        return q_values
+
+    def forward_target(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
+        parameters = self.parameter_net(obs)
+        obs_q = th.cat([obs, parameters], dim=1) # appends parameters to observation
+        q_values = self.q_net_target(obs_q)
         return q_values
 
     def _predict(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:

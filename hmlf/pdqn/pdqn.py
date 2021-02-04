@@ -122,6 +122,9 @@ class PDQN(OffPolicyAlgorithm):
         self.q_net, self.q_net_target = None, None
         self.parameter_net, self.parameter_net_target = None, None
 
+        self.losses_q = []
+        self.losses_parameter = []
+
 
         if _init_setup_model:
             self._setup_model()
@@ -146,7 +149,7 @@ class PDQN(OffPolicyAlgorithm):
         """
         if self.num_timesteps % self.target_update_interval == 0:
             polyak_update(self.q_net.parameters(), self.q_net_target.parameters(), self.tau)
-            polyak_update(self.parameter_net.parameters(), self.parameter_net_target.parameters())
+            polyak_update(self.parameter_net.parameters(), self.parameter_net_target.parameters(), self.tau)
 
         self.exploration_rate = self.exploration_schedule(self._current_progress_remaining)
         logger.record("rollout/exploration rate", self.exploration_rate)
@@ -155,14 +158,14 @@ class PDQN(OffPolicyAlgorithm):
         # Update learning rate according to schedule
         #self._update_learning_rate(self.policy.optimizer) #TODO: Uncomment
 
-        losses = []
+
         for _ in range(gradient_steps):
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)
-
+            #import ipdb; ipdb.set_trace()
             with th.no_grad():
                 # Compute the next Q-values using the target network
-                next_q_values = self.q_net_target(replay_data.next_observations)
+                next_q_values = self.policy.forward_target(replay_data.next_observations)
                 # Follow greedy policy: use the one with the highest value
                 next_q_values, _ = next_q_values.max(dim=1)
                 # Avoid potential broadcast issue
@@ -171,27 +174,44 @@ class PDQN(OffPolicyAlgorithm):
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
             # Get current Q-values estimates
-            current_q_values = self.q_net(replay_data.observations)
+            current_q_values = self.policy.forward(replay_data.observations)
 
             # Retrieve the q-values for the actions from the replay buffer
-            current_q_values = th.gather(current_q_values, dim=1, index=replay_data.actions.long())
+            # Need to do actions[:, 0].reshape(-1, 1) to get the discrete and not include parameters.
+            current_q_values = th.gather(current_q_values, dim=1, index=replay_data.actions[:, 0].reshape(-1, 1).long())
 
             # Compute Huber loss (less sensitive to outliers)
             loss = F.smooth_l1_loss(current_q_values, target_q_values)
-            losses.append(loss.item())
+            #import ipdb; ipdb.set_trace()
+            self.losses_q.append(loss.item())
 
             # Optimize the policy
-            self.policy.optimizer.zero_grad()
+            self.policy.optimizer_q_net.zero_grad()
             loss.backward()
             # Clip gradient norm
-            th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
-            self.policy.optimizer.step()
+            th.nn.utils.clip_grad_norm_(self.policy.q_net.parameters(), self.max_grad_norm)
+            # if (len(self.losses_q) % 1000 == 0):
+            #     import ipdb; ipdb.set_trace()
+            self.policy.optimizer_q_net.step()
+
+            q_values = self.policy.forward(replay_data.observations)
+            loss2 = -q_values.sum()
+            self.losses_parameter.append(loss2.item())
+            self.policy.optimizer_parameter_net.zero_grad()
+            loss2.backward()
+            self.policy.optimizer_parameter_net.step()
+
 
         # Increase update counter
         self._n_updates += gradient_steps
 
+        if (len(self.losses_q) % 1000 == 0):
+            print("q", np.mean(self.losses_q[-100:]))
+            print("p", np.mean(self.losses_parameter[-100:]))
+
         logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
-        logger.record("train/loss", np.mean(losses))
+        logger.record("train/loss_q", np.mean(self.losses_q))
+        logger.record("train/loss_parameter", np.mean(self.losses_parameter))
 
     def predict(
         self,
@@ -211,13 +231,16 @@ class PDQN(OffPolicyAlgorithm):
             (used in recurrent policies)
         """
         if not deterministic and np.random.rand() < self.exploration_rate:
-            if is_vectorized_observation(observation, self.observation_space):
-                n_batch = observation.shape[0]
-                action = np.array([self.action_space.sample() for _ in range(n_batch)])
-            else:
-                action = np.array(self.action_space.sample())
+            #TODO: Fix
+            # if is_vectorized_observation(observation, self.observation_space):
+            #     n_batch = observation.shape[0]
+            #     action = np.array([self.action_space.sample() for _ in range(n_batch)])
+            # else:
+            action = np.array([self.action_space.sample()])
         else:
             action, state = self.policy.predict(observation, state, mask, deterministic)
+            parameters = self.policy.forward_parameters(th.Tensor(observation)).detach().numpy()
+            action = np.array([make_action(action[0], parameters[0], self.env.action_space)])
         return action, state
 
     def learn(
@@ -228,7 +251,7 @@ class PDQN(OffPolicyAlgorithm):
         eval_env: Optional[GymEnv] = None,
         eval_freq: int = -1,
         n_eval_episodes: int = 5,
-        tb_log_name: str = "DQN",
+        tb_log_name: str = "PDQN",
         eval_log_path: Optional[str] = None,
         reset_num_timesteps: bool = True,
     ) -> OffPolicyAlgorithm:
@@ -278,7 +301,7 @@ class PDQN(OffPolicyAlgorithm):
             # Note: when using continuous actions,
             # we assume that the policy uses tanh to scale the action
             # We use non-deterministic action in the case of SAC, for TD3, it does not matter
-            unscaled_action, _ = self.predict(self._last_obs, deterministic=False)
+            unscaled_action, _ = self.predict(self._last_obs)
 
         # Rescale the action from [low, high] to [-1, 1]
         if isinstance(self.action_space, gym.spaces.Box):
@@ -296,3 +319,17 @@ class PDQN(OffPolicyAlgorithm):
             buffer_action = unscaled_action
             action = buffer_action
         return action, buffer_action
+        
+
+def make_action(action: np.int64, parameters: np.ndarray, action_space: gym.Space) -> Tuple: 
+    continous_action_dimensions = [space.shape[0] for space in action_space[1:]] # Since each space is one dimensional, shape[0] gets the dimension
+    split_indizes = np.cumsum(continous_action_dimensions[:-1]) # Skip the last one, because cumsum returns list with N values for N 
+    split = np.split(parameters, split_indizes) # Returns list with parameters for each action subspace
+
+    for i, space_sample in enumerate(split):
+        sample_action_space = action_space[1 + i] # First one is discrete
+
+        split[i] = np.clip(space_sample, sample_action_space.low, sample_action_space.high) # Clips action to subspace boundaries
+
+    action = [action, *split]
+    return action
