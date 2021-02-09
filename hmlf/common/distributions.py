@@ -11,6 +11,7 @@ from torch import nn
 from torch.distributions import Bernoulli, Categorical, Normal, OneHotCategorical
 
 from hmlf.common.preprocessing import get_action_dim
+from hmlf.spaces import SimpleHybrid
 
 
 class Distribution(ABC):
@@ -334,7 +335,7 @@ class TupleDistribution(Distribution):
 
         action_std = th.ones_like(action_logits[:, self.params]) * log_std.exp()
         # print(action_logits, self.actions)
-        self.action_dist = OneHotCategorical(logits=action_logits[:, self.actions])
+        self.action_dist = Categorical(logits=action_logits)
         # print("self.action_dist.sample()", self.action_dist.sample())
         self.action_param_dist = Normal(action_logits[:, self.params], action_std)
         
@@ -378,6 +379,70 @@ class TupleDistribution(Distribution):
         log_prob = self.log_prob(actions)
         return actions, log_prob
     
+
+class HybridDistribution(Distribution):
+    """
+    Tuple distribution for hybrid actions.
+
+    :param action_dim: Number of discrete actions
+    """
+
+    def __init__(self, action_space):
+        super(HybridDistribution).__init__()
+        self.distribution = None
+        self.action_space = action_space
+        self.discrete_dim = action_space.discrete_dim
+        self.continuous_dim = action_space.continuous_dim
+        self.param_idx = slice(self.discrete_dim, self.discrete_dim + self.continuous_dim)
+        self.action_idx = slice(self.discrete_dim)
+
+    def proba_distribution_net(self, latent_dim: int, log_std_init: float = 0.0) -> nn.Module:
+        """
+        Create the layer that represents the distribution:
+        it will be the logits of the Categorical distribution.
+        You can then get probabilities using a softmax.
+
+        :param latent_dim: Dimension of the last layer
+            of the policy network (before the action layer)
+        :return:
+        """
+        action_logits_and_mean = nn.Linear(latent_dim, self.discrete_dim + self.continuous_dim)
+        log_std = nn.Parameter(th.ones(self.continuous_dim) * log_std_init, requires_grad=True)
+
+        return action_logits_and_mean, log_std
+
+    def proba_distribution(self, action_logits: th.Tensor, log_std: th.Tensor) -> "HybridDistribution":
+        action_std = th.ones_like(action_logits[:, self.param_idx]) * log_std.exp()
+        self.action_dist = Categorical(logits=action_logits[:, self.action_idx])
+        self.param_dist = Normal(action_logits[:, self.param_idx], action_std)
+        return self
+
+    def log_prob(self, actions: th.Tensor) -> th.Tensor:
+        log_prob_actions = self.action_dist.log_prob(actions[:, 0])
+        log_prob_param = sum_independent_dims(self.param_dist.log_prob(np.hstack(actions[:, 1:])))
+        return log_prob_actions + log_prob_param
+
+    def entropy(self) -> th.Tensor:
+
+        return self.action_dist.entropy() + sum_independent_dims(self.param_dist.entropy())
+
+    def sample(self) -> th.Tensor:
+        params = self.param_dist.sample()
+        action = self.action_dist.sample()
+        return th.cat(action, params, dim=1)
+
+    def mode(self) -> th.Tensor:
+        action = th.argmax(self.action_dist.probs, dim=1)
+        return self.action_space.make_sample(action, self.param_dist.mean)
+
+    def actions_from_params(self, action_logits: th.Tensor, deterministic: bool = False) -> th.Tensor:
+        self.proba_distribution(action_logits)
+        return self.get_actions(deterministic=deterministic)
+
+    def log_prob_from_params(self, action_logits: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
+        actions = self.actions_from_params(action_logits)
+        log_prob = self.log_prob(actions)
+        return actions, log_prob
 
 class MultiCategoricalDistribution(Distribution):
     """
@@ -751,9 +816,12 @@ def make_proba_distribution(
         return MultiCategoricalDistribution(action_space.nvec, **dist_kwargs)
     elif isinstance(action_space, spaces.MultiBinary):
         return BernoulliDistribution(action_space.n, **dist_kwargs)
-    elif isinstance(action_space, spaces.Tuple):                
+    # elif isinstance(action_space, spaces.Tuple):                
+    #     action_param_dim = sum([np.prod(sub_space.shape) for sub_space in action_space[1:]]) 
+    #     return TupleDistribution(action_space[0].n, action_param_dim)
+    elif isinstance(action_space, SimpleHybrid):                
         action_param_dim = sum([np.prod(sub_space.shape) for sub_space in action_space[1:]]) 
-        return TupleDistribution(action_space[0].n, action_param_dim)
+        return HybridDistribution(action_space)
     else:
         raise NotImplementedError(
             "Error: probability distribution, not implemented for action space"
