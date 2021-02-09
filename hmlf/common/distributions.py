@@ -419,7 +419,7 @@ class HybridDistribution(Distribution):
 
     def log_prob(self, actions: th.Tensor) -> th.Tensor:
         log_prob_actions = self.action_dist.log_prob(actions[:, 0])
-        log_prob_param = sum_independent_dims(self.param_dist.log_prob(np.hstack(actions[:, 1:])))
+        log_prob_param = sum_independent_dims(self.param_dist.log_prob(actions[:, 1:]))
         return log_prob_actions + log_prob_param
 
     def entropy(self) -> th.Tensor:
@@ -429,7 +429,8 @@ class HybridDistribution(Distribution):
     def sample(self) -> th.Tensor:
         params = self.param_dist.sample()
         action = self.action_dist.sample()
-        return th.cat(action, params, dim=1)
+        # print(action, params)
+        return th.cat((action.view(-1, 1), params), dim=1)
 
     def mode(self) -> th.Tensor:
         action = th.argmax(self.action_dist.probs, dim=1)

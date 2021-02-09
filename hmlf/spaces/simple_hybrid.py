@@ -1,7 +1,5 @@
 from typing import List
-from hmlf.spaces import Space
-from hmlf.spaces import Tuple
-from hmlf.spaces import Discrete
+from hmlf.spaces import Space, Tuple, Discrete, Box
 
 import numpy as np
 
@@ -19,9 +17,11 @@ class SimpleHybrid(Tuple):
             if i == 0:
                 assert isinstance(space, Discrete), "First element of SimpleHybrid has to be of type hmlf.spaces.Discrete"
             else:
-                assert isinstance(space, Discrete), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
+                assert isinstance(space, Box), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
         
-        super(SimpleHybrid, self).__init__(None, None)
+        self.discrete_dim = self.spaces[0].n
+        dims_continous = self._get_continous_dims()
+        self.continuous_dim = np.sum(dims_continous)
 
 
     def _get_continous_dims(self) -> List[int]:
@@ -34,28 +34,24 @@ class SimpleHybrid(Tuple):
         return 1 + np.sum(dims_continous)
 
     def make_sample(self, discrete: int, parameters: np.ndarray) -> Tuple:
+        # We clip the parameters
+        param_low = np.hstack((self.spaces[i].low for i in range(1, len(self.spaces))))
+        param_high = np.hstack((self.spaces[i].high for i in range(1, len(self.spaces))))
+        parameters = np.clip(parameters, param_low, param_high)
+        
+        # We prepare the split of the parameters for each discrete action
         dims_continous = self._get_continous_dims()
-        # Skip the last one, because cumsum returns list with N values for N 
         split_indizes = np.cumsum(dims_continous[:-1])
-        # Returns list with parameters for each action subspace
 
-        split = np.split(parameters, split_indizes)
-        for i, space_sample in enumerate(split):
-            sample_action_space = self.spaces[1 + i] # First one is discrete
-            # Clips action to subspace boundaries
-            split[i] = np.clip(split[i], sample_action_space.low, sample_action_space.high)
+        # We format the full action for each environment
+        sample = []
+        for i in range(discrete.shape[0]):
+            sample.append([discrete[i]] + np.split(parameters[i], split_indizes))
 
-        sample = tuple([discrete, *split])
         return sample
 
-    def sample(self) -> Tuple:
-        return tuple([space.sample() for space in self.spaces])
-
     def __repr__(self) -> str:
-        return "SimpleTuple(" + ", ". join([str(s) for s in self.spaces]) + ")"
-
-    def __len__(self) -> int:
-        return len(self.spaces)
+        return "SimpleHybrid(" + ", ". join([str(s) for s in self.spaces]) + ")"
       
     def __eq__(self, other) -> bool:
         return isinstance(other, SimpleHybrid) and self.spaces == other.spaces
