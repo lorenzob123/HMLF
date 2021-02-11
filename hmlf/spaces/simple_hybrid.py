@@ -1,23 +1,23 @@
-from typing import List
-from hmlf.spaces import Space, Tuple, Discrete, Box
+from typing import List, Tuple
+from hmlf import spaces
 
 import numpy as np
 
-class SimpleHybrid(Tuple):
+class SimpleHybrid(spaces.Tuple):
     """
     A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
     Samples have the form (int, Box1.sample(), ..., BoxN.sample())
     Example usage:
     self.observation_space = spaces.Tuple((spaces.Discrete(2), gym.spaces.Box(np.array((0, 1)), np.array((2, 3)))))
     """
-    def __init__(self, spaces):
-        self.spaces = spaces
-        for i, space in enumerate(spaces):
-            assert isinstance(space, Space), "Elements of the SimpleHybrid must be instances of gym.Space"
+    def __init__(self, spaces_list: List[spaces.Space]):
+        self.spaces = spaces_list
+        for i, space in enumerate(spaces_list):
+            assert isinstance(space, spaces.Space), "Elements of the SimpleHybrid must be instances of gym.Space"
             if i == 0:
-                assert isinstance(space, Discrete), "First element of SimpleHybrid has to be of type hmlf.spaces.Discrete"
+                assert isinstance(space, spaces.Discrete), "First element of SimpleHybrid has to be of type hmlf.spaces.Discrete"
             else:
-                assert isinstance(space, Box), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
+                assert isinstance(space, spaces.Box), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
         
         self.discrete_dim = self.spaces[0].n
         dims_continous = self._get_continous_dims()
@@ -33,7 +33,7 @@ class SimpleHybrid(Tuple):
         dims_continous = self._get_continous_dims()
         return 1 + np.sum(dims_continous)
 
-    def make_sample(self, discrete: int, parameters: np.ndarray) -> Tuple:
+    def make_sample(self, discrete: np.array, parameters: np.ndarray) -> List[Tuple]:
         # We clip the parameters
         param_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
         param_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
