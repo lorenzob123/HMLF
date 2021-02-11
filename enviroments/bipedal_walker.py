@@ -35,7 +35,7 @@ if __name__ == "__main__":
                        "policy": 'MlpPolicy',
                        "gamma": 0.98,
                        "buffer_size": 200000,
-                       "learning_starts": 10000,
+                       "learning_starts": 2,
                        "gradient_steps": -1,
                        "n_episodes_rollout": 1,
                        "learning_rate":  1e-3,
@@ -45,7 +45,6 @@ if __name__ == "__main__":
 
     env = [lambda: PaAcBipedalWalker(gym.make('BipedalWalker-v3')) for ip in range(4)]
     env = SubprocVecEnv(env)
-    print(env.action_space)
 
     model = PADDPG(env=PaAcBipedalWalker(gym.make('BipedalWalker-v3')), **hyperparams,  verbose=1)
     model.learn(total_timesteps=1e6)
