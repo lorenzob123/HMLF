@@ -434,7 +434,7 @@ class HybridDistribution(Distribution):
 
     def mode(self) -> th.Tensor:
         action = th.argmax(self.action_dist.probs, dim=1)
-        return self.action_space.make_sample(action, self.param_dist.mean)
+        return th.cat((action.view(-1, 1), self.param_dist.mean), dim=1)
 
     def actions_from_params(self, action_logits: th.Tensor, deterministic: bool = False) -> th.Tensor:
         self.proba_distribution(action_logits)

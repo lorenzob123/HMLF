@@ -35,8 +35,8 @@ class SimpleHybrid(Tuple):
 
     def make_sample(self, discrete: int, parameters: np.ndarray) -> Tuple:
         # We clip the parameters
-        param_low = np.hstack((self.spaces[i].low for i in range(1, len(self.spaces))))
-        param_high = np.hstack((self.spaces[i].high for i in range(1, len(self.spaces))))
+        param_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
+        param_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
         parameters = np.clip(parameters, param_low, param_high)
         
         # We prepare the split of the parameters for each discrete action

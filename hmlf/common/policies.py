@@ -10,6 +10,7 @@ import numpy as np
 import torch as th
 from torch import nn
 
+from hmlf.spaces import SimpleHybrid
 from hmlf.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
@@ -300,8 +301,8 @@ class BasePolicy(BaseModel):
                 # Actions could be on arbitrary scale, so clip the actions to avoid
                 # out of bound error (e.g. if sampling from a Gaussian distribution)
                 actions = np.clip(actions, self.action_space.low, self.action_space.high)
-        if isinstance(self.action_space, gym.spaces.Tuple):
-            actions = onehot_hybrid_2_tuple_hybrid(actions, self.action_space)
+        if isinstance(self.action_space, SimpleHybrid):
+            actions = self.action_space.make_sample(actions[:, 0], actions[:, 1:])
 
         if not vectorized_env:
             if state is not None:
