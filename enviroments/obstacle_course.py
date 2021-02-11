@@ -1,6 +1,7 @@
 import gym
 import numpy as np
 from gym.spaces import Box, Discrete, Tuple
+from hmlf.spaces import SimpleHybrid
 
 
 class ObstacleCourse(gym.Env):
@@ -18,7 +19,7 @@ class ObstacleCourse(gym.Env):
         self.max_timesteps = 30
         self.goal_threshold = 0.05
         tmp = np.ones(1)
-        self.action_space = Tuple((Discrete(2),
+        self.action_space = SimpleHybrid((Discrete(2),
                                    Box(-self.max_move, self.max_move, (1,)),
                                    Box(np.float32(0), np.float32(1), (1,))))
         self.observation_space = Box(low=np.zeros(7, dtype=np.float32), high=np.ones(7, dtype=np.float32))
