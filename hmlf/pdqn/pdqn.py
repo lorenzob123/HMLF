@@ -1,3 +1,4 @@
+import os
 from hmlf.common.noise import ActionNoise
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -150,7 +151,7 @@ class PDQN(OffPolicyAlgorithm):
         """
         if self.num_timesteps % self.target_update_interval == 0:
             polyak_update(self.q_net.parameters(), self.q_net_target.parameters(), self.tau)
-            polyak_update(self.parameter_net.parameters(), self.parameter_net_target.parameters(), self.tau)
+            #polyak_update(self.parameter_net.parameters(), self.parameter_net_target.parameters(), self.tau)
 
         self.exploration_rate = self.exploration_schedule(self._current_progress_remaining)
         logger.record("rollout/exploration rate", self.exploration_rate)
@@ -163,6 +164,7 @@ class PDQN(OffPolicyAlgorithm):
         for _ in range(gradient_steps):
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)
+
             #import ipdb; ipdb.set_trace()
             with th.no_grad():
                 # Compute the next Q-values using the target network
@@ -174,8 +176,10 @@ class PDQN(OffPolicyAlgorithm):
                 # 1-step TD target
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
+            # Append parameters to observation
+            observations = th.cat([replay_data.observations, replay_data.actions[:, 1:]], dim=1)
             # Get current Q-values estimates
-            current_q_values = self.policy.forward(replay_data.observations)
+            current_q_values = self.policy.q_net(observations)
 
             # Retrieve the q-values for the actions from the replay buffer
             # Need to do actions[:, 0].reshape(-1, 1) to get the discrete and not include parameters.

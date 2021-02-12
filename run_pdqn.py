@@ -33,8 +33,8 @@ print(f"action_dim={get_action_dim(env.action_space)}")
 # action = pol.predict(sample)
 # q_values = pol.forward(sample_tensor)
 
-pqdn = PDQN("MlpPolicy", env,)
+pqdn = PDQN("MlpPolicy", env, learning_rate=0.001)
 
-pqdn.learn(total_timesteps=1e6, callback=EvalCallback(eval_env=ObstacleCourse(), eval_freq = 10000, n_eval_episodes=20))
+pqdn.learn(total_timesteps=1e6, callback=EvalCallback(eval_env=ObstacleCourse(), eval_freq = 10000, n_eval_episodes=50))
 
 
