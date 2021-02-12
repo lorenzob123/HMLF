@@ -1,7 +1,6 @@
 import gym
 from gym import spaces
 import numpy as np
-from hmlf.common.vec_env import SubprocVecEnv
 
 
 class DummyEnv(gym.Env):

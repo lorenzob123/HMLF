@@ -1,10 +1,9 @@
 import gym
 import numpy as np
-from gym.spaces import Box, Discrete, Tuple
-from hmlf.spaces import SimpleHybrid, OneHotHybrid
+from hmlf.spaces import SimpleHybrid, Box, Discrete
 
 
-class ObstacleCourse(gym.Env):
+class ObstacleCourse_v2(gym.Env):
     
     
     def __init__(self):
