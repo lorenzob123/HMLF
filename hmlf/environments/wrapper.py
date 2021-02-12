@@ -1,5 +1,5 @@
 import gym 
-from hmlf.spaces import OneHotHybrid
+from hmlf.spaces import OneHotHybrid, SimpleHybrid
 
 
 class OneHotWrapper(gym.Wrapper):
