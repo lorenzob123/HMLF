@@ -206,7 +206,7 @@ class PDQN(OffPolicyAlgorithm):
             loss2.backward()
             self.policy.optimizer_parameter_net.step()
 
-            self.q_values.append(q_values.detach().numpy())
+            self.q_values.append(q_values.detach().cpu().numpy())
 
         # Increase update counter
         self._n_updates += gradient_steps
@@ -246,7 +246,8 @@ class PDQN(OffPolicyAlgorithm):
             action = np.array([self.action_space.sample()])
         else:
             action, state = self.policy.predict(observation, state, mask, deterministic)
-            parameters = self.policy.forward_parameters(th.Tensor(observation)).detach().numpy()
+            obs_tensor = th.Tensor(observation).to(self.device)
+            parameters = self.policy.forward_parameters(obs_tensor).detach().cpu().numpy()
             action = np.array([make_action(action[0], parameters[0], self.env.action_space)])
         return action, state
 
@@ -323,8 +324,8 @@ class PDQN(OffPolicyAlgorithm):
             action = self.policy.unscale_action(scaled_action)
         else:
             # Discrete case, no need to normalize or clip
-            buffer_action = unscaled_action
-            action = buffer_action
+            buffer_action = np.hstack((np.array([unscaled_action[0][0]]), *unscaled_action[0][1:]))
+            action = unscaled_action
         return action, buffer_action
         
 
