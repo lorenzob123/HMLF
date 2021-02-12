@@ -166,7 +166,6 @@ class PADDPG(TD3):
             # Warmup phase
             #unscaled_action = np.hstack(self.action_space.sample()).astype(np.float32)
             unscaled_action = self.action_space.sample()
-            print(unscaled_action)
         else:
             # Note: when using continuous actions,
             # we assume that the policy uses tanh to scale the action
@@ -195,11 +194,11 @@ class PADDPG(TD3):
         #TODO Add scaling for the parameters
         if isinstance(self.action_space, gym.spaces.Tuple):
             buffer_action = unscaled_action
-            action = self.action_space.format_action(buffer_action)
-            
+            action = self.action_space.format_action(buffer_action.reshape(-1, self.action_space.get_dimension()))
         else:
             # Discrete case, no need to normalize or clip
             buffer_action = unscaled_action
             action = buffer_action
+
         
-        return [action], buffer_action
+        return action, buffer_action

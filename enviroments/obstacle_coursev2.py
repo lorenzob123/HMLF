@@ -19,7 +19,7 @@ class ObstacleCourse(gym.Env):
         self.max_timesteps = 100
         self.goal_threshold = 0.05
         tmp = np.ones(1)
-        self.action_space = OneHotHybrid((Discrete(2),
+        self.action_space = SimpleHybrid((Discrete(2),
                                    Box(0, self.max_move, (1,)),
                                    Box(np.float32(0), np.float32(1), (1,))))
         self.observation_space = Box(low=np.zeros(3), high=np.ones(3), dtype=np.float32)
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     # env = [lambda: ObstacleCourse() for ip in range(16)]
     # env = SubprocVecEnv(env)
 
-    model = PADDPG('MlpPolicy', env=ObstacleCourse(),  verbose=2)
+    model = PADDPG('MlpPolicy', env=ObstacleCourse(), learning_rate=1e-4)
 
     obs = ObstacleCourse().reset()
 
