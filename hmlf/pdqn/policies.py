@@ -1,12 +1,10 @@
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, Union
-
-import gym
-import torch as th
+from hmlf.spaces import SimpleHybrid, Box, Discrete, Space
+from typing import Any, Dict, List, Optional, Type
 from torch import nn
+
+import torch as th
 import numpy as np
 import copy
-
-from torch.nn.parameter import Parameter
 
 
 from hmlf.common.policies import BasePolicy, register_policy
@@ -16,33 +14,17 @@ from hmlf.common.type_aliases import Schedule
 from hmlf.td3.policies import Actor
 from hmlf.dqn.policies import QNetwork
 
+def build_simple_parameter_space(action_space: SimpleHybrid) -> Box:
+    return Box(action_space.continuous_low, action_space.continuous_high)
 
-# need Parameter (Actor) Network s -> parameters
-# Need Q Network (State + ParameterSpace)
+def build_state_parameter_space(observation_space: Box, action_space: SimpleHybrid) -> Box:
+    lows = np.hstack([observation_space.low, action_space.continuous_low])
+    highs = np.hstack([observation_space.high, action_space.continuous_high])
 
-#TODO: Add assert or something similar to force standard Tuple structure [Discrete, Box, Box, ...]
-def build_simple_parameter_space(action_space: gym.spaces.Tuple) -> gym.spaces.Box:
-    lows = np.hstack([space.low for space in action_space[1:]])
-    highs = np.hstack([space.high for space in action_space[1:]])
+    return Box(lows, highs)
 
-    return gym.spaces.Box(lows, highs)
-
-
-def build_state_parameter_space(observation_space: gym.spaces.Box, action_space: gym.spaces.Tuple) -> gym.spaces.Box:
-    lows = np.hstack([observation_space.low] + [space.low for space in action_space[1:]])
-    highs = np.hstack([observation_space.high] + [space.high for space in action_space[1:]])
-
-    return gym.spaces.Box(lows, highs)
-
-def build_action_space_q(action_space: gym.spaces.Tuple) -> gym.spaces.Discrete:
+def build_action_space_q(action_space: SimpleHybrid) -> Discrete:
     return copy.copy(action_space[0])
-
-
-def make_action(q_argmax: th.Tensor, parameters: th.Tensor, action_space: gym.spaces.Tuple) -> Tuple[th.Tensor]:
-    dims = [np.prod(action_space[i].shape) for i in range(1, len(action_space))]
-    sections = np.cumsum(dims)
-    action = tuple((q_argmax, *np.split(parameters[0], sections)[:-1])) #TODO: [:-1] always needed?
-    return action
 
 
 class PDQNPolicy(BasePolicy):
@@ -67,8 +49,8 @@ class PDQNPolicy(BasePolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: Space,
+        action_space: SimpleHybrid,
         lr_schedule: Schedule,
         net_arch: Optional[List[int]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
@@ -78,6 +60,9 @@ class PDQNPolicy(BasePolicy):
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
     ):
+
+        assert isinstance(action_space, SimpleHybrid)
+
         self.action_space_parameter = build_simple_parameter_space(action_space)
         self.observation_space_q = build_state_parameter_space(observation_space, action_space)
         self.action_space_q = build_action_space_q(action_space)
@@ -195,7 +180,7 @@ class PDQNPolicy(BasePolicy):
     def _update_features_extractor(
         self, 
         net_kwargs: Dict[str, Any],
-        observation_space: gym.spaces.Space,
+        observation_space: Space,
         features_extractor: Optional[BaseFeaturesExtractor] = None
     ) -> Dict[str, Any]:
         """
@@ -215,7 +200,7 @@ class PDQNPolicy(BasePolicy):
         net_kwargs.update(dict(features_extractor=features_extractor, features_dim=features_extractor.features_dim))
         return net_kwargs
 
-    def make_features_extractor(self, observation_space: gym.spaces.Space) -> BaseFeaturesExtractor:
+    def make_features_extractor(self, observation_space: Space) -> BaseFeaturesExtractor:
         """ Helper method to create a features extractor."""
         return self.features_extractor_class(observation_space, **self.features_extractor_kwargs)
 
@@ -244,8 +229,8 @@ class CnnPolicy(PDQNPolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: Space,
+        action_space: SimpleHybrid,
         lr_schedule: Schedule,
         net_arch: Optional[List[int]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,

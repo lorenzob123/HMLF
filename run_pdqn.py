@@ -8,7 +8,7 @@ import torch
 import sys
 sys.path.append("./environments")
 
-from enviroments.obstacle_course import ObstacleCourse
+from enviroments.obstacle_coursev2 import ObstacleCourse
 env = ObstacleCourse()
 
 from hmlf.common.preprocessing import get_action_dim
@@ -33,7 +33,7 @@ print(f"action_dim={get_action_dim(env.action_space)}")
 # action = pol.predict(sample)
 # q_values = pol.forward(sample_tensor)
 
-pqdn = PDQN("MlpPolicy", env, learning_starts=1000)
+pqdn = PDQN("MlpPolicy", env,)
 
 pqdn.learn(total_timesteps=1e6, callback=EvalCallback(eval_env=ObstacleCourse(), eval_freq = 10000, n_eval_episodes=20))
 

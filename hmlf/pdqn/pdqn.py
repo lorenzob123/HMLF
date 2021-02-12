@@ -124,6 +124,7 @@ class PDQN(OffPolicyAlgorithm):
 
         self.losses_q = []
         self.losses_parameter = []
+        self.q_values = []
 
 
         if _init_setup_model:
@@ -156,7 +157,7 @@ class PDQN(OffPolicyAlgorithm):
 
     def train(self, gradient_steps: int, batch_size: int = 100) -> None:
         # Update learning rate according to schedule
-        #self._update_learning_rate(self.policy.optimizer) #TODO: Uncomment
+        self._update_learning_rate([self.policy.optimizer_q_net, self.policy.optimizer_parameter_net]) #TODO: Uncomment
 
 
         for _ in range(gradient_steps):
@@ -201,6 +202,7 @@ class PDQN(OffPolicyAlgorithm):
             loss2.backward()
             self.policy.optimizer_parameter_net.step()
 
+            self.q_values.append(q_values.detach().numpy())
 
         # Increase update counter
         self._n_updates += gradient_steps
@@ -208,6 +210,7 @@ class PDQN(OffPolicyAlgorithm):
         if (len(self.losses_q) % 1000 == 0):
             print("q", np.mean(self.losses_q[-100:]))
             print("p", np.mean(self.losses_parameter[-100:]))
+            print("p", np.mean(self.q_values[-100:], axis=1)[:3])
 
         logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
         logger.record("train/loss_q", np.mean(self.losses_q))

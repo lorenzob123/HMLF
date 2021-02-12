@@ -23,6 +23,9 @@ class SimpleHybrid(spaces.Tuple):
         dims_continous = self._get_continous_dims()
         self.continuous_dim = np.sum(dims_continous)
 
+        self.continuous_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
+        self.continuous_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
+
 
     def _get_continous_dims(self) -> List[int]:
         # Since each space is one dimensional, shape[0] gets the dimension
@@ -35,9 +38,7 @@ class SimpleHybrid(spaces.Tuple):
 
     def make_sample(self, discrete: np.array, parameters: np.ndarray) -> List[Tuple]:
         # We clip the parameters
-        param_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
-        param_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
-        parameters = np.clip(parameters, param_low, param_high)
+        parameters = np.clip(parameters, self.continuous_low, self.continuous_high)
         
         # We prepare the split of the parameters for each discrete action
         dims_continous = self._get_continous_dims()
