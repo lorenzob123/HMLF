@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 from gym.spaces import Box, Discrete, Tuple
-from hmlf.spaces import SimpleHybrid
+from hmlf.spaces import SimpleHybrid, OneHotHybrid
 
 
 class ObstacleCourse(gym.Env):
@@ -19,10 +19,10 @@ class ObstacleCourse(gym.Env):
         self.max_timesteps = 100
         self.goal_threshold = 0.05
         tmp = np.ones(1)
-        self.action_space = SimpleHybrid((Discrete(2),
+        self.action_space = OneHotHybrid((Discrete(2),
                                    Box(0, self.max_move, (1,)),
                                    Box(np.float32(0), np.float32(1), (1,))))
-        self.observation_space = Box(low=np.zeros(3), high=np.ones(3))
+        self.observation_space = Box(low=np.zeros(3), high=np.ones(3), dtype=np.float32)
 
         self.position = 0
         self.time = 0
@@ -120,10 +120,10 @@ if __name__ == "__main__":
     from hmlf.common.callbacks import EvalCallback
     from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
-    env = [lambda: ObstacleCourse() for ip in range(16)]
-    env = SubprocVecEnv(env)
+    # env = [lambda: ObstacleCourse() for ip in range(16)]
+    # env = SubprocVecEnv(env)
 
-    model = PPO('MlpPolicy', env=env,  verbose=2)
+    model = PADDPG('MlpPolicy', env=ObstacleCourse(),  verbose=2)
 
     obs = ObstacleCourse().reset()
 

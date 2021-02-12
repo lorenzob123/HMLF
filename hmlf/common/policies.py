@@ -302,7 +302,7 @@ class BasePolicy(BaseModel):
                 # out of bound error (e.g. if sampling from a Gaussian distribution)
                 actions = np.clip(actions, self.action_space.low, self.action_space.high)
         if isinstance(self.action_space, SimpleHybrid):
-            actions = self.action_space.make_sample(actions[:, 0], actions[:, 1:])
+            actions = self.action_space.format_action(actions)
 
         if not vectorized_env:
             if state is not None:
