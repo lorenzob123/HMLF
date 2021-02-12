@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 from gym.spaces import Box, Discrete, Tuple
-from hmlf.spaces import SimpleHybrid, OneHotHybrid
+from hmlf.spaces import SimpleHybrid
 
 
 class ObstacleCourse(gym.Env):
@@ -16,13 +16,13 @@ class ObstacleCourse(gym.Env):
         self.goal_position = .95
         self.obstacle_thickness = 0.01
         self.jump_threshold =.1
-        self.max_timesteps = 100
+        self.max_timesteps = 30
         self.goal_threshold = 0.05
         tmp = np.ones(1)
         self.action_space = SimpleHybrid((Discrete(2),
-                                   Box(0, self.max_move, (1,)),
+                                   Box(-self.max_move, self.max_move, (1,)),
                                    Box(np.float32(0), np.float32(1), (1,))))
-        self.observation_space = Box(low=np.zeros(3), high=np.ones(3), dtype=np.float32)
+        self.observation_space = Box(low=np.zeros(7, dtype=np.float32), high=np.ones(7, dtype=np.float32))
 
         self.position = 0
         self.time = 0
@@ -63,8 +63,10 @@ class ObstacleCourse(gym.Env):
 
         if change:
             obstacle_idx = np.where(pre_relative_position * post_relative_position < 0)[0][0]
-            self.position = self.obstacle_position[obstacle_idx] - self.obstacle_thickness
-
+            if movement >= 0:
+                self.position = self.obstacle_position[obstacle_idx] - self.obstacle_thickness
+            elif movement < 0:
+                self.position = self.obstacle_position[obstacle_idx] + self.obstacle_thickness
 
         else:
             self.position += movement
@@ -92,15 +94,7 @@ class ObstacleCourse(gym.Env):
 
 
     def get_observation(self):
-        next_obstacles = np.argwhere((self.obstacle_position - self.position) > 0)
-        if next_obstacles.size > 0:
-            distance_next = self.obstacle_position[next_obstacles[0]][0]
-            height_next = self.obstacle_target_height[next_obstacles[0]][0]
-        else:
-            distance_next = 1
-            height_next = 1
-        # print(np.array([self.position, distance_next, height_next]))
-        return np.array([self.position, distance_next, height_next])
+        return np.hstack((np.array([self.position]), self.obstacle_position, self.obstacle_target_height))
 
 
     def compute_reward_done(self):
@@ -111,20 +105,3 @@ class ObstacleCourse(gym.Env):
         self.time += 1
 
         return -distance, self.time >= self.max_timesteps
-
-
-
-if __name__ == "__main__":
-    from hmlf import PADDPG, DDPG, PPO
-    from hmlf.common.vec_env import SubprocVecEnv
-    from hmlf.common.callbacks import EvalCallback
-    from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
-
-    # env = [lambda: ObstacleCourse() for ip in range(16)]
-    # env = SubprocVecEnv(env)
-
-    model = PADDPG('MlpPolicy', env=ObstacleCourse(), learning_rate=1e-4)
-
-    obs = ObstacleCourse().reset()
-
-    model.learn(total_timesteps=1e6, callback=EvalCallback(eval_env=ObstacleCourse(), eval_freq = 1000, n_eval_episodes=20))

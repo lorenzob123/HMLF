@@ -40,14 +40,3 @@ class DummyEnv(gym.Env):
 
     def close (self):
         pass
-
-
-if __name__ == "__main__":
-    from hmlf import PADDPG, DDPG, PPO
-    
-
-    env = [lambda: DummyEnv() for ip in range(8)]
-    env = SubprocVecEnv(env)
-
-    model = PADDPG('MlpPolicy', DummyEnv(), verbose=1)
-    model.learn(total_timesteps=1000000)
