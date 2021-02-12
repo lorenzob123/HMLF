@@ -8,7 +8,7 @@ import copy
 
 
 from hmlf.common.policies import BasePolicy, register_policy
-from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
+from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN
 from hmlf.common.type_aliases import Schedule
 
 from hmlf.td3.policies import Actor
@@ -29,7 +29,7 @@ def build_action_space_q(action_space: SimpleHybrid) -> Discrete:
 
 class PDQNPolicy(BasePolicy):
     """
-    Policy class with Q-Value Net and target net for DQN
+    Policy class with Q-Value Net and target net for P-DQN.
 
     :param observation_space: Observation space
     :param action_space: Action space
@@ -102,8 +102,8 @@ class PDQNPolicy(BasePolicy):
             "normalize_images": normalize_images,
         }
 
-        self.q_net, self.q_net_target = None, None
-        self.parameter_net, self.parameter_net_target = None, None
+        self.q_net, self.q_net_target, self.parameter_net = None, None, None
+        
         self._build(lr_schedule)
 
     def _build(self, lr_schedule: Schedule) -> None:
@@ -119,9 +119,6 @@ class PDQNPolicy(BasePolicy):
         self.q_net_target.load_state_dict(self.q_net.state_dict())
 
         self.parameter_net = self._make_parameter_net()
-        self.parameter_net_target = self._make_parameter_net()
-        self.parameter_net_target.load_state_dict(self.parameter_net.state_dict())
-
 
         #TODO: Separater arguments for parameter net?
         # Setup optimizer with initial learning rate

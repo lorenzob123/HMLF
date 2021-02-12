@@ -16,10 +16,10 @@ from hmlf.pdqn.policies import PDQNPolicy
 
 class PDQN(OffPolicyAlgorithm):
     """
-    Deep Q-Network (DQN)
+    Deep Parametrized Q-Network (P-DQN)
 
-    Paper: https://arxiv.org/abs/1312.5602, https://www.nature.com/articles/nature14236
-    Default hyperparameters are taken from the nature paper,
+    Paper: https://arxiv.org/abs/1810.06394
+    Default hyperparameters are taken from the DQN-nature paper,
     except for the optimizer and learning rate that were taken from Stable Baselines defaults.
 
     :param policy: The policy model to use (MlpPolicy, CnnPolicy, ...)
@@ -120,13 +120,8 @@ class PDQN(OffPolicyAlgorithm):
         self.exploration_rate = 0.0
         # Linear schedule will be defined in `_setup_model()`
         self.exploration_schedule = None
-        self.q_net, self.q_net_target = None, None
-        self.parameter_net, self.parameter_net_target = None, None
 
-        self.losses_q = []
-        self.losses_parameter = []
-        self.q_values = []
-
+        self.q_net, self.q_net_target, self.parameter_net = None, None, None
 
         if _init_setup_model:
             self._setup_model()
@@ -142,7 +137,6 @@ class PDQN(OffPolicyAlgorithm):
         self.q_net = self.policy.q_net
         self.q_net_target = self.policy.q_net_target
         self.parameter_net = self.policy.parameter_net
-        self.parameter_net_target = self.policy.parameter_net_target
 
     def _on_step(self) -> None:
         """
@@ -151,16 +145,16 @@ class PDQN(OffPolicyAlgorithm):
         """
         if self.num_timesteps % self.target_update_interval == 0:
             polyak_update(self.q_net.parameters(), self.q_net_target.parameters(), self.tau)
-            #polyak_update(self.parameter_net.parameters(), self.parameter_net_target.parameters(), self.tau)
 
         self.exploration_rate = self.exploration_schedule(self._current_progress_remaining)
         logger.record("rollout/exploration rate", self.exploration_rate)
 
     def train(self, gradient_steps: int, batch_size: int = 100) -> None:
         # Update learning rate according to schedule
-        self._update_learning_rate([self.policy.optimizer_q_net, self.policy.optimizer_parameter_net]) #TODO: Uncomment
+        self._update_learning_rate([self.policy.optimizer_q_net, self.policy.optimizer_parameter_net])
 
-
+        loss_q = []
+        loss_parameter = []
         for _ in range(gradient_steps):
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)
@@ -187,38 +181,30 @@ class PDQN(OffPolicyAlgorithm):
 
             # Compute Huber loss (less sensitive to outliers)
             loss = F.smooth_l1_loss(current_q_values, target_q_values)
-            #import ipdb; ipdb.set_trace()
-            self.losses_q.append(loss.item())
 
             # Optimize the policy
             self.policy.optimizer_q_net.zero_grad()
             loss.backward()
             # Clip gradient norm
             th.nn.utils.clip_grad_norm_(self.policy.q_net.parameters(), self.max_grad_norm)
-            # if (len(self.losses_q) % 1000 == 0):
-            #     import ipdb; ipdb.set_trace()
             self.policy.optimizer_q_net.step()
 
             q_values = self.policy.forward(replay_data.observations)
             loss2 = -q_values.sum()
-            self.losses_parameter.append(loss2.item())
             self.policy.optimizer_parameter_net.zero_grad()
             loss2.backward()
+            th.nn.utils.clip_grad_norm_(self.policy.parameter_net.parameters(), self.max_grad_norm)
             self.policy.optimizer_parameter_net.step()
 
-            self.q_values.append(q_values.detach().cpu().numpy())
+            loss_q.append(loss.item())
+            loss_parameter.append(loss2.item())
 
         # Increase update counter
         self._n_updates += gradient_steps
 
-        if (len(self.losses_q) % 1000 == 0):
-            print("q", np.mean(self.losses_q[-100:]))
-            print("p", np.mean(self.losses_parameter[-100:]))
-            print("p", np.mean(self.q_values[-100:], axis=1)[:3])
-
         logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
-        logger.record("train/loss_q", np.mean(self.losses_q))
-        logger.record("train/loss_parameter", np.mean(self.losses_parameter))
+        logger.record("train/loss_q", np.mean(loss_q))
+        logger.record("train/loss_parameter", np.mean(loss_parameter))
 
     def predict(
         self,
@@ -239,16 +225,16 @@ class PDQN(OffPolicyAlgorithm):
         """
         if not deterministic and np.random.rand() < self.exploration_rate:
             #TODO: Fix
-            # if is_vectorized_observation(observation, self.observation_space):
-            #     n_batch = observation.shape[0]
-            #     action = np.array([self.action_space.sample() for _ in range(n_batch)])
-            # else:
-            action = np.array([self.action_space.sample()])
+            if is_vectorized_observation(observation, self.observation_space):
+                n_batch = observation.shape[0]
+                action = np.array([self.action_space.sample() for _ in range(n_batch)])
+            else:
+                action = np.array([self.action_space.sample()])
         else:
             action, state = self.policy.predict(observation, state, mask, deterministic)
             obs_tensor = th.Tensor(observation).to(self.device)
             parameters = self.policy.forward_parameters(obs_tensor).detach().cpu().numpy()
-            action = np.array([make_action(action[0], parameters[0], self.env.action_space)])
+            action = self.action_space.make_sample(action, parameters)
         return action, state
 
     def learn(
@@ -327,17 +313,3 @@ class PDQN(OffPolicyAlgorithm):
             buffer_action = np.hstack((np.array([unscaled_action[0][0]]), *unscaled_action[0][1:]))
             action = unscaled_action
         return action, buffer_action
-        
-
-def make_action(action: np.int64, parameters: np.ndarray, action_space: gym.Space) -> Tuple: 
-    continous_action_dimensions = [space.shape[0] for space in action_space[1:]] # Since each space is one dimensional, shape[0] gets the dimension
-    split_indizes = np.cumsum(continous_action_dimensions[:-1]) # Skip the last one, because cumsum returns list with N values for N 
-    split = np.split(parameters, split_indizes) # Returns list with parameters for each action subspace
-
-    for i, space_sample in enumerate(split):
-        sample_action_space = action_space[1 + i] # First one is discrete
-
-        split[i] = np.clip(space_sample, sample_action_space.low, sample_action_space.high) # Clips action to subspace boundaries
-
-    action = [action, *split]
-    return action
