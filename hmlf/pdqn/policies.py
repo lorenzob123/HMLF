@@ -14,18 +14,12 @@ from hmlf.common.type_aliases import Schedule
 from hmlf.td3.policies import Actor
 from hmlf.dqn.policies import QNetwork
 
-def build_simple_parameter_space(action_space: SimpleHybrid) -> Box:
-    return Box(action_space.continuous_low, action_space.continuous_high)
 
 def build_state_parameter_space(observation_space: Box, action_space: SimpleHybrid) -> Box:
     lows = np.hstack([observation_space.low, action_space.continuous_low])
     highs = np.hstack([observation_space.high, action_space.continuous_high])
 
     return Box(lows, highs)
-
-def build_action_space_q(action_space: SimpleHybrid) -> Discrete:
-    return copy.copy(action_space[0])
-
 
 class PDQNPolicy(BasePolicy):
     """
@@ -51,7 +45,8 @@ class PDQNPolicy(BasePolicy):
         self,
         observation_space: Space,
         action_space: SimpleHybrid,
-        lr_schedule: Schedule,
+        lr_schedule_q: Schedule,
+        lr_schedule_parameter: Schedule,
         net_arch: Optional[List[int]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
         features_extractor_class: Type[BaseFeaturesExtractor] = FlattenExtractor,
@@ -63,9 +58,9 @@ class PDQNPolicy(BasePolicy):
 
         assert isinstance(action_space, SimpleHybrid)
 
-        self.action_space_parameter = build_simple_parameter_space(action_space)
+        self.action_space_parameter = Box(action_space.continuous_low, action_space.continuous_high)
         self.observation_space_q = build_state_parameter_space(observation_space, action_space)
-        self.action_space_q = build_action_space_q(action_space)
+        self.action_space_q = copy.copy(action_space[0])
 
         super(PDQNPolicy, self).__init__(
             observation_space,
@@ -104,9 +99,9 @@ class PDQNPolicy(BasePolicy):
 
         self.q_net, self.q_net_target, self.parameter_net = None, None, None
         
-        self._build(lr_schedule)
+        self._build(lr_schedule_q, lr_schedule_parameter)
 
-    def _build(self, lr_schedule: Schedule) -> None:
+    def _build(self, lr_schedule_q: Schedule, lr_schedule_parameter: Schedule) -> None:
         """
         Create the network and the optimizer.
 
@@ -123,8 +118,8 @@ class PDQNPolicy(BasePolicy):
         #TODO: Separater arguments for parameter net?
         # Setup optimizer with initial learning rate
         print(self.optimizer_kwargs)
-        self.optimizer_q_net = self.optimizer_class(self.q_net.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
-        self.optimizer_parameter_net = self.optimizer_class(self.parameter_net.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
+        self.optimizer_q_net = self.optimizer_class(self.q_net.parameters(), lr=lr_schedule_q(1), **self.optimizer_kwargs)
+        self.optimizer_parameter_net = self.optimizer_class(self.parameter_net.parameters(), lr=lr_schedule_parameter(1), **self.optimizer_kwargs)
 
     def _make_q_net(self) -> QNetwork:
         # Make sure we always have separate networks for features extractors etc
