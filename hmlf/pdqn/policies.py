@@ -27,8 +27,10 @@ class PDQNPolicy(BasePolicy):
 
     :param observation_space: Observation space
     :param action_space: Action space
-    :param lr_schedule: Learning rate schedule (could be constant)
-    :param net_arch: The specification of the policy and value networks.
+    :param lr_schedule_q: Learning rate schedule for Q-Network (could be constant)
+    :param lr_schedule_parameter: Learning rate schedule for parameter network (could be constant)
+    :param net_arch_q: The specification of the Q-Network.
+    :param net_arch_parameter: The specification of the parameter network.
     :param activation_fn: Activation function
     :param features_extractor_class: Features extractor to use.
     :param features_extractor_kwargs: Keyword arguments
@@ -47,7 +49,8 @@ class PDQNPolicy(BasePolicy):
         action_space: SimpleHybrid,
         lr_schedule_q: Schedule,
         lr_schedule_parameter: Schedule,
-        net_arch: Optional[List[int]] = None,
+        net_arch_q: Optional[List[int]] = None,
+        net_arch_parameter: Optional[List[int]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
         features_extractor_class: Type[BaseFeaturesExtractor] = FlattenExtractor,
         features_extractor_kwargs: Optional[Dict[str, Any]] = None,
@@ -71,20 +74,16 @@ class PDQNPolicy(BasePolicy):
             optimizer_kwargs=optimizer_kwargs,
         )
 
-        if net_arch is None:
-            if features_extractor_class == FlattenExtractor:
-                net_arch = [64, 64]
-            else:
-                net_arch = []
+        self.net_arch_q = self.get_net_arch(net_arch_q, features_extractor_class)
+        self.net_arch_parameter = self.get_net_arch(net_arch_parameter, features_extractor_class)
 
-        self.net_arch = net_arch
         self.activation_fn = activation_fn
         self.normalize_images = normalize_images
 
         self.net_args_q = {
             "observation_space": self.observation_space_q,
             "action_space": self.action_space_q,
-            "net_arch": self.net_arch,
+            "net_arch": self.net_arch_q,
             "activation_fn": self.activation_fn,
             "normalize_images": normalize_images,
         }
@@ -92,7 +91,7 @@ class PDQNPolicy(BasePolicy):
         self.net_args_parameter = {
             "observation_space": self.observation_space,
             "action_space": self.action_space_parameter,
-            "net_arch": self.net_arch,
+            "net_arch": self.net_arch_parameter,
             "activation_fn": self.activation_fn,
             "normalize_images": normalize_images,
         }
@@ -100,6 +99,16 @@ class PDQNPolicy(BasePolicy):
         self.q_net, self.q_net_target, self.parameter_net = None, None, None
         
         self._build(lr_schedule_q, lr_schedule_parameter)
+
+
+    def get_net_arch(self, net_arch: Optional[List[int]], features_extractor_class: Type[BaseFeaturesExtractor]):
+        if net_arch is None:
+            if features_extractor_class == FlattenExtractor:
+                net_arch = [64, 64]
+            else:
+                net_arch = []
+            return net_arch
+
 
     def _build(self, lr_schedule_q: Schedule, lr_schedule_parameter: Schedule) -> None:
         """
@@ -158,7 +167,8 @@ class PDQNPolicy(BasePolicy):
 
         data.update(
             dict(
-                net_arch=self.net_args["net_arch"],
+                net_arch_q=self.net_args["net_arch_q"],
+                net_arch_parameter=self.net_args["net_arch_parameter"],
                 activation_fn=self.net_args["activation_fn"],
                 lr_schedule=self._dummy_schedule,  # dummy lr schedule, not needed for loading policy alone
                 optimizer_class=self.optimizer_class,
@@ -208,7 +218,8 @@ class CnnPolicy(PDQNPolicy):
     :param observation_space: Observation space
     :param action_space: Action space
     :param lr_schedule: Learning rate schedule (could be constant)
-    :param net_arch: The specification of the policy and value networks.
+    :param net_arch_q: The specification of the Q-Network.
+    :param net_arch_parameter: The specification of the parameter network.
     :param activation_fn: Activation function
     :param features_extractor_class: Features extractor to use.
     :param normalize_images: Whether to normalize images or not,
@@ -224,7 +235,8 @@ class CnnPolicy(PDQNPolicy):
         observation_space: Space,
         action_space: SimpleHybrid,
         lr_schedule: Schedule,
-        net_arch: Optional[List[int]] = None,
+        net_arch_q: Optional[List[int]] = None,
+        net_arch_parameter: Optional[List[int]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
         features_extractor_class: Type[BaseFeaturesExtractor] = NatureCNN,
         features_extractor_kwargs: Optional[Dict[str, Any]] = None,
@@ -236,7 +248,8 @@ class CnnPolicy(PDQNPolicy):
             observation_space,
             action_space,
             lr_schedule,
-            net_arch,
+            net_arch_q,
+            net_arch_parameter,
             activation_fn,
             features_extractor_class,
             features_extractor_kwargs,
