@@ -140,22 +140,37 @@ class PDQNPolicy(BasePolicy):
         #TODO implement separate arguments
         return Actor(**net_args).to(self.device)
 
-    def forward_parameters(self, obs: th.Tensor, deterministic: bool=True) -> th.Tensor:
-        parameters = self.parameter_net(obs)
-        return parameters
+    def _format_q_observation(self, obs: th.Tensor, action_parameters: th.Tensor) -> th.Tensor:
+        #TODO Documentation
+        return th.cat([obs, action_parameters], dim=1)
+
+    def _forward_q_target(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
+        observations = self._format_q_observation(obs, action_parameters)
+
+        q_values = self.q_net_target(observations)
+        return q_values
 
     def forward(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
         #Calculates q_values
         parameters = self.forward_parameters(obs)
-        obs_q = th.cat([obs, parameters], dim=1) # appends parameters to observation
-        q_values = self.q_net(obs_q)
+        q_values = self.forward_q(obs, parameters)
         return q_values
 
     def forward_target(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
-        parameters = self.parameter_net(obs)
-        obs_q = th.cat([obs, parameters], dim=1) # appends parameters to observation
-        q_values = self.q_net_target(obs_q)
+        #Calculates q_values from target net
+        parameters = self.forward_parameters(obs)
+        q_values = self._forward_q_target(obs, parameters)
         return q_values
+
+    def forward_q(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
+        observations = self._format_q_observation(obs, action_parameters)
+
+        q_values = self.q_net(observations)
+        return q_values
+
+    def forward_parameters(self, obs: th.Tensor, deterministic: bool=True) -> th.Tensor:
+        parameters = self.parameter_net(obs)
+        return parameters
 
     def _predict(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
         # Returns actions (index)

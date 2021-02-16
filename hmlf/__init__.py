@@ -8,6 +8,8 @@ from hmlf.paddpg import PADDPG
 from hmlf.ppo import PPO
 from hmlf.sac import SAC
 from hmlf.td3 import TD3
+from hmlf.pdqn import PDQN
+from hmlf.mpdqn import MPDQN
 
 # Read version from file
 version_file = os.path.join(os.path.dirname(__file__), "version.txt")

@@ -201,8 +201,7 @@ class MPDQNPolicy(BasePolicy):
 
     def forward_target(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
         parameters = self.parameter_net(obs)
-        q_values = self._forward_q_target(obs, parameters)
-        return q_values
+        return self._forward_q_target(obs, parameters)
 
     def _predict(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
         # Returns actions (index)

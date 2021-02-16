@@ -1,5 +1,5 @@
+from hmlf.common.policies import BasePolicy
 from hmlf.common.buffers import ReplayBuffer
-import os
 from hmlf.common.noise import ActionNoise
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -81,6 +81,7 @@ class PDQN(OffPolicyAlgorithm):
         exploration_initial_eps: float = 1.0,
         exploration_final_eps: float = 0.05,
         max_grad_norm: float = 10,
+        policy_class: Optional[Type[BasePolicy]] = None,
         tensorboard_log: Optional[str] = None,
         create_eval_env: bool = False,
         policy_kwargs: Optional[Dict[str, Any]] = None,
@@ -90,10 +91,13 @@ class PDQN(OffPolicyAlgorithm):
         _init_setup_model: bool = True,
     ):
 
+        if policy_class is None:
+            policy_class = PDQNPolicy
+
         super(PDQN, self).__init__(
             policy,
             env,
-            PDQNPolicy,
+            policy_class, # Usually PDQNPolicy, but for MP-DQN we need to pass MPDQN-Policy
             1, #learning_rate. We set it up ourselves, because we have two networks.
             buffer_size,
             learning_starts,
@@ -201,11 +205,8 @@ class PDQN(OffPolicyAlgorithm):
                 # 1-step TD target
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
-            # Append parameters to observation
-            observations = th.cat([replay_data.observations, replay_data.actions[:, 1:]], dim=1)
             # Get current Q-values estimates
-            current_q_values = self.policy.q_net(observations)
-
+            current_q_values = self.policy.forward_q(replay_data.observations, replay_data.actions[:, 1:])
             # Retrieve the q-values for the actions from the replay buffer
             # Need to do actions[:, 0].reshape(-1, 1) to get the discrete and not include parameters.
             current_q_values = th.gather(current_q_values, dim=1, index=replay_data.actions[:, 0].reshape(-1, 1).long())
@@ -255,7 +256,6 @@ class PDQN(OffPolicyAlgorithm):
             (used in recurrent policies)
         """
         if not deterministic and np.random.rand() < self.exploration_rate:
-            #TODO: Fix
             if is_vectorized_observation(observation, self.observation_space):
                 n_batch = observation.shape[0]
                 action = np.array([self.action_space.sample() for _ in range(n_batch)])
