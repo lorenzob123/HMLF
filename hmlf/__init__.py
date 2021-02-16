@@ -5,6 +5,7 @@ from hmlf.ddpg import DDPG
 from hmlf.dqn import DQN
 from hmlf.her import HER
 from hmlf.paddpg import PADDPG
+from hmlf.pdqn import PDQN
 from hmlf.ppo import PPO
 from hmlf.sac import SAC
 from hmlf.td3 import TD3
