@@ -10,6 +10,7 @@ import numpy as np
 import torch as th
 from torch import nn
 
+from hmlf.spaces import SimpleHybrid
 from hmlf.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
@@ -18,7 +19,8 @@ from hmlf.common.distributions import (
     MultiCategoricalDistribution,
     StateDependentNoiseDistribution,
     TupleDistribution,
-    make_proba_distribution,
+    HybridDistribution,
+    make_proba_distribution
 )
 from hmlf.common.preprocessing import get_action_dim, is_image_space, preprocess_obs
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, MlpExtractor, NatureCNN, create_mlp
@@ -299,8 +301,8 @@ class BasePolicy(BaseModel):
                 # Actions could be on arbitrary scale, so clip the actions to avoid
                 # out of bound error (e.g. if sampling from a Gaussian distribution)
                 actions = np.clip(actions, self.action_space.low, self.action_space.high)
-        if isinstance(self.action_space, gym.spaces.Tuple):
-            actions = onehot_hybrid_2_tuple_hybrid(actions, self.action_space)
+        if isinstance(self.action_space, SimpleHybrid):
+            actions = self.action_space.format_action(actions)
 
         if not vectorized_env:
             if state is not None:
@@ -520,6 +522,10 @@ class ActorCriticPolicy(BasePolicy):
             self.action_net, self.log_std  = self.action_dist.proba_distribution_net(
                 latent_dim=latent_dim_pi, log_std_init=self.log_std_init
             )
+        elif isinstance(self.action_dist, HybridDistribution):
+            self.action_net, self.log_std  = self.action_dist.proba_distribution_net(
+                latent_dim=latent_dim_pi, log_std_init=self.log_std_init
+            )
         else:
             raise NotImplementedError(f"Unsupported distribution '{self.action_dist}'.")
 
@@ -602,6 +608,8 @@ class ActorCriticPolicy(BasePolicy):
         elif isinstance(self.action_dist, StateDependentNoiseDistribution):
             return self.action_dist.proba_distribution(mean_actions, self.log_std, latent_sde)
         elif isinstance(self.action_dist, TupleDistribution):
+            return self.action_dist.proba_distribution(mean_actions, self.log_std)
+        elif isinstance(self.action_dist, HybridDistribution):
             return self.action_dist.proba_distribution(mean_actions, self.log_std)
         else:
             raise ValueError("Invalid action distribution")

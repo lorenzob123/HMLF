@@ -164,16 +164,20 @@ class PADDPG(TD3):
         # Select action randomly or according to policy
         if self.num_timesteps < learning_starts and not (self.use_sde and self.use_sde_at_warmup):
             # Warmup phase
-            unscaled_action = np.hstack(self.action_space.sample()).astype(np.float32)
-            action_sample = self.action_space.sample()
-            discrete_action = np.zeros(self.action_space[0].n)
-            np.put(discrete_action, action_sample[0],1)
-            unscaled_action = np.hstack((discrete_action, np.hstack(action_sample[1:]))).astype(np.float32)
+            #unscaled_action = np.hstack(self.action_space.sample()).astype(np.float32)
+            unscaled_action = self.action_space.sample()
         else:
             # Note: when using continuous actions,
             # we assume that the policy uses tanh to scale the action
             # We use non-deterministic action in the case of SAC, for TD3, it does not matter
-            unscaled_action, _ = self.predict(self._last_obs, deterministic=False)
+            # Note: when using continuous actions,
+            # we assume that the policy uses tanh to scale the action
+            # We use non-deterministic action in the case of SAC, for TD3, it does not matter
+            observation = th.as_tensor(self._last_obs).to(self.device)
+            with th.no_grad():
+                actions = self.policy._predict(observation, deterministic=False)
+            # Convert to numpy
+            unscaled_action = actions.cpu().numpy()
             unscaled_action = unscaled_action[0]
 
         # # Rescale the action from [low, high] to [-1, 1]
@@ -190,15 +194,11 @@ class PADDPG(TD3):
         #TODO Add scaling for the parameters
         if isinstance(self.action_space, gym.spaces.Tuple):
             buffer_action = unscaled_action
-            n = self.action_space[0].n
-            dims = [np.prod(self.action_space[i].shape) for i in range(1, len(self.action_space))]
-            sections = np.cumsum(dims) + n -1
-            action_index = np.argmax(unscaled_action[:n])
-            action = tuple((action_index, *np.split(unscaled_action, sections)[1:]))
-            
+            action = self.action_space.format_action(buffer_action.reshape(-1, self.action_space.get_dimension()))
         else:
             # Discrete case, no need to normalize or clip
             buffer_action = unscaled_action
             action = buffer_action
+
         
-        return [action], buffer_action
+        return action, buffer_action
