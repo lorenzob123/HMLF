@@ -297,7 +297,7 @@ class PDQN(OffPolicyAlgorithm):
         return super(PDQN, self)._excluded_save_params() + ["q_net", "q_net_target"]
 
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
-        state_dicts = ["policy", "policy.optimizer"]
+        state_dicts = ["policy", "policy.optimizer_q_net", "policy.optimizer_parameter_net"]
 
         return state_dicts, []
 
