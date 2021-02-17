@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Type, Union
 
 import gym
+
 import torch as th
 from torch import nn
 
@@ -14,6 +15,7 @@ from hmlf.common.torch_layers import (
     get_actor_critic_arch,
 )
 from hmlf.common.type_aliases import Schedule
+from hmlf.spaces.simple_hybrid import SimpleHybrid
 
 
 class Actor(BasePolicy):
@@ -34,7 +36,7 @@ class Actor(BasePolicy):
     def __init__(
         self,
         observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        action_space: SimpleHybrid,
         net_arch: List[int],
         features_extractor: nn.Module,
         features_dim: int,
@@ -55,10 +57,12 @@ class Actor(BasePolicy):
         self.features_dim = features_dim
         self.activation_fn = activation_fn
 
-        action_dim = get_action_dim(self.action_space)
-        actor_net = create_mlp(features_dim, action_dim, net_arch, activation_fn, squash_output=True)
-        # Deterministic action
-        self.mu = nn.Sequential(*actor_net)
+        action_dim = self.action_space._get_continous_dims()
+        actor_list = []
+        for action_param_dim in action_dim:
+            actor_net = create_mlp(features_dim -1, action_param_dim, net_arch, activation_fn, squash_output=True)        
+            actor_list.append(nn.Sequential(*actor_net))
+        self.mu_list = nn.ModuleList(actor_list)
 
     def _get_data(self) -> Dict[str, Any]:
         data = super()._get_data()
@@ -75,14 +79,24 @@ class Actor(BasePolicy):
 
     def forward(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
         # assert deterministic, 'The TD3 actor only outputs deterministic actions'
-        features = self.extract_features(obs)
-        return self.mu(features)
+        # TODO: implement a way to use extract_features
+        # features = self.extract_features(obs)
+        
+        # TODO: this is pseudo code and it will not work because of the batched env
+        actions = [th.zeros(obs.shape[0], dim).to(self.device) for dim in self.action_space._get_continous_dims()]
+
+        for i in range(obs.shape[0]):
+            discrete_i = int(obs[i,0].item())
+            param_i = self.mu_list[discrete_i](obs[i,1:])
+            actions[discrete_i][i, :] = param_i
+
+        return th.cat(actions, dim=1)
 
     def _predict(self, observation: th.Tensor, deterministic: bool = False) -> th.Tensor:
         return self.forward(observation, deterministic=deterministic)
 
 
-class TD3Policy(BasePolicy):
+class SDDPGPolicy(BasePolicy):
     """
     Policy class (with both actor and critic) for TD3.
 
@@ -120,7 +134,7 @@ class TD3Policy(BasePolicy):
         n_critics: int = 2,
         share_features_extractor: bool = True,
     ):
-        super(TD3Policy, self).__init__(
+        super(SDDPGPolicy, self).__init__(
             observation_space,
             action_space,
             features_extractor_class,
@@ -213,6 +227,7 @@ class TD3Policy(BasePolicy):
         return Actor(**actor_kwargs).to(self.device)
 
     def make_critic(self, features_extractor: Optional[BaseFeaturesExtractor] = None) -> ContinuousCritic:
+
         critic_kwargs = self._update_features_extractor(self.critic_kwargs, features_extractor)
         return ContinuousCritic(**critic_kwargs).to(self.device)
 
@@ -223,10 +238,10 @@ class TD3Policy(BasePolicy):
         return self.actor(observation, deterministic=deterministic)
 
 
-MlpPolicy = TD3Policy
+MlpPolicy = SDDPGPolicy
 
 
-class CnnPolicy(TD3Policy):
+class CnnPolicy(SDDPGPolicy):
     """
     Policy class (with both actor and critic) for TD3.
 

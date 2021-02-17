@@ -7,6 +7,7 @@ from hmlf.her import HER
 from hmlf.paddpg import PADDPG
 from hmlf.ppo import PPO
 from hmlf.sac import SAC
+from hmlf.sddpg import SDDPG
 from hmlf.td3 import TD3
 
 # Read version from file

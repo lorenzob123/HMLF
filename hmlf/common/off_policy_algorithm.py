@@ -303,6 +303,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         if self.num_timesteps < learning_starts and not (self.use_sde and self.use_sde_at_warmup):
             # Warmup phase
             unscaled_action = np.array([self.action_space.sample()])
+
         else:
             # Note: when using continuous actions,
             # we assume that the policy uses tanh to scale the action

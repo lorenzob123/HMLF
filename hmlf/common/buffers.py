@@ -209,7 +209,6 @@ class ReplayBuffer(BaseBuffer):
             self.observations[(self.pos + 1) % self.buffer_size] = np.array(next_obs).copy()
         else:
             self.next_observations[self.pos] = np.array(next_obs).copy()
-
         self.actions[self.pos] = np.array(action).copy()
         self.rewards[self.pos] = np.array(reward).copy()
         self.dones[self.pos] = np.array(done).copy()

@@ -111,11 +111,13 @@ class SDDPG(OffPolicyAlgorithm):
             supported_action_spaces=(gym.spaces.Box, gym.spaces.Tuple),
         )
 
-        self.policy = my_policy
 
         self.policy_delay = policy_delay
         self.target_noise_clip = target_noise_clip
         self.target_policy_noise = target_policy_noise
+
+        if "n_critics" not in self.policy_kwargs:
+            self.policy_kwargs["n_critics"] = 1
 
         if _init_setup_model:
             self._setup_model()
@@ -215,3 +217,41 @@ class SDDPG(OffPolicyAlgorithm):
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
         state_dicts = ["policy", "actor.optimizer", "critic.optimizer"]
         return state_dicts, []
+
+
+
+    def _sample_action(
+        self, learning_starts: int, action_noise: Optional[ActionNoise] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Sample an action according to the exploration policy.
+        This is either done by sampling the probability distribution of the policy,
+        or sampling a random action (from a uniform distribution over the action space)
+        or by adding noise to the deterministic output.
+
+        :param action_noise: Action noise that will be used for exploration
+            Required for deterministic policy (e.g. TD3). This can also be used
+            in addition to the stochastic policy for SAC.
+        :param learning_starts: Number of steps before learning for the warm-up phase.
+        :return: action to take in the environment
+            and scaled action that will be stored in the replay buffer.
+            The two differs when the action space is not normalized (bounds are not [-1, 1]).
+        """
+        # Select action randomly or according to policy
+        if self.num_timesteps < learning_starts and not (self.use_sde and self.use_sde_at_warmup):
+            # Warmup phase
+            action = self.action_space.sample()
+            # ! Debug
+            buffer_action = np.hstack(action)
+            action = [action]
+        else:
+            # Note: when using continuous actions,
+            # we assume that the policy uses tanh to scale the action
+            # We use non-deterministic action in the case of SAC, for TD3, it does not matter
+            unscaled_action, _ = self.predict(self._last_obs, deterministic=False)
+            buffer_action = unscaled_action
+            action = self.action_space.build_action(self._last_obs[:, 0], unscaled_action)
+
+        # Rescale the action from [low, high] to [-1, 1]
+
+        return action, buffer_action
