@@ -87,7 +87,7 @@ class DQN(OffPolicyAlgorithm):
         super(DQN, self).__init__(
             policy,
             env,
-            DQNPolicy,
+            "DQN",
             learning_rate,
             buffer_size,
             learning_starts,

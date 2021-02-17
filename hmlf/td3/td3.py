@@ -63,6 +63,7 @@ class TD3(OffPolicyAlgorithm):
         self,
         policy: Union[str, Type[TD3Policy]],
         env: Union[GymEnv, str],
+        policy_group: "TD3",
         learning_rate: Union[float, Schedule] = 1e-3,
         buffer_size: int = int(1e6),
         learning_starts: int = 100,
@@ -84,12 +85,15 @@ class TD3(OffPolicyAlgorithm):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
+        algorithm_name: Optional[str]=None,
     ):
+        if algorithm_name is None:
+            algorithm_name = "TD3"
 
         super(TD3, self).__init__(
             policy,
             env,
-            TD3Policy,
+            algorithm_name,
             learning_rate,
             buffer_size,
             learning_starts,

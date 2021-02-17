@@ -85,6 +85,7 @@ class PADDPG(TD3):
         super(PADDPG, self).__init__(
             policy=policy,
             env=env,
+            policy_group="TD3",
             learning_rate=learning_rate,
             buffer_size=buffer_size,
             learning_starts=learning_starts,

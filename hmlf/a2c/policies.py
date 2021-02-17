@@ -5,5 +5,5 @@ from hmlf.common.policies import ActorCriticCnnPolicy, ActorCriticPolicy, regist
 MlpPolicy = ActorCriticPolicy
 CnnPolicy = ActorCriticCnnPolicy
 
-register_policy("MlpPolicy", ActorCriticPolicy)
-register_policy("CnnPolicy", ActorCriticCnnPolicy)
+register_policy(MlpPolicy, "MlpPolicy", "A2C")
+register_policy(CnnPolicy, "CnnPolicy", "A2C")

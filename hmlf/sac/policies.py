@@ -435,5 +435,5 @@ class CnnPolicy(SACPolicy):
         )
 
 
-register_policy("MlpPolicy", MlpPolicy)
-register_policy("CnnPolicy", CnnPolicy)
+register_policy(MlpPolicy, "MlpPolicy", "SAC")
+register_policy(CnnPolicy, "CnnPolicy", "SAC")

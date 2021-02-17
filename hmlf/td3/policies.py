@@ -280,5 +280,5 @@ class CnnPolicy(TD3Policy):
         )
 
 
-register_policy("MlpPolicy", MlpPolicy)
-register_policy("CnnPolicy", CnnPolicy)
+register_policy(MlpPolicy, "MlpPolicy", "TD3")
+register_policy(CnnPolicy, "CnnPolicy", "TD3")

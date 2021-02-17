@@ -141,7 +141,6 @@ class PDQNPolicy(BasePolicy):
         return Actor(**net_args).to(self.device)
 
     def _format_q_observation(self, obs: th.Tensor, action_parameters: th.Tensor) -> th.Tensor:
-        #TODO Documentation
         return th.cat([obs, action_parameters], dim=1)
 
     def _forward_q_target(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
@@ -273,5 +272,7 @@ class CnnPolicy(PDQNPolicy):
             optimizer_kwargs,
         )
 
-register_policy("MlpPolicy", MlpPolicy)
-register_policy("CnnPolicy", CnnPolicy)
+
+register_policy(MlpPolicy, "MlpPolicy", "PDQN")
+register_policy(CnnPolicy, "CnnPolicy", "PDQN")
+

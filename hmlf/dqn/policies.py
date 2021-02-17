@@ -233,5 +233,5 @@ class CnnPolicy(DQNPolicy):
         )
 
 
-register_policy("MlpPolicy", MlpPolicy)
-register_policy("CnnPolicy", CnnPolicy)
+register_policy(MlpPolicy, "MlpPolicy", "DQN")
+register_policy(CnnPolicy, "CnnPolicy", "DQN")

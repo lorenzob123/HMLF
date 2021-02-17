@@ -104,7 +104,7 @@ class SAC(OffPolicyAlgorithm):
         super(SAC, self).__init__(
             policy,
             env,
-            SACPolicy,
+            "SAC",
             learning_rate,
             buffer_size,
             learning_starts,
