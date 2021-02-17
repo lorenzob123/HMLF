@@ -74,9 +74,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
     def __init__(
         self,
-        policy: Type[BasePolicy],
+        policy: Union[str, Type[BasePolicy]],
         env: Union[GymEnv, str],
-        policy_base: Type[BasePolicy],
+        policy_group: str,
         learning_rate: Union[float, Schedule],
         buffer_size: int = int(1e6),
         learning_starts: int = 100,
@@ -107,7 +107,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         super(OffPolicyAlgorithm, self).__init__(
             policy=policy,
             env=env,
-            policy_base=policy_base,
+            policy_group=policy_group,
             learning_rate=learning_rate,
             policy_kwargs=policy_kwargs,
             tensorboard_log=tensorboard_log,

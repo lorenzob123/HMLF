@@ -84,9 +84,9 @@ class BaseAlgorithm(ABC):
 
     def __init__(
         self,
-        policy: Type[BasePolicy],
+        policy: Union[str, Type[BasePolicy]],
         env: Union[GymEnv, str, None],
-        policy_base: Type[BasePolicy],
+        policy_group: str,
         learning_rate: Union[float, Schedule],
         policy_kwargs: Dict[str, Any] = None,
         tensorboard_log: Optional[str] = None,
@@ -101,10 +101,16 @@ class BaseAlgorithm(ABC):
         supported_action_spaces: Optional[Tuple[gym.spaces.Space, ...]] = None,
     ):
 
-        if isinstance(policy, str) and policy_base is not None:
-            self.policy_class = get_policy_from_name(policy_base, policy)
+        # if isinstance(policy, str) and policy_base is not None:
+        #     self.policy_class = get_policy_from_name(policy_base, policy)
+        # else:
+        #     self.policy_class = policy
+
+        if isinstance(policy, str):
+            self.policy_class = get_policy_from_name(policy, policy_group)
         else:
             self.policy_class = policy
+
 
         self.device = get_device(device)
         if verbose > 0:
