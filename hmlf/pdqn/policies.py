@@ -7,7 +7,7 @@ import numpy as np
 import copy
 
 
-from hmlf.common.policies import BasePolicy, register_policy
+from hmlf.common.policies import BasePolicy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN
 from hmlf.common.type_aliases import Schedule
 
@@ -271,8 +271,3 @@ class CnnPolicy(PDQNPolicy):
             optimizer_class,
             optimizer_kwargs,
         )
-
-
-register_policy(MlpPolicy, "MlpPolicy", "PDQN")
-register_policy(CnnPolicy, "CnnPolicy", "PDQN")
-

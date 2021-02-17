@@ -54,7 +54,7 @@ class A2C(OnPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[ActorCriticPolicy]],
+        policy: Type[ActorCriticPolicy],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule] = 7e-4,
         n_steps: int = 5,
@@ -80,7 +80,6 @@ class A2C(OnPolicyAlgorithm):
         super(A2C, self).__init__(
             policy,
             env,
-            policy_group="A2C",
             learning_rate=learning_rate,
             n_steps=n_steps,
             gamma=gamma,

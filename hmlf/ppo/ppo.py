@@ -67,9 +67,8 @@ class PPO(OnPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[ActorCriticPolicy]],
+        policy: Type[ActorCriticPolicy],
         env: Union[GymEnv, str],
-        policy_group: "PPO",
         learning_rate: Union[float, Schedule] = 3e-4,
         n_steps: int = 2048,
         batch_size: Optional[int] = 64,
@@ -96,7 +95,6 @@ class PPO(OnPolicyAlgorithm):
         super(PPO, self).__init__(
             policy,
             env,
-            algorithm_name="PPO",
             learning_rate=learning_rate,
             n_steps=n_steps,
             gamma=gamma,

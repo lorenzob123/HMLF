@@ -77,7 +77,7 @@ class HER(BaseAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[BasePolicy]],
+        policy: Type[BasePolicy],
         env: Union[GymEnv, str],
         model_class: Type[OffPolicyAlgorithm],
         n_sampled_goal: int = 4,
@@ -89,7 +89,7 @@ class HER(BaseAlgorithm):
     ):
 
         # we will use the policy and learning rate from the model
-        super(HER, self).__init__(policy=BasePolicy, env=env, policy_base=BasePolicy, learning_rate=0.0)
+        super(HER, self).__init__(policy=BasePolicy, env=env, learning_rate=0.0)
         del self.policy, self.learning_rate
 
         if self.get_vec_normalize_env() is not None:

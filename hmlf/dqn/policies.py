@@ -4,7 +4,7 @@ import gym
 import torch as th
 from torch import nn
 
-from hmlf.common.policies import BasePolicy, register_policy
+from hmlf.common.policies import BasePolicy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp
 from hmlf.common.type_aliases import Schedule
 
@@ -231,7 +231,3 @@ class CnnPolicy(DQNPolicy):
             optimizer_class,
             optimizer_kwargs,
         )
-
-
-register_policy(MlpPolicy, "MlpPolicy", "DQN")
-register_policy(CnnPolicy, "CnnPolicy", "DQN")

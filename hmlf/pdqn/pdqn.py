@@ -1,3 +1,4 @@
+from hmlf.pdqn.policies import PDQNPolicy
 from hmlf.common.policies import BasePolicy
 from hmlf.common.buffers import ReplayBuffer
 from hmlf.common.noise import ActionNoise
@@ -62,7 +63,7 @@ class PDQN(OffPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[BasePolicy]],
+        policy: Type[PDQNPolicy],
         env: Union[GymEnv, str],
         learning_rate_q: Union[float, Schedule] = 1e-4,
         learning_rate_parameter: Union[float, Schedule] = 1e-4,
@@ -87,16 +88,11 @@ class PDQN(OffPolicyAlgorithm):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
-        policy_group: str = None,
     ):
-
-        if policy_group is None:
-            policy_group = "PDQN"
 
         super(PDQN, self).__init__(
             policy,
             env,
-            policy_group, # Usually PDQNPolicy, but for MP-DQN we need to pass MPDQN-Policy
             1, #learning_rate. We set it up ourselves, because we have two networks.
             buffer_size,
             learning_starts,

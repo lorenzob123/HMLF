@@ -27,7 +27,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     :param policy: Policy object
     :param env: The environment to learn from
                 (if registered in Gym, can be str. Can be None for loading trained models)
-    :param policy_base: The base policy used by this method
     :param learning_rate: learning rate for the optimizer,
         it can be a function of the current progress remaining (from 1 to 0)
     :param buffer_size: size of the replay buffer
@@ -74,9 +73,8 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[BasePolicy]],
+        policy: Type[BasePolicy],
         env: Union[GymEnv, str],
-        policy_group: str,
         learning_rate: Union[float, Schedule],
         buffer_size: int = int(1e6),
         learning_starts: int = 100,
@@ -107,7 +105,6 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         super(OffPolicyAlgorithm, self).__init__(
             policy=policy,
             env=env,
-            policy_group=policy_group,
             learning_rate=learning_rate,
             policy_kwargs=policy_kwargs,
             tensorboard_log=tensorboard_log,

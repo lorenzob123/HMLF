@@ -58,7 +58,7 @@ class DQN(OffPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[DQNPolicy]],
+        policy: Type[DQNPolicy],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule] = 1e-4,
         buffer_size: int = 1000000,
@@ -87,7 +87,6 @@ class DQN(OffPolicyAlgorithm):
         super(DQN, self).__init__(
             policy,
             env,
-            "DQN",
             learning_rate,
             buffer_size,
             learning_starts,

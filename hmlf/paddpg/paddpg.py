@@ -60,7 +60,7 @@ class PADDPG(TD3):
 
     def __init__(
         self,
-        policy: Union[str, Type[TD3Policy]],
+        policy: Type[TD3Policy],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Callable] = 1e-3,
         buffer_size: int = int(1e6),
@@ -85,7 +85,6 @@ class PADDPG(TD3):
         super(PADDPG, self).__init__(
             policy=policy,
             env=env,
-            policy_group="TD3",
             learning_rate=learning_rate,
             buffer_size=buffer_size,
             learning_starts=learning_starts,
