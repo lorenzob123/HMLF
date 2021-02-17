@@ -817,75 +817,13 @@ def create_sde_features_extractor(
 
 _policy_registry = dict()  # type: Dict[Type[BasePolicy], Dict[str, Type[BasePolicy]]]
 
-
-# def get_policy_from_name(base_policy_type: Type[BasePolicy], name: str) -> Type[BasePolicy]:
-#     """
-#     Returns the registered policy from the base type and name.
-#     See `register_policy` for registering policies and explanation.
-
-#     :param base_policy_type: the base policy class
-#     :param name: the policy name
-#     :return: the policy
-#     """
-#     if base_policy_type not in _policy_registry:
-#         raise KeyError(f"Error: the policy type {base_policy_type} is not registered!")
-#     if name not in _policy_registry[base_policy_type]:
-#         raise KeyError(
-#             f"Error: unknown policy type {name},"
-#             f"the only registed policy type are: {list(_policy_registry[base_policy_type].keys())}!"
-#         )
-#     return _policy_registry[base_policy_type][name]
-
-
-# def register_policy(name: str, policy: Type[BasePolicy]) -> None:
-#     """
-#     Register a policy, so it can be called using its name.
-#     e.g. SAC('MlpPolicy', ...) instead of SAC(MlpPolicy, ...).
-
-#     The goal here is to standardize policy naming, e.g.
-#     all algorithms can call upon "MlpPolicy" or "CnnPolicy",
-#     and they receive respective policies that work for them.
-#     Consider following:
-
-#     OnlinePolicy
-#     -- OnlineMlpPolicy ("MlpPolicy")
-#     -- OnlineCnnPolicy ("CnnPolicy")
-#     OfflinePolicy
-#     -- OfflineMlpPolicy ("MlpPolicy")
-#     -- OfflineCnnPolicy ("CnnPolicy")
-
-#     Two policies have name "MlpPolicy" and two have "CnnPolicy".
-#     In `get_policy_from_name`, the parent class (e.g. OnlinePolicy)
-#     is given and used to select and return the correct policy.
-
-#     :param name: the policy name
-#     :param policy: the policy class
-#     """
-#     sub_class = None
-#     for cls in BasePolicy.__subclasses__():
-#         if issubclass(policy, cls):
-#             sub_class = cls
-#             break
-#     if sub_class is None:
-#         raise ValueError(f"Error: the policy {policy} is not of any known subclasses of BasePolicy!")
-
-#     if sub_class not in _policy_registry:
-#         _policy_registry[sub_class] = {}
-#     if name in _policy_registry[sub_class]:
-#         # Check if the registered policy is same
-#         # we try to register. If not so,
-#         # do not override and complain.
-#         if _policy_registry[sub_class][name] != policy:
-#             raise ValueError(f"Error: the name {name} is already registered for a different policy, will not override.")
-#     _policy_registry[sub_class][name] = policy
-
 def get_policy_from_name(policy_type: str, policy_group: str) -> Type[BasePolicy]:
     """
     Returns the registered policy from the base type and name.
     See `register_policy` for registering policies and explanation.
 
-    :param base_policy_type: the base policy class
-    :param name: the policy name
+    :param policy_type: common name of the policy. e.g. 'MlpPolicy'
+    :param policy_group: Algorithm/Policy group to which the policy belongs. E.g. TD3 for DDPG and TD3
     :return: the policy
     """
     if policy_group not in _policy_registry:
@@ -899,9 +837,6 @@ def get_policy_from_name(policy_type: str, policy_group: str) -> Type[BasePolicy
 
 
 def register_policy(policy: Type[BasePolicy], policy_type: str, policy_group: str) -> None:
-    # policy_type is in ['MlPolicy', 'CNNPolicy']
-    # policy_group is e.g. 'MPDQN'
-    # policy is the actual policy, e.g. MPDQNPolicy (class)
     """
     Register a policy, so it can be called using its name.
     e.g. SAC('MlpPolicy', ...) instead of SAC(MlpPolicy, ...).
@@ -922,8 +857,9 @@ def register_policy(policy: Type[BasePolicy], policy_type: str, policy_group: st
     In `get_policy_from_name`, the parent class (e.g. OnlinePolicy)
     is given and used to select and return the correct policy.
 
-    :param name: the policy name
-    :param policy: the policy class
+    :param policy: class reference of the policy. e.g. the PDQNPolicy
+    :param policy_type: common name of the policy. e.g. 'MlpPolicy'
+    :param policy_group: Algorithm/Policy group to which the policy belongs. E.g. TD3 for DDPG and TD3
     """
 
     if policy_group not in _policy_registry:
