@@ -69,10 +69,6 @@ class PPO(OnPolicyAlgorithm):
         self,
         policy: Union[str, Type[ActorCriticPolicy]],
         env: Union[GymEnv, str],
-<<<<<<< Updated upstream
-=======
-        policy_group: str = "PPO",
->>>>>>> Stashed changes
         learning_rate: Union[float, Schedule] = 3e-4,
         n_steps: int = 2048,
         batch_size: Optional[int] = 64,
@@ -99,10 +95,6 @@ class PPO(OnPolicyAlgorithm):
         super(PPO, self).__init__(
             policy,
             env,
-<<<<<<< Updated upstream
-=======
-            policy_group="PPO",
->>>>>>> Stashed changes
             learning_rate=learning_rate,
             n_steps=n_steps,
             gamma=gamma,
