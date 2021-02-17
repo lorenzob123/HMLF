@@ -4,7 +4,7 @@ from typing import Tuple
 import numpy as np
 import torch as th
 from gym import spaces
-from hmlf.spaces import SimpleHybrid, OneHotHybrid
+from hmlf.spaces import SimpleHybrid, OneHotHybrid, ContinuosParameters
 
 from torch.nn import functional as F
 
@@ -158,6 +158,9 @@ def get_action_dim(action_space: spaces.Space) -> int:
     elif isinstance(action_space, spaces.MultiBinary):
         # Number of binary actions
         return int(action_space.n)
+    elif isinstance(action_space, ContinuosParameters):
+        dim = action_space.get_dimension()
+        return int(dim)
     elif isinstance(action_space, spaces.Tuple):
         all_param_box = True
         for sub_space in action_space[1:]:
