@@ -34,7 +34,7 @@ def onehot_hybrid_2_tuple_hybrid(actions: np.ndarray, action_space: Tuple) -> li
     # We split actions to get the paramters for each task separeted
     idx_splits = [action_space[0].n] + [action_space[i].shape[0] for i in range(1, len(action_space))]
     idx_splits = np.cumsum(idx_splits)
-    _, *continuos_spl = np.split(actions, idx_splits[:-1], axis=1)
+    _, *continuous_spl = np.split(actions, idx_splits[:-1], axis=1)
 
 
     # We loop over all the enviroments and we format the actions as:
@@ -42,6 +42,6 @@ def onehot_hybrid_2_tuple_hybrid(actions: np.ndarray, action_space: Tuple) -> li
     clipped_actions = [[] for i in range(actions.shape[0])]
     for i in range(actions.shape[0]):
         clipped_actions[i].append(task[i])
-        for task_param in continuos_spl:
+        for task_param in continuous_spl:
             clipped_actions[i].append(task_param[i])
     return clipped_actions
