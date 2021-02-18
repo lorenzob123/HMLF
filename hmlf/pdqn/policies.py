@@ -7,7 +7,7 @@ import numpy as np
 import copy
 
 
-from hmlf.common.policies import BasePolicy, register_policy
+from hmlf.common.policies import BasePolicy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN
 from hmlf.common.type_aliases import Schedule
 
@@ -141,7 +141,6 @@ class PDQNPolicy(BasePolicy):
         return Actor(**net_args).to(self.device)
 
     def _format_q_observation(self, obs: th.Tensor, action_parameters: th.Tensor) -> th.Tensor:
-        #TODO Documentation
         return th.cat([obs, action_parameters], dim=1)
 
     def _forward_q_target(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
@@ -272,6 +271,3 @@ class CnnPolicy(PDQNPolicy):
             optimizer_class,
             optimizer_kwargs,
         )
-
-register_policy("MlpPolicy", MlpPolicy)
-register_policy("CnnPolicy", CnnPolicy)

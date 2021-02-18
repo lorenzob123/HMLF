@@ -4,7 +4,7 @@ import gym
 import torch as th
 from torch import nn
 
-from hmlf.common.policies import BasePolicy, ContinuousCritic, register_policy
+from hmlf.common.policies import BasePolicy, ContinuousCritic
 from hmlf.common.preprocessing import get_action_dim
 from hmlf.common.torch_layers import (
     BaseFeaturesExtractor,
@@ -278,7 +278,3 @@ class CnnPolicy(TD3Policy):
             n_critics,
             share_features_extractor,
         )
-
-
-register_policy("MlpPolicy", MlpPolicy)
-register_policy("CnnPolicy", CnnPolicy)

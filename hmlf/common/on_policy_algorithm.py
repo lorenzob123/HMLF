@@ -52,7 +52,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[ActorCriticPolicy]],
+        policy: Type[ActorCriticPolicy],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule],
         n_steps: int,
@@ -77,7 +77,6 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         super(OnPolicyAlgorithm, self).__init__(
             policy=policy,
             env=env,
-            policy_base=ActorCriticPolicy,
             learning_rate=learning_rate,
             policy_kwargs=policy_kwargs,
             verbose=verbose,

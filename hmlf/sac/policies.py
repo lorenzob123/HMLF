@@ -5,7 +5,7 @@ import torch as th
 from torch import nn
 
 from hmlf.common.distributions import SquashedDiagGaussianDistribution, StateDependentNoiseDistribution
-from hmlf.common.policies import BasePolicy, ContinuousCritic, create_sde_features_extractor, register_policy
+from hmlf.common.policies import BasePolicy, ContinuousCritic, create_sde_features_extractor
 from hmlf.common.preprocessing import get_action_dim
 from hmlf.common.torch_layers import (
     BaseFeaturesExtractor,
@@ -433,7 +433,3 @@ class CnnPolicy(SACPolicy):
             n_critics,
             share_features_extractor,
         )
-
-
-register_policy("MlpPolicy", MlpPolicy)
-register_policy("CnnPolicy", CnnPolicy)

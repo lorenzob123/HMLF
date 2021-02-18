@@ -1,3 +1,4 @@
+from hmlf.pdqn.policies import PDQNPolicy
 from hmlf.common.policies import BasePolicy
 from hmlf.common.buffers import ReplayBuffer
 from hmlf.common.noise import ActionNoise
@@ -12,7 +13,6 @@ from hmlf.common import logger
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import get_linear_fn, get_schedule_fn, is_vectorized_observation, polyak_update, update_learning_rate
-from hmlf.pdqn.policies import PDQNPolicy
 
 
 class PDQN(OffPolicyAlgorithm):
@@ -63,7 +63,7 @@ class PDQN(OffPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[PDQNPolicy]],
+        policy: Type[PDQNPolicy],
         env: Union[GymEnv, str],
         learning_rate_q: Union[float, Schedule] = 1e-4,
         learning_rate_parameter: Union[float, Schedule] = 1e-4,
@@ -81,7 +81,6 @@ class PDQN(OffPolicyAlgorithm):
         exploration_initial_eps: float = 1.0,
         exploration_final_eps: float = 0.05,
         max_grad_norm: float = 10,
-        policy_class: Optional[Type[BasePolicy]] = None,
         tensorboard_log: Optional[str] = None,
         create_eval_env: bool = False,
         policy_kwargs: Optional[Dict[str, Any]] = None,
@@ -91,13 +90,9 @@ class PDQN(OffPolicyAlgorithm):
         _init_setup_model: bool = True,
     ):
 
-        if policy_class is None:
-            policy_class = PDQNPolicy
-
         super(PDQN, self).__init__(
             policy,
             env,
-            policy_class, # Usually PDQNPolicy, but for MP-DQN we need to pass MPDQN-Policy
             1, #learning_rate. We set it up ourselves, because we have two networks.
             buffer_size,
             learning_starts,

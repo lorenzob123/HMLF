@@ -6,6 +6,8 @@ from torch.nn import functional as F
 
 from hmlf.common.type_aliases import GymEnv, Schedule
 from hmlf.mpdqn.policies import MPDQNPolicy
+
+
 from hmlf.pdqn import PDQN
 
 
@@ -58,7 +60,7 @@ class MPDQN(PDQN):
 
     def __init__(
         self,
-        policy: Union[str, Type[MPDQNPolicy]],
+        policy: Type[MPDQNPolicy],
         env: Union[GymEnv, str],
         learning_rate_q: Union[float, Schedule] = 1e-4,
         learning_rate_parameter: Union[float, Schedule] = 1e-4,
@@ -87,7 +89,6 @@ class MPDQN(PDQN):
 
         super(MPDQN, self).__init__(
             policy = policy, #: Union[str, Type[MPDQNPolicy]],
-            policy_class = MPDQNPolicy, # Need to add that for the P-DQN to use the correct policy
             env = env, #: Union[GymEnv, str],
             learning_rate_q = learning_rate_q, #: Union[float, Schedule] = 1e-4,
             learning_rate_parameter = learning_rate_parameter, #: Union[float, Schedule] = 1e-4,

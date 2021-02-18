@@ -16,7 +16,7 @@ from hmlf.common.callbacks import BaseCallback, CallbackList, ConvertCallback, E
 from hmlf.common.env_util import is_wrapped
 from hmlf.common.monitor import Monitor
 from hmlf.common.noise import ActionNoise
-from hmlf.common.policies import BasePolicy, get_policy_from_name
+from hmlf.common.policies import BasePolicy
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.save_util import load_from_zip_file, recursive_getattr, recursive_setattr, save_to_zip_file
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
@@ -59,7 +59,6 @@ class BaseAlgorithm(ABC):
     :param policy: Policy object
     :param env: The environment to learn from
                 (if registered in Gym, can be str. Can be None for loading trained models)
-    :param policy_base: The base policy used by this method
     :param learning_rate: learning rate for the optimizer,
         it can be a function of the current progress remaining (from 1 to 0)
     :param policy_kwargs: Additional arguments to be passed to the policy on creation
@@ -86,7 +85,6 @@ class BaseAlgorithm(ABC):
         self,
         policy: Type[BasePolicy],
         env: Union[GymEnv, str, None],
-        policy_base: Type[BasePolicy],
         learning_rate: Union[float, Schedule],
         policy_kwargs: Dict[str, Any] = None,
         tensorboard_log: Optional[str] = None,
@@ -101,10 +99,11 @@ class BaseAlgorithm(ABC):
         supported_action_spaces: Optional[Tuple[gym.spaces.Space, ...]] = None,
     ):
 
-        if isinstance(policy, str) and policy_base is not None:
-            self.policy_class = get_policy_from_name(policy_base, policy)
+        if isinstance(policy, str):
+            raise ValueError("Policy needs to be of Type[BasePolicy], not String.")
         else:
             self.policy_class = policy
+
 
         self.device = get_device(device)
         if verbose > 0:

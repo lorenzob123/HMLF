@@ -61,7 +61,7 @@ class TD3(OffPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[TD3Policy]],
+        policy: Type[TD3Policy],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule] = 1e-3,
         buffer_size: int = int(1e6),
@@ -89,7 +89,6 @@ class TD3(OffPolicyAlgorithm):
         super(TD3, self).__init__(
             policy,
             env,
-            TD3Policy,
             learning_rate,
             buffer_size,
             learning_starts,
