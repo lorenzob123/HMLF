@@ -27,7 +27,7 @@ from hmlf.common.utils import (
     set_random_seed,
     update_learning_rate,
 )
-from hmlf.common.vec_env import (
+from hmlf.environments.vec_env import (
     DummyVecEnv,
     VecEnv,
     VecNormalize,
@@ -35,7 +35,7 @@ from hmlf.common.vec_env import (
     is_vecenv_wrapped,
     unwrap_vec_normalize,
 )
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 
 
 def maybe_make_env(env: Union[GymEnv, str, None], verbose: int) -> Optional[GymEnv]:

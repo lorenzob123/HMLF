@@ -4,9 +4,9 @@ from typing import Callable
 from gym.wrappers.monitoring import video_recorder
 
 from hmlf.common import logger
-from hmlf.common.vec_env.base_vec_env import VecEnv, VecEnvObs, VecEnvStepReturn, VecEnvWrapper
-from hmlf.common.vec_env.dummy_vec_env import DummyVecEnv
-from hmlf.common.vec_env.subproc_vec_env import SubprocVecEnv
+from hmlf.environments.vec_env.base_vec_env import VecEnv, VecEnvObs, VecEnvStepReturn, VecEnvWrapper
+from hmlf.environments.vec_env.dummy_vec_env import DummyVecEnv
+from hmlf.environments.vec_env.subproc_vec_env import SubprocVecEnv
 
 
 class VecVideoRecorder(VecEnvWrapper):

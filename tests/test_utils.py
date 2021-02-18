@@ -13,7 +13,7 @@ from hmlf.common.evaluation import evaluate_policy
 from hmlf.common.monitor import Monitor
 from hmlf.common.noise import ActionNoise, OrnsteinUhlenbeckActionNoise, VectorizedActionNoise
 from hmlf.common.utils import polyak_update, zip_strict
-from hmlf.common.vec_env import DummyVecEnv, SubprocVecEnv
+from hmlf.environments.vec_env import DummyVecEnv, SubprocVecEnv
 
 
 @pytest.mark.parametrize("env_id", ["CartPole-v1", lambda: gym.make("CartPole-v1")])

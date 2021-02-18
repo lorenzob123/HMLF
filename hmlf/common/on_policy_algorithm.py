@@ -12,7 +12,7 @@ from hmlf.common.callbacks import BaseCallback
 from hmlf.common.policies import ActorCriticPolicy
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import safe_mean
-from hmlf.common.vec_env import VecEnv
+from hmlf.environments.vec_env import VecEnv
 from hmlf.common.hybrid_utils import onehot_hybrid_2_tuple_hybrid
 
 

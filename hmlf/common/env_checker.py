@@ -5,7 +5,7 @@ import gym
 import numpy as np
 from gym import spaces
 
-from hmlf.common.vec_env import DummyVecEnv, VecCheckNan
+from hmlf.environments.vec_env import DummyVecEnv, VecCheckNan
 
 
 def _is_numpy_array_space(space: spaces.Space) -> bool:

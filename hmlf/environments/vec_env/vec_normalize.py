@@ -7,7 +7,7 @@ import numpy as np
 
 from hmlf.common import utils
 from hmlf.common.running_mean_std import RunningMeanStd
-from hmlf.common.vec_env.base_vec_env import VecEnv, VecEnvStepReturn, VecEnvWrapper
+from hmlf.environments.vec_env.base_vec_env import VecEnv, VecEnvStepReturn, VecEnvWrapper
 
 
 class VecNormalize(VecEnvWrapper):

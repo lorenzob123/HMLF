@@ -14,8 +14,8 @@ from hmlf.common.policies import BasePolicy
 from hmlf.common.save_util import load_from_zip_file, recursive_setattr
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, RolloutReturn
 from hmlf.common.utils import check_for_correct_spaces
-from hmlf.common.vec_env import VecEnv
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.environments.vec_env import VecEnv
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 from hmlf.her.goal_selection_strategy import KEY_TO_GOAL_STRATEGY, GoalSelectionStrategy
 from hmlf.her.her_replay_buffer import HerReplayBuffer
 

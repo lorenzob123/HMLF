@@ -5,8 +5,8 @@ from typing import Any, Callable, List, Optional, Sequence, Type, Union
 import gym
 import numpy as np
 
-from hmlf.common.vec_env.base_vec_env import VecEnv, VecEnvIndices, VecEnvObs, VecEnvStepReturn
-from hmlf.common.vec_env.util import copy_obs_dict, dict_to_obs, obs_space_info
+from hmlf.environments.vec_env.base_vec_env import VecEnv, VecEnvIndices, VecEnvObs, VecEnvStepReturn
+from hmlf.environments.vec_env.util import copy_obs_dict, dict_to_obs, obs_space_info
 
 
 class DummyVecEnv(VecEnv):

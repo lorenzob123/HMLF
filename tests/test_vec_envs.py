@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from hmlf.common.monitor import Monitor
-from hmlf.common.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecNormalize
+from hmlf.environments.vec_env import DummyVecEnv, SubprocVecEnv, VecFrameStack, VecNormalize
 
 N_ENVS = 3
 VEC_ENV_CLASSES = [DummyVecEnv, SubprocVecEnv]

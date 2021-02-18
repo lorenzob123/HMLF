@@ -17,7 +17,7 @@ from hmlf.common.policies import BasePolicy
 from hmlf.common.save_util import load_from_pkl, save_to_pkl
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, RolloutReturn, Schedule
 from hmlf.common.utils import safe_mean
-from hmlf.common.vec_env import VecEnv
+from hmlf.environments.vec_env import VecEnv
 
 
 class OffPolicyAlgorithm(BaseAlgorithm):

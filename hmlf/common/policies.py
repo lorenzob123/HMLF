@@ -26,8 +26,8 @@ from hmlf.common.preprocessing import get_action_dim, is_image_space, preprocess
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, MlpExtractor, NatureCNN, create_mlp
 from hmlf.common.type_aliases import Schedule
 from hmlf.common.utils import get_device, is_vectorized_observation
-from hmlf.common.vec_env import VecTransposeImage
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.environments.vec_env import VecTransposeImage
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 from hmlf.common.hybrid_utils import onehot_hybrid_2_tuple_hybrid
 
 

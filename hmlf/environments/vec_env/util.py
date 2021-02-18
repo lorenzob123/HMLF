@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Tuple
 import gym
 import numpy as np
 
-from hmlf.common.vec_env.base_vec_env import VecEnvObs
+from hmlf.environments.vec_env.base_vec_env import VecEnvObs
 
 
 def copy_obs_dict(obs: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:

@@ -54,9 +54,9 @@ Example
 
     from hmlf import HER, DDPG, DQN, SAC, TD3
     from hmlf.her.goal_selection_strategy import GoalSelectionStrategy
-    from hmlf.common.bit_flipping_env import BitFlippingEnv
-    from hmlf.common.vec_env import DummyVecEnv
-    from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+    from hmlf.environments.bit_flipping_env import BitFlippingEnv
+    from hmlf.environments.vec_env import DummyVecEnv
+    from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 
     model_class = DQN  # works also with SAC, DDPG and TD3
     N_BITS = 15

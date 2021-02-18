@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple, Type, Union
 import gym
 import numpy as np
 
-from hmlf.common.vec_env.base_vec_env import (
+from hmlf.environments.vec_env.base_vec_env import (
     CloudpickleWrapper,
     VecEnv,
     VecEnvIndices,

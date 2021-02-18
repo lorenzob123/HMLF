@@ -14,7 +14,7 @@ except ImportError:
 
 from hmlf.common.preprocessing import get_action_dim, get_obs_shape
 from hmlf.common.type_aliases import ReplayBufferSamples, RolloutBufferSamples
-from hmlf.common.vec_env import VecNormalize
+from hmlf.environments.vec_env import VecNormalize
 
 
 class BaseBuffer(ABC):

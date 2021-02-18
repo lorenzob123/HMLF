@@ -6,7 +6,7 @@ from gym import spaces
 from hmlf import HER, SAC, TD3
 from hmlf.common.monitor import Monitor
 from hmlf.common.running_mean_std import RunningMeanStd
-from hmlf.common.vec_env import (
+from hmlf.environments.vec_env import (
     DummyVecEnv,
     VecFrameStack,
     VecNormalize,

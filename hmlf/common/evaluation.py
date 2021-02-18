@@ -5,7 +5,7 @@ import gym
 import numpy as np
 
 from hmlf.common import base_class
-from hmlf.common.vec_env import VecEnv
+from hmlf.environments.vec_env import VecEnv
 
 
 def evaluate_policy(

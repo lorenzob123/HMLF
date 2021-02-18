@@ -9,9 +9,9 @@ import pytest
 import torch as th
 
 from hmlf import DDPG, DQN, HER, SAC, TD3
-from hmlf.common.bit_flipping_env import BitFlippingEnv
-from hmlf.common.vec_env import DummyVecEnv
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.environments.bit_flipping_env import BitFlippingEnv
+from hmlf.environments.vec_env import DummyVecEnv
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 from hmlf.her.goal_selection_strategy import GoalSelectionStrategy
 from hmlf.her.her import get_time_limit
 

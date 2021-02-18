@@ -2,7 +2,7 @@ import numpy as np
 from gym import spaces
 
 from hmlf.common.preprocessing import is_image_space
-from hmlf.common.vec_env.base_vec_env import VecEnv, VecEnvStepReturn, VecEnvWrapper
+from hmlf.environments.vec_env.base_vec_env import VecEnv, VecEnvStepReturn, VecEnvWrapper
 
 
 class VecTransposeImage(VecEnvWrapper):

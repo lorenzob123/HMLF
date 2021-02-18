@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 
-from hmlf.common.vec_env.base_vec_env import VecEnv, VecEnvObs, VecEnvStepReturn, VecEnvWrapper
+from hmlf.environments.vec_env.base_vec_env import VecEnv, VecEnvObs, VecEnvStepReturn, VecEnvWrapper
 
 
 class VecCheckNan(VecEnvWrapper):
