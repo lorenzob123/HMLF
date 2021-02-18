@@ -66,7 +66,7 @@ class MPDQNPolicy(PDQNPolicy):
         # For formatting inside forward Q
         self.discrete_action_size = self.action_space_q.n
         self.state_size = len(action_space.continuous_low)
-        self.offsets = np.cumsum(action_space._get_continous_dims())
+        self.offsets = np.cumsum(action_space._get_ continuous_dims())
         self.offsets = np.insert(self.offsets, 0, 0)
 
 

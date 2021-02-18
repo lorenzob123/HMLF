@@ -20,18 +20,18 @@ class OneHotHybrid(SimpleHybrid):
                 assert isinstance(space, Box), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
         
         self.discrete_dim = self.spaces[0].n
-        dims_continous = self._get_continous_dims()
-        self.continuous_dim = np.sum(dims_continous)
+        dims_ continuous = self._get_ continuous_dims()
+        self.continuous_dim = np.sum(dims_ continuous)
 
 
-    def _get_continous_dims(self) -> List[int]:
+    def _get_ continuous_dims(self) -> List[int]:
         # Since each space is one dimensional, shape[0] gets the dimension
         dims = [space.shape[0] for space in self.spaces[1:]]  
         return dims
 
     def get_dimension(self) -> int:
-        dims_continous = self._get_continous_dims()
-        return self.discrete_dim + np.sum(dims_continous)
+        dims_ continuous = self._get_ continuous_dims()
+        return self.discrete_dim + np.sum(dims_ continuous)
 
     def sample(self):
         discrete_action = np.zeros(self.spaces[0].n)
@@ -50,8 +50,8 @@ class OneHotHybrid(SimpleHybrid):
         parameters = np.clip(parameters, param_low, param_high)
         
         # We prepare the split of the parameters for each discrete action
-        dims_continous = self._get_continous_dims()
-        split_indizes = np.cumsum(dims_continous[:-1])
+        dims_ continuous = self._get_ continuous_dims()
+        split_indizes = np.cumsum(dims_ continuous[:-1])
 
         # We format the full action for each environment
         sample = []
