@@ -21,7 +21,7 @@ def build_state_parameter_space(observation_space: Box, action_space: SimpleHybr
 
     return Box(lows, highs)
 
-class PDQNPolicy(BasePolicy):
+class MPDQNPolicy(BasePolicy):
     """
     Policy class with Q-Value Net and target net for P-DQN.
 
@@ -65,7 +65,13 @@ class PDQNPolicy(BasePolicy):
         self.observation_space_q = build_state_parameter_space(observation_space, action_space)
         self.action_space_q = copy.copy(action_space[0])
 
-        super(PDQNPolicy, self).__init__(
+        # For formatting inside forward Q
+        self.discrete_action_size = self.action_space_q.n
+        self.state_size = len(action_space.continuous_low)
+        self.offsets = np.cumsum(action_space._get_continous_dims())
+        self.offsets = np.insert(self.offsets, 0, 0)
+
+        super(MPDQNPolicy, self).__init__(
             observation_space,
             self.action_space_q,
             features_extractor_class,
@@ -140,37 +146,62 @@ class PDQNPolicy(BasePolicy):
         #TODO implement separate arguments
         return Actor(**net_args).to(self.device)
 
-    def _format_q_observation(self, obs: th.Tensor, action_parameters: th.Tensor) -> th.Tensor:
+    def forward_parameters(self, obs: th.Tensor, deterministic: bool=True) -> th.Tensor:
+        parameters = self.parameter_net(obs)
+        return parameters
+
+
+    def _format_q_observation(self, obs: th.Tensor, action_parameters: th.Tensor, batch_size: int) -> th.Tensor:
         #TODO Documentation
-        return th.cat([obs, action_parameters], dim=1)
+        # Shape is as in P-DQN, but all parameters are set to zero
+        observations = th.cat((obs, th.zeros_like(action_parameters)), dim=1)
+        # Repeat for each action
+        observations = observations.repeat(self.discrete_action_size, 1)
+
+        for i in range(self.discrete_action_size):
+            row_from = i * batch_size # Beginning of current batch
+            row_to = (i + 1) * batch_size # End of current batch
+            col_from = self.state_size + self.offsets[i] # Beginning of current parameter slice
+            col_to = self.state_size + self.offsets[i + 1] # End of current parameter slice
+            observations[row_from : row_to, col_from : col_to] = action_parameters[:, self.offsets[i] : self.offsets[i + 1]]
+        
+        return observations
+
+    def _format_q_output(self, q_values: th.Tensor, batch_size: int) -> th.Tensor:
+        #TODO Documentation
+        Q = []
+        for i in range(self.discrete_action_size):
+            Qi = q_values[i * batch_size : ( i + 1)*batch_size, i]
+            if len(Qi.shape) == 1:
+                Qi = Qi.unsqueeze(1)
+            Q.append(Qi)
+        Q = th.cat(Q, dim=1)
+        return Q
+
+    def forward_q(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
+        batch_size = action_parameters.shape[0]
+        observations = self._format_q_observation(obs, action_parameters, batch_size)
+
+        q_values = self.q_net(observations)
+        Q = self._format_q_output(q_values, batch_size)
+        return Q
 
     def _forward_q_target(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
-        observations = self._format_q_observation(obs, action_parameters)
+        batch_size = action_parameters.shape[0]
+        observations = self._format_q_observation(obs, action_parameters, batch_size)
 
         q_values = self.q_net_target(observations)
-        return q_values
+        Q = self._format_q_output(q_values, batch_size)
+        return Q
 
     def forward(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
         #Calculates q_values
         parameters = self.forward_parameters(obs)
-        q_values = self.forward_q(obs, parameters)
-        return q_values
+        return self.forward_q(obs, parameters)
 
     def forward_target(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
-        #Calculates q_values from target net
-        parameters = self.forward_parameters(obs)
-        q_values = self._forward_q_target(obs, parameters)
-        return q_values
-
-    def forward_q(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
-        observations = self._format_q_observation(obs, action_parameters)
-
-        q_values = self.q_net(observations)
-        return q_values
-
-    def forward_parameters(self, obs: th.Tensor, deterministic: bool=True) -> th.Tensor:
         parameters = self.parameter_net(obs)
-        return parameters
+        return self._forward_q_target(obs, parameters)
 
     def _predict(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
         # Returns actions (index)
@@ -223,10 +254,10 @@ class PDQNPolicy(BasePolicy):
 
 
 
-MlpPolicy = PDQNPolicy
+MlpPolicy = MPDQNPolicy
 
 
-class CnnPolicy(PDQNPolicy):
+class CnnPolicy(MPDQNPolicy):
     """
     Policy class for DQN when using images as input.
 
