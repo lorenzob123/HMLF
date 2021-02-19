@@ -8,30 +8,30 @@ class OneHotHybrid(SimpleHybrid):
     A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
     Samples have the form (int, Box1.sample(), ..., BoxN.sample())
     Example usage:
-    self.observation_space = spaces.Tuple((spaces.Discrete(2), gym.spaces.Box(np.array((0, 1)), np.array((2, 3)))))
+    self.observation_space = spaces.Tuple((spaces.Discrete(2), hmlf.spaces.Box(np.array((0, 1)), np.array((2, 3)))))
     """
     def __init__(self, spaces):
         self.spaces = spaces
         for i, space in enumerate(spaces):
-            assert isinstance(space, Space), "Elements of the SimpleHybrid must be instances of gym.Space"
+            assert isinstance(space, Space), "Elements of the SimpleHybrid must be instances of hmlf.Space"
             if i == 0:
                 assert isinstance(space, Discrete), "First element of SimpleHybrid has to be of type hmlf.spaces.Discrete"
             else:
                 assert isinstance(space, Box), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
         
         self.discrete_dim = self.spaces[0].n
-        dims_ continuous = self._get_ continuous_dims()
-        self.continuous_dim = np.sum(dims_ continuous)
+        dims_continuous = self._get_continuous_dims()
+        self.continuous_dim = np.sum(dims_continuous)
 
 
-    def _get_ continuous_dims(self) -> List[int]:
+    def _get_continuous_dims(self) -> List[int]:
         # Since each space is one dimensional, shape[0] gets the dimension
         dims = [space.shape[0] for space in self.spaces[1:]]  
         return dims
 
     def get_dimension(self) -> int:
-        dims_ continuous = self._get_ continuous_dims()
-        return self.discrete_dim + np.sum(dims_ continuous)
+        dims_continuous = self._get_continuous_dims()
+        return self.discrete_dim + np.sum(dims_continuous)
 
     def sample(self):
         discrete_action = np.zeros(self.spaces[0].n)
@@ -50,8 +50,8 @@ class OneHotHybrid(SimpleHybrid):
         parameters = np.clip(parameters, param_low, param_high)
         
         # We prepare the split of the parameters for each discrete action
-        dims_ continuous = self._get_ continuous_dims()
-        split_indizes = np.cumsum(dims_ continuous[:-1])
+        dims_continuous = self._get_continuous_dims()
+        split_indizes = np.cumsum(dims_continuous[:-1])
 
         # We format the full action for each environment
         sample = []

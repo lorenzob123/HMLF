@@ -1,10 +1,9 @@
 from hmlf.pdqn.policies import PDQNPolicy
-from hmlf.common.policies import BasePolicy
 from hmlf.common.buffers import ReplayBuffer
 from hmlf.common.noise import ActionNoise
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
+from hmlf import spaces
 import numpy as np
 import torch as th
 from torch.nn import functional as F
@@ -111,7 +110,7 @@ class PDQN(OffPolicyAlgorithm):
             seed=seed,
             sde_support=False,
             optimize_memory_usage=optimize_memory_usage,
-            supported_action_spaces=(gym.spaces.Tuple,),
+            supported_action_spaces=(spaces.Tuple,),
         )
 
         self.exploration_initial_eps = exploration_initial_eps
@@ -324,7 +323,7 @@ class PDQN(OffPolicyAlgorithm):
             unscaled_action, _ = self.predict(self._last_obs)
 
         # Rescale the action from [low, high] to [-1, 1]
-        if isinstance(self.action_space, gym.spaces.Box):
+        if isinstance(self.action_space, spaces.Box):
             scaled_action = self.policy.scale_action(unscaled_action)
 
             # Add noise to the action (improve exploration)

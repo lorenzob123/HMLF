@@ -11,6 +11,7 @@ from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import polyak_update
 from hmlf.td3.policies import TD3Policy
+from hmlf import spaces
 
 
 class TD3(OffPolicyAlgorithm):
@@ -107,7 +108,7 @@ class TD3(OffPolicyAlgorithm):
             seed=seed,
             sde_support=False,
             optimize_memory_usage=optimize_memory_usage,
-            supported_action_spaces=(gym.spaces.Box, gym.spaces.Tuple),
+            supported_action_spaces=(spaces.Box, spaces.Tuple),
         )
 
         self.policy_delay = policy_delay

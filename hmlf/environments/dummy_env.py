@@ -1,5 +1,5 @@
 import gym
-from gym import spaces
+from hmlf import spaces
 import numpy as np
 
 

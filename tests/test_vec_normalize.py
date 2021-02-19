@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 import pytest
-from gym import spaces
+from hmlf import spaces
 
 from hmlf import HER, SAC, TD3
 from hmlf.common.monitor import Monitor

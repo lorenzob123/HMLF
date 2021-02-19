@@ -4,10 +4,10 @@ import time
 import warnings
 from typing import Any, Dict, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 
+from hmlf import spaces
 from hmlf.common import logger
 from hmlf.common.base_class import BaseAlgorithm
 from hmlf.common.buffers import ReplayBuffer
@@ -99,7 +99,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         use_sde_at_warmup: bool = False,
         sde_support: bool = True,
         remove_time_limit_termination: bool = False,
-        supported_action_spaces: Optional[Tuple[gym.spaces.Space, ...]] = None,
+        supported_action_spaces: Optional[Tuple[spaces.Space, ...]] = None,
     ):
 
         super(OffPolicyAlgorithm, self).__init__(
@@ -307,7 +307,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             unscaled_action, _ = self.predict(self._last_obs, deterministic=False)
 
         # Rescale the action from [low, high] to [-1, 1]
-        if isinstance(self.action_space, gym.spaces.Box):
+        if isinstance(self.action_space, spaces.Box):
             scaled_action = self.policy.scale_action(unscaled_action)
 
             # Add noise to the action (improve exploration)

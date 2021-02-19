@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 import torch as th
-from gym import spaces
+from hmlf import spaces
 from hmlf.spaces import SimpleHybrid, OneHotHybrid
 
 from torch.nn import functional as F

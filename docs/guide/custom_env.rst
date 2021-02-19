@@ -17,7 +17,7 @@ That is to say, your environment must implement the following methods (and inher
 .. code-block:: python
 
   import gym
-  from gym import spaces
+  from hmlf import spaces
 
   class CustomEnv(gym.Env):
     """Custom Environment that follows gym interface"""
@@ -26,7 +26,7 @@ That is to say, your environment must implement the following methods (and inher
     def __init__(self, arg1, arg2, ...):
       super(CustomEnv, self).__init__()
       # Define action and observation space
-      # They must be gym.spaces objects
+      # They must be hmlf.spaces objects
       # Example when using discrete actions:
       self.action_space = spaces.Discrete(N_DISCRETE_ACTIONS)
       # Example for using image as input (can be channel-first or channel-last):

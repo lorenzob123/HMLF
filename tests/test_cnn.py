@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 import pytest
 import torch as th
-from gym import spaces
+from hmlf import spaces
 
 from hmlf import A2C, DQN, PPO, SAC, TD3
 from hmlf.environments.identity_env import FakeImageEnv

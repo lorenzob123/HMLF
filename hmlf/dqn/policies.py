@@ -7,6 +7,7 @@ from torch import nn
 from hmlf.common.policies import BasePolicy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp
 from hmlf.common.type_aliases import Schedule
+from hmlf import spaces
 
 
 class QNetwork(BasePolicy):
@@ -23,8 +24,8 @@ class QNetwork(BasePolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         features_extractor: nn.Module,
         features_dim: int,
         net_arch: Optional[List[int]] = None,
@@ -101,8 +102,8 @@ class DQNPolicy(BasePolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         lr_schedule: Schedule,
         net_arch: Optional[List[int]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
@@ -208,8 +209,8 @@ class CnnPolicy(DQNPolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         lr_schedule: Schedule,
         net_arch: Optional[List[int]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,

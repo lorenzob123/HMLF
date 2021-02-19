@@ -7,6 +7,7 @@ import gym
 import numpy as np
 
 from hmlf.common import logger
+from hmlf import spaces
 
 # Define type aliases here to avoid circular import
 # Used when we want to access one or more VecEnv
@@ -56,7 +57,7 @@ class VecEnv(ABC):
 
     metadata = {"render.modes": ["human", "rgb_array"]}
 
-    def __init__(self, num_envs: int, observation_space: gym.spaces.Space, action_space: gym.spaces.Space):
+    def __init__(self, num_envs: int, observation_space: spaces.Space, action_space: spaces.Space):
         self.num_envs = num_envs
         self.observation_space = observation_space
         self.action_space = action_space
@@ -249,8 +250,8 @@ class VecEnvWrapper(VecEnv):
     def __init__(
         self,
         venv: VecEnv,
-        observation_space: Optional[gym.spaces.Space] = None,
-        action_space: Optional[gym.spaces.Space] = None,
+        observation_space: Optional[spaces.Space] = None,
+        action_space: Optional[spaces.Space] = None,
     ):
         self.venv = venv
         VecEnv.__init__(

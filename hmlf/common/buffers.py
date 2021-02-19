@@ -4,7 +4,7 @@ from typing import Dict, Generator, Optional, Union
 
 import numpy as np
 import torch as th
-from gym import spaces
+from hmlf import spaces
 
 try:
     # Check memory used by replay buffer when possible

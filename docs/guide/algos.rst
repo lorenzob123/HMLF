@@ -21,7 +21,7 @@ TD3          ✔️          ❌            ❌                ❌              
 .. note::
     Non-array spaces such as ``Dict`` or ``Tuple`` are not currently supported by any algorithm.
 
-Actions ``gym.spaces``:
+Actions ``hmlf.spaces``:
 
 -  ``Box``: A N-dimensional box that contains every point in the action
    space.

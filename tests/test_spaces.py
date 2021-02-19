@@ -1,6 +1,7 @@
 import gym
 import numpy as np
 import pytest
+from hmlf import spaces
 
 from hmlf import A2C, DDPG, DQN, PPO, SAC, TD3
 from hmlf.common.evaluation import evaluate_policy
@@ -9,8 +10,8 @@ from hmlf.common.evaluation import evaluate_policy
 class DummyMultiDiscreteSpace(gym.Env):
     def __init__(self, nvec):
         super(DummyMultiDiscreteSpace, self).__init__()
-        self.observation_space = gym.spaces.MultiDiscrete(nvec)
-        self.action_space = gym.spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.MultiDiscrete(nvec)
+        self.action_space = spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
 
     def reset(self):
         return self.observation_space.sample()
@@ -22,8 +23,8 @@ class DummyMultiDiscreteSpace(gym.Env):
 class DummyMultiBinary(gym.Env):
     def __init__(self, n):
         super(DummyMultiBinary, self).__init__()
-        self.observation_space = gym.spaces.MultiBinary(n)
-        self.action_space = gym.spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.MultiBinary(n)
+        self.action_space = spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
 
     def reset(self):
         return self.observation_space.sample()
@@ -41,7 +42,7 @@ def test_identity_spaces(model_class, env):
     """
     # DQN only support discrete actions
     if model_class == DQN:
-        env.action_space = gym.spaces.Discrete(4)
+        env.action_space = spaces.Discrete(4)
 
     env = gym.wrappers.TimeLimit(env, max_episode_steps=100)
 

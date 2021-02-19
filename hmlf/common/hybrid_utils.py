@@ -1,5 +1,5 @@
 import numpy as np
-from gym.spaces import Tuple
+from hmlf.spaces import Tuple
 
 
 def onehot_hybrid_2_tuple_hybrid(actions: np.ndarray, action_space: Tuple) -> list: 
@@ -11,7 +11,7 @@ def onehot_hybrid_2_tuple_hybrid(actions: np.ndarray, action_space: Tuple) -> li
         actions (np.ndarray): an np.ndarray which has the actions with one-hot encoding for
                               the discrete task, concatenated with all the parameters for all
                               the tasks. 
-        action_space (gym.spaces.Tuple): The action space of the env being used. It is expected to be
+        action_space (hmlf.spaces.Tuple): The action space of the env being used. It is expected to be
                                          of type Tuple with the first entry Discrete and the remaining
                                          ones Box.
 

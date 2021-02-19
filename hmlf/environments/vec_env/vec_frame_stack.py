@@ -2,7 +2,7 @@ import warnings
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-from gym import spaces
+from hmlf import spaces
 
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.environments.vec_env.base_vec_env import VecEnv, VecEnvWrapper
@@ -28,7 +28,7 @@ class VecFrameStack(VecEnvWrapper):
         self.n_stack = n_stack
 
         wrapped_obs_space = venv.observation_space
-        assert isinstance(wrapped_obs_space, spaces.Box), "VecFrameStack only work with gym.spaces.Box observation space"
+        assert isinstance(wrapped_obs_space, spaces.Box), "VecFrameStack only work with hmlf.spaces.Box observation space"
 
         if channels_order is None:
             # Detect channel location automatically for images

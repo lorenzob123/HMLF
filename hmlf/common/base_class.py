@@ -11,6 +11,7 @@ import gym
 import numpy as np
 import torch as th
 
+from hmlf import spaces
 from hmlf.common import logger, utils
 from hmlf.common.callbacks import BaseCallback, CallbackList, ConvertCallback, EvalCallback
 from hmlf.common.env_util import is_wrapped
@@ -96,7 +97,7 @@ class BaseAlgorithm(ABC):
         seed: Optional[int] = None,
         use_sde: bool = False,
         sde_sample_freq: int = -1,
-        supported_action_spaces: Optional[Tuple[gym.spaces.Space, ...]] = None,
+        supported_action_spaces: Optional[Tuple[spaces.Space, ...]] = None,
     ):
 
         if isinstance(policy, str):
@@ -114,8 +115,8 @@ class BaseAlgorithm(ABC):
         self._vec_normalize_env = unwrap_vec_normalize(env)
         self.verbose = verbose
         self.policy_kwargs = {} if policy_kwargs is None else policy_kwargs
-        self.observation_space = None  # type: Optional[gym.spaces.Space]
-        self.action_space = None  # type: Optional[gym.spaces.Space]
+        self.observation_space = None  # type: Optional[spaces.Space]
+        self.action_space = None  # type: Optional[spaces.Space]
         self.n_envs = None
         self.num_timesteps = 0
         # Used for updating schedules
@@ -170,7 +171,7 @@ class BaseAlgorithm(ABC):
                     "Error: the model does not support multiple envs; it requires " "a single vectorized environment."
                 )
 
-            if self.use_sde and not isinstance(self.action_space, gym.spaces.Box):
+            if self.use_sde and not isinstance(self.action_space, spaces.Box):
                 raise ValueError("generalized State-Dependent Exploration (gSDE) can only be used with continuous actions.")
 
     @staticmethod
@@ -204,7 +205,7 @@ class BaseAlgorithm(ABC):
             env = VecTransposeImage(env)
 
         # check if wrapper for dict support is needed when using HER
-        if isinstance(env.observation_space, gym.spaces.dict.Dict):
+        if isinstance(env.observation_space, spaces.dict.Dict):
             env = ObsDictWrapper(env)
 
         return env

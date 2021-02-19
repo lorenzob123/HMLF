@@ -3,10 +3,9 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import gym
 import torch as th
 import numpy as np
-from gym import spaces
+from hmlf import spaces
 from torch import nn
 from torch.distributions import Bernoulli, Categorical, Normal, OneHotCategorical
 
@@ -793,7 +792,7 @@ class TanhBijector(object):
 
 
 def make_proba_distribution(
-    action_space: gym.spaces.Space, use_sde: bool = False, dist_kwargs: Optional[Dict[str, Any]] = None
+    action_space: spaces.Space, use_sde: bool = False, dist_kwargs: Optional[Dict[str, Any]] = None
 ) -> Distribution:
     """
     Return an instance of Distribution for the correct type of action space

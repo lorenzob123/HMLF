@@ -37,6 +37,7 @@ for both code and stack traces.
 import gym
 import numpy as np
 
+from hmlf import spaces
 from hmlf import A2C
 from hmlf.common.env_checker import check_env
 
@@ -45,8 +46,8 @@ class CustomEnv(gym.Env):
 
   def __init__(self):
     super(CustomEnv, self).__init__()
-    self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(14,))
-    self.action_space = gym.spaces.Box(low=-1, high=1, shape=(6,))
+    self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(14,))
+    self.action_space = spaces.Box(low=-1, high=1, shape=(6,))
 
   def reset(self):
     return self.observation_space.sample()

@@ -1,6 +1,8 @@
 import gym
 import numpy as np
 
+from hmlf import spaces
+
 
 class PaAcBipedalWalker(gym.Wrapper):
     
@@ -8,9 +10,9 @@ class PaAcBipedalWalker(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)
         self.env = env
-        self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(2),
-                                             gym.spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32),
-                                             gym.spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)))
+        self.action_space = spaces.Tuple((spaces.Discrete(2),
+                                             spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32),
+                                             spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)))
     
     def step(self, pa_action):
         leg = {'left': 0, 'right':1}

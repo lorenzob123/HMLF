@@ -70,12 +70,12 @@ that derives from ``BaseFeaturesExtractor`` and then pass it to the model when t
 
   class CustomCNN(BaseFeaturesExtractor):
       """
-      :param observation_space: (gym.Space)
+      :param observation_space: (hmlf.spaces.Space)
       :param features_dim: (int) Number of features extracted.
           This corresponds to the number of unit for the last layer.
       """
 
-      def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 256):
+      def __init__(self, observation_space: hmlf.spaces.Box, features_dim: int = 256):
           super(CustomCNN, self).__init__(observation_space, features_dim)
           # We assume CxHxW images (channels first)
           # Re-ordering will be done by pre-preprocessing or wrapper
@@ -233,8 +233,8 @@ If your task requires even more granular control over the policy/value architect
   class CustomActorCriticPolicy(ActorCriticPolicy):
       def __init__(
           self,
-          observation_space: gym.spaces.Space,
-          action_space: gym.spaces.Space,
+          observation_space: hmlf.spaces.Space,
+          action_space: hmlf.spaces.Space,
           lr_schedule: Callable[[float], float],
           net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
           activation_fn: Type[nn.Module] = nn.Tanh,

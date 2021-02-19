@@ -7,6 +7,7 @@ from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback
 from hmlf.td3.policies import TD3Policy
 from hmlf.td3.td3 import TD3
+from hmlf import spaces
 
 ##################################
 # self._sample_actions
@@ -181,7 +182,7 @@ class PADDPG(TD3):
             unscaled_action = unscaled_action[0]
 
         # # Rescale the action from [low, high] to [-1, 1]
-        # if isinstance(self.action_space, gym.spaces.Box):
+        # if isinstance(self.action_space, spaces.Box):
         #     scaled_action = self.policy.scale_action(unscaled_action)
 
         #     # Add noise to the action (improve exploration)
@@ -192,7 +193,7 @@ class PADDPG(TD3):
         #     buffer_action = scaled_action
         #     action = self.policy.unscale_action(scaled_action)
         #TODO Add scaling for the parameters
-        if isinstance(self.action_space, gym.spaces.Tuple):
+        if isinstance(self.action_space, spaces.Tuple):
             buffer_action = unscaled_action
             action = self.action_space.format_action(buffer_action.reshape(-1, self.action_space.get_dimension()))
         else:

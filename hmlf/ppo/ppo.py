@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Type, Union
 
 import numpy as np
 import torch as th
-from gym import spaces
+from hmlf import spaces
 from torch.nn import functional as F
 
 from hmlf.common import logger

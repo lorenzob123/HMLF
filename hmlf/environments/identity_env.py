@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 import numpy as np
 from gym import Env, Space
-from gym.spaces import Box, Discrete, MultiBinary, MultiDiscrete
+from hmlf.spaces import Box, Discrete, MultiBinary, MultiDiscrete
 
 from hmlf.common.type_aliases import GymObs, GymStepReturn
 
