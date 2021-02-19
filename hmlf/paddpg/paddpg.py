@@ -1,20 +1,19 @@
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
+##################################
+# self._sample_actions
+import numpy as np
 import torch as th
 
+from hmlf import spaces
 from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback
 from hmlf.td3.policies import TD3Policy
 from hmlf.td3.td3 import TD3
 
-##################################
-# self._sample_actions
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
-
-import gym
-import numpy as np
 ####################################
+
 
 class PADDPG(TD3):
     """
@@ -142,7 +141,6 @@ class PADDPG(TD3):
             reset_num_timesteps=reset_num_timesteps,
         )
 
-
     def _sample_action(
         self, learning_starts: int, action_noise: Optional[ActionNoise] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
@@ -160,11 +158,11 @@ class PADDPG(TD3):
             and scaled action that will be stored in the replay buffer.
             The two differs when the action space is not normalized (bounds are not [-1, 1]).
         """
-        
+
         # Select action randomly or according to policy
         if self.num_timesteps < learning_starts and not (self.use_sde and self.use_sde_at_warmup):
             # Warmup phase
-            #unscaled_action = np.hstack(self.action_space.sample()).astype(np.float32)
+            # unscaled_action = np.hstack(self.action_space.sample()).astype(np.float32)
             unscaled_action = self.action_space.sample()
         else:
             # Note: when using continuous actions,
@@ -181,7 +179,7 @@ class PADDPG(TD3):
             unscaled_action = unscaled_action[0]
 
         # # Rescale the action from [low, high] to [-1, 1]
-        # if isinstance(self.action_space, gym.spaces.Box):
+        # if isinstance(self.action_space, spaces.Box):
         #     scaled_action = self.policy.scale_action(unscaled_action)
 
         #     # Add noise to the action (improve exploration)
@@ -191,8 +189,8 @@ class PADDPG(TD3):
         #     # We store the scaled action in the buffer
         #     buffer_action = scaled_action
         #     action = self.policy.unscale_action(scaled_action)
-        #TODO Add scaling for the parameters
-        if isinstance(self.action_space, gym.spaces.Tuple):
+        # TODO Add scaling for the parameters
+        if isinstance(self.action_space, spaces.Tuple):
             buffer_action = unscaled_action
             action = self.action_space.format_action(buffer_action.reshape(-1, self.action_space.get_dimension()))
         else:
@@ -200,5 +198,4 @@ class PADDPG(TD3):
             buffer_action = unscaled_action
             action = buffer_action
 
-        
         return action, buffer_action

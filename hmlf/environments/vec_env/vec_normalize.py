@@ -2,12 +2,12 @@ import pickle
 from copy import deepcopy
 from typing import Any, Dict, Union
 
-import gym
 import numpy as np
 
+from hmlf import spaces
 from hmlf.common import utils
 from hmlf.common.running_mean_std import RunningMeanStd
-from hmlf.common.vec_env.base_vec_env import VecEnv, VecEnvStepReturn, VecEnvWrapper
+from hmlf.environments.vec_env.base_vec_env import VecEnv, VecEnvStepReturn, VecEnvWrapper
 
 
 class VecNormalize(VecEnvWrapper):
@@ -39,10 +39,10 @@ class VecNormalize(VecEnvWrapper):
         VecEnvWrapper.__init__(self, venv)
 
         assert isinstance(
-            self.observation_space, (gym.spaces.Box, gym.spaces.Dict)
-        ), "VecNormalize only support `gym.spaces.Box` and `gym.spaces.Dict` observation spaces"
+            self.observation_space, (spaces.Box, spaces.Dict)
+        ), "VecNormalize only support `spaces.Box` and `spaces.Dict` observation spaces"
 
-        if isinstance(self.observation_space, gym.spaces.Dict):
+        if isinstance(self.observation_space, spaces.Dict):
             self.obs_keys = set(self.observation_space.spaces.keys())
             self.obs_spaces = self.observation_space.spaces
             self.obs_rms = {key: RunningMeanStd(shape=space.shape) for key, space in self.obs_spaces.items()}

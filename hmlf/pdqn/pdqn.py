@@ -1,18 +1,17 @@
-from hmlf.pdqn.policies import PDQNPolicy
-from hmlf.common.policies import BasePolicy
-from hmlf.common.buffers import ReplayBuffer
-from hmlf.common.noise import ActionNoise
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 from torch.nn import functional as F
 
+from hmlf import spaces
 from hmlf.common import logger
+from hmlf.common.buffers import ReplayBuffer
+from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import get_linear_fn, get_schedule_fn, is_vectorized_observation, polyak_update, update_learning_rate
+from hmlf.pdqn.policies import PDQNPolicy
 
 
 class PDQN(OffPolicyAlgorithm):
@@ -93,7 +92,7 @@ class PDQN(OffPolicyAlgorithm):
         super(PDQN, self).__init__(
             policy,
             env,
-            1, #learning_rate. We set it up ourselves, because we have two networks.
+            1,  # learning_rate. We set it up ourselves, because we have two networks.
             buffer_size,
             learning_starts,
             batch_size,
@@ -111,7 +110,7 @@ class PDQN(OffPolicyAlgorithm):
             seed=seed,
             sde_support=False,
             optimize_memory_usage=optimize_memory_usage,
-            supported_action_spaces=(gym.spaces.Tuple,),
+            supported_action_spaces=(spaces.Tuple,),
         )
 
         self.exploration_initial_eps = exploration_initial_eps
@@ -148,12 +147,13 @@ class PDQN(OffPolicyAlgorithm):
             self.device,
             optimize_memory_usage=self.optimize_memory_usage,
         )
-        self.policy = self.policy_class( # PDQN
+        # PDQNPolicy or MP-DQNPolicy
+        self.policy = self.policy_class(
             self.observation_space,
             self.action_space,
             self.lr_schedule_q,
             self.lr_schedule_parameter,
-            **self.policy_kwargs  # pytype:disable=not-instantiable
+            **self.policy_kwargs,  # pytype:disable=not-instantiable
         )
         self.policy = self.policy.to(self.device)
         # Additional P-DQN _setup_model
@@ -161,7 +161,6 @@ class PDQN(OffPolicyAlgorithm):
         self.exploration_schedule = get_linear_fn(
             self.exploration_initial_eps, self.exploration_final_eps, self.exploration_fraction
         )
-
 
     def _create_aliases(self) -> None:
         self.q_net = self.policy.q_net
@@ -189,7 +188,6 @@ class PDQN(OffPolicyAlgorithm):
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)
 
-            #import ipdb; ipdb.set_trace()
             with th.no_grad():
                 # Compute the next Q-values using the target network
                 next_q_values = self.policy.forward_target(replay_data.next_observations)
@@ -324,7 +322,7 @@ class PDQN(OffPolicyAlgorithm):
             unscaled_action, _ = self.predict(self._last_obs)
 
         # Rescale the action from [low, high] to [-1, 1]
-        if isinstance(self.action_space, gym.spaces.Box):
+        if isinstance(self.action_space, spaces.Box):
             scaled_action = self.policy.scale_action(unscaled_action)
 
             # Add noise to the action (improve exploration)
@@ -345,7 +343,6 @@ class PDQN(OffPolicyAlgorithm):
         # Override from base class, to implement two learning_rates
         self.lr_schedule_q = get_schedule_fn(self.learning_rate_q)
         self.lr_schedule_parameter = get_schedule_fn(self.learning_rate_parameter)
-
 
     def _update_learning_rate(self, optimizer_q: th.optim.Optimizer, optimizer_parameter: th.optim.Optimizer) -> None:
         """

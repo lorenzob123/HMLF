@@ -1,18 +1,11 @@
 import gym
 import numpy as np
 import pytest
-from gym import spaces
 
-from hmlf import HER, SAC, TD3
+from hmlf import HER, SAC, TD3, spaces
 from hmlf.common.monitor import Monitor
 from hmlf.common.running_mean_std import RunningMeanStd
-from hmlf.common.vec_env import (
-    DummyVecEnv,
-    VecFrameStack,
-    VecNormalize,
-    sync_envs_normalization,
-    unwrap_vec_normalize,
-)
+from hmlf.environments.vec_env import DummyVecEnv, VecFrameStack, VecNormalize, sync_envs_normalization, unwrap_vec_normalize
 
 ENV_ID = "Pendulum-v0"
 

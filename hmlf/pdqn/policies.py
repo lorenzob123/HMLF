@@ -1,18 +1,16 @@
-from hmlf.spaces import SimpleHybrid, Box, Discrete, Space
-from typing import Any, Dict, List, Optional, Type
-from torch import nn
-
-import torch as th
-import numpy as np
 import copy
+from typing import Any, Dict, List, Optional, Type
 
+import numpy as np
+import torch as th
+from torch import nn
 
 from hmlf.common.policies import BasePolicy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN
 from hmlf.common.type_aliases import Schedule
-
-from hmlf.td3.policies import Actor
 from hmlf.dqn.policies import QNetwork
+from hmlf.spaces import Box, SimpleHybrid, Space
+from hmlf.td3.policies import Actor
 
 
 def build_state_parameter_space(observation_space: Box, action_space: SimpleHybrid) -> Box:
@@ -20,6 +18,7 @@ def build_state_parameter_space(observation_space: Box, action_space: SimpleHybr
     highs = np.hstack([observation_space.high, action_space.continuous_high])
 
     return Box(lows, highs)
+
 
 class PDQNPolicy(BasePolicy):
     """
@@ -97,9 +96,8 @@ class PDQNPolicy(BasePolicy):
         }
 
         self.q_net, self.q_net_target, self.parameter_net = None, None, None
-        
-        self._build(lr_schedule_q, lr_schedule_parameter)
 
+        self._build(lr_schedule_q, lr_schedule_parameter)
 
     def get_net_arch(self, net_arch: Optional[List[int]], features_extractor_class: Type[BaseFeaturesExtractor]):
         if net_arch is None:
@@ -108,7 +106,6 @@ class PDQNPolicy(BasePolicy):
             else:
                 net_arch = []
             return net_arch
-
 
     def _build(self, lr_schedule_q: Schedule, lr_schedule_parameter: Schedule) -> None:
         """
@@ -124,11 +121,13 @@ class PDQNPolicy(BasePolicy):
 
         self.parameter_net = self._make_parameter_net()
 
-        #TODO: Separater arguments for parameter net?
+        # TODO: Separater arguments for parameter net?
         # Setup optimizer with initial learning rate
         print(self.optimizer_kwargs)
         self.optimizer_q_net = self.optimizer_class(self.q_net.parameters(), lr=lr_schedule_q(1), **self.optimizer_kwargs)
-        self.optimizer_parameter_net = self.optimizer_class(self.parameter_net.parameters(), lr=lr_schedule_parameter(1), **self.optimizer_kwargs)
+        self.optimizer_parameter_net = self.optimizer_class(
+            self.parameter_net.parameters(), lr=lr_schedule_parameter(1), **self.optimizer_kwargs
+        )
 
     def _make_q_net(self) -> QNetwork:
         # Make sure we always have separate networks for features extractors etc
@@ -137,37 +136,37 @@ class PDQNPolicy(BasePolicy):
 
     def _make_parameter_net(self) -> Actor:
         net_args = self._update_features_extractor(self.net_args_parameter, self.observation_space, features_extractor=None)
-        #TODO implement separate arguments
+        # TODO implement separate arguments
         return Actor(**net_args).to(self.device)
 
     def _format_q_observation(self, obs: th.Tensor, action_parameters: th.Tensor) -> th.Tensor:
         return th.cat([obs, action_parameters], dim=1)
 
-    def _forward_q_target(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
+    def _forward_q_target(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool = True) -> th.Tensor:
         observations = self._format_q_observation(obs, action_parameters)
 
         q_values = self.q_net_target(observations)
         return q_values
 
     def forward(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
-        #Calculates q_values
+        # Calculates q_values
         parameters = self.forward_parameters(obs)
         q_values = self.forward_q(obs, parameters)
         return q_values
 
     def forward_target(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
-        #Calculates q_values from target net
+        # Calculates q_values from target net
         parameters = self.forward_parameters(obs)
         q_values = self._forward_q_target(obs, parameters)
         return q_values
 
-    def forward_q(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool=True) -> th.Tensor:
+    def forward_q(self, obs: th.Tensor, action_parameters: th.Tensor, deterministic: bool = True) -> th.Tensor:
         observations = self._format_q_observation(obs, action_parameters)
 
         q_values = self.q_net(observations)
         return q_values
 
-    def forward_parameters(self, obs: th.Tensor, deterministic: bool=True) -> th.Tensor:
+    def forward_parameters(self, obs: th.Tensor, deterministic: bool = True) -> th.Tensor:
         parameters = self.parameter_net(obs)
         return parameters
 
@@ -194,10 +193,7 @@ class PDQNPolicy(BasePolicy):
         return data
 
     def _update_features_extractor(
-        self, 
-        net_kwargs: Dict[str, Any],
-        observation_space: Space,
-        features_extractor: Optional[BaseFeaturesExtractor] = None
+        self, net_kwargs: Dict[str, Any], observation_space: Space, features_extractor: Optional[BaseFeaturesExtractor] = None
     ) -> Dict[str, Any]:
         """
         Update the network keyword arguments and create a new features extractor object if needed.
@@ -219,7 +215,6 @@ class PDQNPolicy(BasePolicy):
     def make_features_extractor(self, observation_space: Space) -> BaseFeaturesExtractor:
         """ Helper method to create a features extractor."""
         return self.features_extractor_class(observation_space, **self.features_extractor_kwargs)
-
 
 
 MlpPolicy = PDQNPolicy

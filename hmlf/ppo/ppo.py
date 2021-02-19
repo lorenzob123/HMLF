@@ -3,9 +3,9 @@ from typing import Any, Dict, Optional, Type, Union
 
 import numpy as np
 import torch as th
-from gym import spaces
 from torch.nn import functional as F
 
+from hmlf import spaces
 from hmlf.common import logger
 from hmlf.common.on_policy_algorithm import OnPolicyAlgorithm
 from hmlf.common.policies import ActorCriticPolicy
@@ -111,13 +111,7 @@ class PPO(OnPolicyAlgorithm):
             create_eval_env=create_eval_env,
             seed=seed,
             _init_setup_model=False,
-            supported_action_spaces=(
-                spaces.Box,
-                spaces.Discrete,
-                spaces.MultiDiscrete,
-                spaces.MultiBinary,
-                spaces.Tuple
-            ),
+            supported_action_spaces=(spaces.Box, spaces.Discrete, spaces.MultiDiscrete, spaces.MultiBinary, spaces.Tuple),
         )
         if self.env is not None:
             # Check that `n_steps * n_envs > 1` to avoid NaN

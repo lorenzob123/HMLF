@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch as th
-from gym import spaces
 
+from hmlf import spaces
 from hmlf.common.buffers import ReplayBuffer
 from hmlf.common.type_aliases import ReplayBufferSamples, RolloutBufferSamples
-from hmlf.common.vec_env import VecNormalize
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.environments.vec_env import VecNormalize
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 from hmlf.her.goal_selection_strategy import GoalSelectionStrategy
 
 

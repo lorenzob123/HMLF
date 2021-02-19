@@ -101,11 +101,11 @@ It will monitor the actions, observations, and rewards, indicating what action o
 .. code-block:: python
 
   import gym
-  from gym import spaces
+  from hmlf import spaces
   import numpy as np
 
   from hmlf import PPO
-  from hmlf.common.vec_env import DummyVecEnv, VecCheckNan
+  from hmlf.environments.vec_env import DummyVecEnv, VecCheckNan
 
   class NanAndInfEnv(gym.Env):
       """Custom Environment that raised NaNs and Infs"""

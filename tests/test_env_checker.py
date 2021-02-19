@@ -1,9 +1,9 @@
 import gym
 import numpy as np
 import pytest
-from gym.spaces import Box, Dict, Discrete
 
 from hmlf.common.env_checker import check_env
+from hmlf.spaces import Box, Dict, Discrete
 
 
 class ActionDictTestEnv(gym.Env):

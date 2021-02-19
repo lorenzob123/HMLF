@@ -1,15 +1,10 @@
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Optional, Type, Union
 
-import numpy as np
 import torch as th
-from torch.nn import functional as F
 
 from hmlf.common.type_aliases import GymEnv, Schedule
 from hmlf.mpdqn.policies import MPDQNPolicy
-
-
 from hmlf.pdqn import PDQN
-
 
 
 class MPDQN(PDQN):
@@ -88,29 +83,29 @@ class MPDQN(PDQN):
     ):
 
         super(MPDQN, self).__init__(
-            policy = policy, #: Union[str, Type[MPDQNPolicy]],
-            env = env, #: Union[GymEnv, str],
-            learning_rate_q = learning_rate_q, #: Union[float, Schedule] = 1e-4,
-            learning_rate_parameter = learning_rate_parameter, #: Union[float, Schedule] = 1e-4,
-            buffer_size = buffer_size, #: int = 1000000,
-            learning_starts = learning_starts, #: int = 50000,
-            batch_size = batch_size, #: Optional[int] = 32,
-            tau = tau, #: float = 1.0,
-            gamma = gamma, #: float = 0.99,
-            train_freq = train_freq, #: int = 4,
-            gradient_steps = gradient_steps, #: int = 1,
-            n_episodes_rollout = n_episodes_rollout, #: int = -1,
-            optimize_memory_usage = optimize_memory_usage, #: bool = False,
-            target_update_interval = target_update_interval, #: int = 10000,
-            exploration_fraction = exploration_fraction, #: float = 0.1,
-            exploration_initial_eps = exploration_initial_eps, #: float = 1.0,
-            exploration_final_eps = exploration_final_eps, #: float = 0.05,
-            max_grad_norm = max_grad_norm, #: float = 10,
-            tensorboard_log = tensorboard_log, #: Optional[str] = None,
-            create_eval_env = create_eval_env, #: bool = False,
-            policy_kwargs = policy_kwargs, #: Optional[Dict[str, Any]] = None,
-            verbose = verbose, #: int = 0,
-            seed = seed, #: Optional[int] = None,
-            device = device, #: Union[th.device, str] = "auto",
-            _init_setup_model = _init_setup_model, #: bool = True,
+            policy=policy,  # :Union[str, Type[MPDQNPolicy]],
+            env=env,  # :Union[GymEnv, str],
+            learning_rate_q=learning_rate_q,  # :Union[float, Schedule] = 1e-4,
+            learning_rate_parameter=learning_rate_parameter,  # :Union[float, Schedule] = 1e-4,
+            buffer_size=buffer_size,  # :int = 1000000,
+            learning_starts=learning_starts,  # :int = 50000,
+            batch_size=batch_size,  # :Optional[int] = 32,
+            tau=tau,  # :float = 1.0,
+            gamma=gamma,  # :float = 0.99,
+            train_freq=train_freq,  # :int = 4,
+            gradient_steps=gradient_steps,  # :int = 1,
+            n_episodes_rollout=n_episodes_rollout,  # :int = -1,
+            optimize_memory_usage=optimize_memory_usage,  # :bool = False,
+            target_update_interval=target_update_interval,  # :int = 10000,
+            exploration_fraction=exploration_fraction,  # :float = 0.1,
+            exploration_initial_eps=exploration_initial_eps,  # :float = 1.0,
+            exploration_final_eps=exploration_final_eps,  # :float = 0.05,
+            max_grad_norm=max_grad_norm,  # :float = 10,
+            tensorboard_log=tensorboard_log,  # :Optional[str] = None,
+            create_eval_env=create_eval_env,  # :bool = False,
+            policy_kwargs=policy_kwargs,  # :Optional[Dict[str, Any]] = None,
+            verbose=verbose,  # :int = 0,
+            seed=seed,  # :Optional[int] = None,
+            device=device,  # :Union[th.device, str] = "auto",
+            _init_setup_model=_init_setup_model,  # :bool = True,
         )

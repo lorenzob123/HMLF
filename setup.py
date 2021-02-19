@@ -98,6 +98,8 @@ setup(
             "isort>=5.0",
             # Reformat
             "black",
+            # Git hooks
+            "pre-commit",
         ],
         "docs": [
             "sphinx",

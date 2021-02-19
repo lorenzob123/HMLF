@@ -5,7 +5,6 @@ from collections import deque
 from itertools import zip_longest
 from typing import Iterable, Optional, Union
 
-import gym
 import numpy as np
 import torch as th
 
@@ -15,6 +14,7 @@ try:
 except ImportError:
     SummaryWriter = None
 
+from hmlf import spaces
 from hmlf.common import logger
 from hmlf.common.type_aliases import GymEnv, Schedule
 
@@ -190,7 +190,7 @@ def configure_logger(
         logger.configure(format_strings=[""])
 
 
-def check_for_correct_spaces(env: GymEnv, observation_space: gym.spaces.Space, action_space: gym.spaces.Space) -> None:
+def check_for_correct_spaces(env: GymEnv, observation_space: spaces.Space, action_space: spaces.Space) -> None:
     """
     Checks that the environment has same spaces as provided ones. Used by BaseAlgorithm to check if
     spaces match after loading the model with given env.
@@ -208,7 +208,7 @@ def check_for_correct_spaces(env: GymEnv, observation_space: gym.spaces.Space, a
         raise ValueError(f"Action spaces do not match: {action_space} != {env.action_space}")
 
 
-def is_vectorized_observation(observation: np.ndarray, observation_space: gym.spaces.Space) -> bool:
+def is_vectorized_observation(observation: np.ndarray, observation_space: spaces.Space) -> bool:
     """
     For every observation type, detects and validates the shape,
     then returns whether or not the observation is vectorized.
@@ -217,7 +217,7 @@ def is_vectorized_observation(observation: np.ndarray, observation_space: gym.sp
     :param observation_space: the observation space
     :return: whether the given observation is vectorized or not
     """
-    if isinstance(observation_space, gym.spaces.Box):
+    if isinstance(observation_space, spaces.Box):
         if observation.shape == observation_space.shape:
             return False
         elif observation.shape[1:] == observation_space.shape:
@@ -228,7 +228,7 @@ def is_vectorized_observation(observation: np.ndarray, observation_space: gym.sp
                 + f"Box environment, please use {observation_space.shape} "
                 + "or (n_env, {}) for the observation shape.".format(", ".join(map(str, observation_space.shape)))
             )
-    elif isinstance(observation_space, gym.spaces.Discrete):
+    elif isinstance(observation_space, spaces.Discrete):
         if observation.shape == ():  # A numpy array of a number, has shape empty tuple '()'
             return False
         elif len(observation.shape) == 1:
@@ -239,7 +239,7 @@ def is_vectorized_observation(observation: np.ndarray, observation_space: gym.sp
                 + "Discrete environment, please use (1,) or (n_env, 1) for the observation shape."
             )
 
-    elif isinstance(observation_space, gym.spaces.MultiDiscrete):
+    elif isinstance(observation_space, spaces.MultiDiscrete):
         if observation.shape == (len(observation_space.nvec),):
             return False
         elif len(observation.shape) == 2 and observation.shape[1] == len(observation_space.nvec):
@@ -250,7 +250,7 @@ def is_vectorized_observation(observation: np.ndarray, observation_space: gym.sp
                 + f"environment, please use ({len(observation_space.nvec)},) or "
                 + f"(n_env, {len(observation_space.nvec)}) for the observation shape."
             )
-    elif isinstance(observation_space, gym.spaces.MultiBinary):
+    elif isinstance(observation_space, spaces.MultiBinary):
         if observation.shape == (observation_space.n,):
             return False
         elif len(observation.shape) == 2 and observation.shape[1] == observation_space.n:

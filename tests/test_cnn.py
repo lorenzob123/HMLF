@@ -4,13 +4,12 @@ from copy import deepcopy
 import numpy as np
 import pytest
 import torch as th
-from gym import spaces
 
-from hmlf import A2C, DQN, PPO, SAC, TD3
-from hmlf.common.identity_env import FakeImageEnv
+from hmlf import A2C, DQN, PPO, SAC, TD3, spaces
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.utils import zip_strict
-from hmlf.common.vec_env import VecTransposeImage, is_vecenv_wrapped
+from hmlf.environments.identity_env import FakeImageEnv
+from hmlf.environments.vec_env import VecTransposeImage, is_vecenv_wrapped
 
 
 @pytest.mark.parametrize("model_class", [A2C, PPO, SAC, TD3, DQN])

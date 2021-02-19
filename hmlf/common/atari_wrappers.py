@@ -1,6 +1,7 @@
 import gym
 import numpy as np
-from gym import spaces
+
+from hmlf import spaces
 
 try:
     import cv2  # pytype:disable=import-error

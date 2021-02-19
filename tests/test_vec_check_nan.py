@@ -1,9 +1,9 @@
 import gym
 import numpy as np
 import pytest
-from gym import spaces
 
-from hmlf.common.vec_env import DummyVecEnv, VecCheckNan
+from hmlf import spaces
+from hmlf.environments.vec_env import DummyVecEnv, VecCheckNan
 
 
 class NanAndInfEnv(gym.Env):

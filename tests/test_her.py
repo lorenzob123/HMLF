@@ -9,9 +9,9 @@ import pytest
 import torch as th
 
 from hmlf import DDPG, DQN, HER, SAC, TD3
-from hmlf.common.bit_flipping_env import BitFlippingEnv
-from hmlf.common.vec_env import DummyVecEnv
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.environments.bit_flipping_env import BitFlippingEnv
+from hmlf.environments.vec_env import DummyVecEnv
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 from hmlf.her.goal_selection_strategy import GoalSelectionStrategy
 from hmlf.her.her import get_time_limit
 
@@ -111,7 +111,7 @@ def test_save_load(tmp_path, model_class, use_sde, online_sampling):
         learning_starts=100,
         n_episodes_rollout=-1,
         max_episode_length=n_bits,
-        **kwargs
+        **kwargs,
     )
 
     model.learn(total_timesteps=300)

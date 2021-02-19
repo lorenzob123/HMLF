@@ -4,7 +4,7 @@ import torch as th
 
 from hmlf import A2C, DQN, PPO, SAC, TD3
 from hmlf.common.utils import get_device
-from hmlf.common.vec_env import DummyVecEnv
+from hmlf.environments.vec_env import DummyVecEnv
 
 MODEL_LIST = [
     PPO,

@@ -1,19 +1,13 @@
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import torch as th
 from torch import nn
 
+from hmlf import spaces
 from hmlf.common.distributions import SquashedDiagGaussianDistribution, StateDependentNoiseDistribution
 from hmlf.common.policies import BasePolicy, ContinuousCritic, create_sde_features_extractor
 from hmlf.common.preprocessing import get_action_dim
-from hmlf.common.torch_layers import (
-    BaseFeaturesExtractor,
-    FlattenExtractor,
-    NatureCNN,
-    create_mlp,
-    get_actor_critic_arch,
-)
+from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
 
 # CAP the standard deviation of the actor
@@ -49,8 +43,8 @@ class Actor(BasePolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         net_arch: List[int],
         features_extractor: nn.Module,
         features_dim: int,
@@ -226,8 +220,8 @@ class SACPolicy(BasePolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         lr_schedule: Schedule,
         net_arch: Optional[Union[List[int], Dict[str, List[int]]]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
@@ -396,8 +390,8 @@ class CnnPolicy(SACPolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         lr_schedule: Schedule,
         net_arch: Optional[Union[List[int], Dict[str, List[int]]]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,

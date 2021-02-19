@@ -1,10 +1,11 @@
 from itertools import zip_longest
 from typing import Dict, List, Tuple, Type, Union
 
-import gym
 import torch as th
 from torch import nn
 
+import hmlf
+from hmlf import spaces
 from hmlf.common.preprocessing import get_flattened_obs_dim, is_image_space
 from hmlf.common.utils import get_device
 
@@ -17,7 +18,7 @@ class BaseFeaturesExtractor(nn.Module):
     :param features_dim: Number of features extracted.
     """
 
-    def __init__(self, observation_space: gym.Space, features_dim: int = 0):
+    def __init__(self, observation_space: spaces.Space, features_dim: int = 0):
         super(BaseFeaturesExtractor, self).__init__()
         assert features_dim > 0
         self._observation_space = observation_space
@@ -39,7 +40,7 @@ class FlattenExtractor(BaseFeaturesExtractor):
     :param observation_space:
     """
 
-    def __init__(self, observation_space: gym.Space):
+    def __init__(self, observation_space: hmlf.Space):
         super(FlattenExtractor, self).__init__(observation_space, get_flattened_obs_dim(observation_space))
         self.flatten = nn.Flatten()
 
@@ -59,7 +60,7 @@ class NatureCNN(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 512):
+    def __init__(self, observation_space: spaces.Box, features_dim: int = 512):
         super(NatureCNN, self).__init__(observation_space, features_dim)
         # We assume CxHxW images (channels first)
         # Re-ordering will be done by pre-preprocessing or wrapper

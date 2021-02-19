@@ -5,30 +5,29 @@ from abc import ABC, abstractmethod
 from functools import partial
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 from torch import nn
 
-from hmlf.spaces import SimpleHybrid
+from hmlf import spaces
 from hmlf.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
     DiagGaussianDistribution,
     Distribution,
+    HybridDistribution,
     MultiCategoricalDistribution,
     StateDependentNoiseDistribution,
     TupleDistribution,
-    HybridDistribution,
-    make_proba_distribution
+    make_proba_distribution,
 )
 from hmlf.common.preprocessing import get_action_dim, is_image_space, preprocess_obs
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, MlpExtractor, NatureCNN, create_mlp
 from hmlf.common.type_aliases import Schedule
 from hmlf.common.utils import get_device, is_vectorized_observation
-from hmlf.common.vec_env import VecTransposeImage
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
-from hmlf.common.hybrid_utils import onehot_hybrid_2_tuple_hybrid
+from hmlf.environments.vec_env import VecTransposeImage
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.spaces import SimpleHybrid
 
 
 class BaseModel(nn.Module, ABC):
@@ -55,8 +54,8 @@ class BaseModel(nn.Module, ABC):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         features_extractor_class: Type[BaseFeaturesExtractor] = FlattenExtractor,
         features_extractor_kwargs: Optional[Dict[str, Any]] = None,
         features_extractor: Optional[nn.Module] = None,
@@ -293,7 +292,7 @@ class BasePolicy(BaseModel):
         # Convert to numpy
         actions = actions.cpu().numpy()
 
-        if isinstance(self.action_space, gym.spaces.Box):
+        if isinstance(self.action_space, spaces.Box):
             if self.squash_output:
                 # Rescale to proper domain when using squashing
                 actions = self.unscale_action(actions)
@@ -369,8 +368,8 @@ class ActorCriticPolicy(BasePolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         lr_schedule: Schedule,
         net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
         activation_fn: Type[nn.Module] = nn.Tanh,
@@ -519,11 +518,11 @@ class ActorCriticPolicy(BasePolicy):
         elif isinstance(self.action_dist, BernoulliDistribution):
             self.action_net = self.action_dist.proba_distribution_net(latent_dim=latent_dim_pi)
         elif isinstance(self.action_dist, TupleDistribution):
-            self.action_net, self.log_std  = self.action_dist.proba_distribution_net(
+            self.action_net, self.log_std = self.action_dist.proba_distribution_net(
                 latent_dim=latent_dim_pi, log_std_init=self.log_std_init
             )
         elif isinstance(self.action_dist, HybridDistribution):
-            self.action_net, self.log_std  = self.action_dist.proba_distribution_net(
+            self.action_net, self.log_std = self.action_dist.proba_distribution_net(
                 latent_dim=latent_dim_pi, log_std_init=self.log_std_init
             )
         else:
@@ -679,8 +678,8 @@ class ActorCriticCnnPolicy(ActorCriticPolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         lr_schedule: Schedule,
         net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
         activation_fn: Type[nn.Module] = nn.Tanh,
@@ -747,8 +746,8 @@ class ContinuousCritic(BaseModel):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
         net_arch: List[int],
         features_extractor: nn.Module,
         features_dim: int,
@@ -813,4 +812,3 @@ def create_sde_features_extractor(
     latent_sde_dim = sde_net_arch[-1] if len(sde_net_arch) > 0 else features_dim
     sde_features_extractor = nn.Sequential(*latent_sde_net)
     return sde_features_extractor, latent_sde_dim
-    

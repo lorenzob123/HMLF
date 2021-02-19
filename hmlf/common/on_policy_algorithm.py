@@ -1,10 +1,10 @@
 import time
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 
+from hmlf import spaces
 from hmlf.common import logger
 from hmlf.common.base_class import BaseAlgorithm
 from hmlf.common.buffers import RolloutBuffer
@@ -12,8 +12,7 @@ from hmlf.common.callbacks import BaseCallback
 from hmlf.common.policies import ActorCriticPolicy
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import safe_mean
-from hmlf.common.vec_env import VecEnv
-from hmlf.common.hybrid_utils import onehot_hybrid_2_tuple_hybrid
+from hmlf.environments.vec_env import VecEnv
 
 
 class OnPolicyAlgorithm(BaseAlgorithm):
@@ -71,7 +70,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
-        supported_action_spaces: Optional[Tuple[gym.spaces.Space, ...]] = None,
+        supported_action_spaces: Optional[Tuple[spaces.Space, ...]] = None,
     ):
 
         super(OnPolicyAlgorithm, self).__init__(
@@ -119,7 +118,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self.action_space,
             self.lr_schedule,
             use_sde=self.use_sde,
-            **self.policy_kwargs  # pytype:disable=not-instantiable
+            **self.policy_kwargs,  # pytype:disable=not-instantiable
         )
         self.policy = self.policy.to(self.device)
 
@@ -162,9 +161,9 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             # Rescale and perform action
             clipped_actions = actions
             # Clip the actions to avoid out of bound error
-            if isinstance(self.action_space, gym.spaces.Box):
+            if isinstance(self.action_space, spaces.Box):
                 clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
-            if isinstance(self.action_space, gym.spaces.Tuple):
+            if isinstance(self.action_space, spaces.Tuple):
 
                 clipped_actions = self.action_space.format_action(actions)
             new_obs, rewards, dones, infos = env.step(clipped_actions)
@@ -179,7 +178,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self._update_info_buffer(infos)
             n_steps += 1
 
-            if isinstance(self.action_space, gym.spaces.Discrete):
+            if isinstance(self.action_space, spaces.Discrete):
                 # Reshape in case of discrete action
                 actions = actions.reshape(-1, 1)
             rollout_buffer.add(self._last_obs, actions, rewards, self._last_dones, values, log_probs)
