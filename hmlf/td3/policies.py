@@ -3,17 +3,11 @@ from typing import Any, Dict, List, Optional, Type, Union
 import torch as th
 from torch import nn
 
+from hmlf import spaces
 from hmlf.common.policies import BasePolicy, ContinuousCritic
 from hmlf.common.preprocessing import get_action_dim
-from hmlf.common.torch_layers import (
-    BaseFeaturesExtractor,
-    FlattenExtractor,
-    NatureCNN,
-    create_mlp,
-    get_actor_critic_arch,
-)
+from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
-from hmlf import spaces
 
 
 class Actor(BasePolicy):

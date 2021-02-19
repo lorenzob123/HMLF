@@ -1,17 +1,16 @@
-from typing import Any, Callable, Dict, Optional, Type, Union, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
+##################################
+# self._sample_actions
+import numpy as np
 import torch as th
 
+from hmlf import spaces
 from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback
 from hmlf.td3.policies import TD3Policy
 from hmlf.td3.td3 import TD3
-from hmlf import spaces
-
-##################################
-# self._sample_actions
-import numpy as np
 
 ####################################
 

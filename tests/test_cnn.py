@@ -4,12 +4,11 @@ from copy import deepcopy
 import numpy as np
 import pytest
 import torch as th
-from hmlf import spaces
 
-from hmlf import A2C, DQN, PPO, SAC, TD3
-from hmlf.environments.identity_env import FakeImageEnv
+from hmlf import A2C, DQN, PPO, SAC, TD3, spaces
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.utils import zip_strict
+from hmlf.environments.identity_env import FakeImageEnv
 from hmlf.environments.vec_env import VecTransposeImage, is_vecenv_wrapped
 
 

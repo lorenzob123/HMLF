@@ -1,6 +1,7 @@
 import gym
 import numpy as np
-from hmlf.spaces import SimpleHybrid, Box, Discrete
+
+from hmlf.spaces import Box, Discrete, SimpleHybrid
 
 
 class ObstacleCourse(gym.Env):

@@ -3,11 +3,11 @@ from typing import Dict, List, Tuple, Type, Union
 
 import torch as th
 from torch import nn
-import hmlf
 
+import hmlf
+from hmlf import spaces
 from hmlf.common.preprocessing import get_flattened_obs_dim, is_image_space
 from hmlf.common.utils import get_device
-from hmlf import spaces
 
 
 class BaseFeaturesExtractor(nn.Module):

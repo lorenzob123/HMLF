@@ -4,8 +4,6 @@ import torch as th
 
 from hmlf.common.type_aliases import GymEnv, Schedule
 from hmlf.mpdqn.policies import MPDQNPolicy
-
-
 from hmlf.pdqn import PDQN
 
 

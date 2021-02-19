@@ -1,13 +1,13 @@
-from hmlf.spaces import SimpleHybrid, Space
 from typing import Any, Dict, List, Optional, Type
-from torch import nn
 
-import torch as th
 import numpy as np
+import torch as th
+from torch import nn
 
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN
 from hmlf.common.type_aliases import Schedule
 from hmlf.pdqn import MlpPolicy as PDQNPolicy
+from hmlf.spaces import SimpleHybrid, Space
 
 
 class MPDQNPolicy(PDQNPolicy):

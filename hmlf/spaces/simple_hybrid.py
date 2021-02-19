@@ -1,7 +1,8 @@
 from typing import List, Tuple
-from hmlf import spaces
 
 import numpy as np
+
+from hmlf import spaces
 
 
 class SimpleHybrid(spaces.Tuple):

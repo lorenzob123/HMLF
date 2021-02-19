@@ -7,13 +7,7 @@ from hmlf import spaces
 from hmlf.common.distributions import SquashedDiagGaussianDistribution, StateDependentNoiseDistribution
 from hmlf.common.policies import BasePolicy, ContinuousCritic, create_sde_features_extractor
 from hmlf.common.preprocessing import get_action_dim
-from hmlf.common.torch_layers import (
-    BaseFeaturesExtractor,
-    FlattenExtractor,
-    NatureCNN,
-    create_mlp,
-    get_actor_critic_arch,
-)
+from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
 
 # CAP the standard deviation of the actor

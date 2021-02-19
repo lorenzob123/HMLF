@@ -21,13 +21,7 @@ from hmlf.common.policies import BasePolicy
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.save_util import load_from_zip_file, recursive_getattr, recursive_setattr, save_to_zip_file
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
-from hmlf.common.utils import (
-    check_for_correct_spaces,
-    get_device,
-    get_schedule_fn,
-    set_random_seed,
-    update_learning_rate,
-)
+from hmlf.common.utils import check_for_correct_spaces, get_device, get_schedule_fn, set_random_seed, update_learning_rate
 from hmlf.environments.vec_env import (
     DummyVecEnv,
     VecEnv,

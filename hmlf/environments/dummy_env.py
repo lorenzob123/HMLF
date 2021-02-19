@@ -1,6 +1,7 @@
 import gym
-from hmlf import spaces
 import numpy as np
+
+from hmlf import spaces
 
 
 class DummyEnv(gym.Env):

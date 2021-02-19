@@ -4,10 +4,10 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch as th
-from hmlf import spaces
 from torch import nn
 from torch.distributions import Bernoulli, Categorical, Normal
 
+from hmlf import spaces
 from hmlf.common.preprocessing import get_action_dim
 from hmlf.spaces import SimpleHybrid
 

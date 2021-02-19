@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from hmlf import A2C, DDPG, DQN, HER, PPO, SAC, TD3
-from hmlf.environments.bit_flipping_env import BitFlippingEnv
 from hmlf.common.callbacks import (
     CallbackList,
     CheckpointCallback,
@@ -16,6 +15,7 @@ from hmlf.common.callbacks import (
     StopTrainingOnRewardThreshold,
 )
 from hmlf.common.env_util import make_vec_env
+from hmlf.environments.bit_flipping_env import BitFlippingEnv
 from hmlf.environments.vec_env import DummyVecEnv
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 

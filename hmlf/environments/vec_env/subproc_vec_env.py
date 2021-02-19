@@ -5,14 +5,8 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple, Type, Union
 import gym
 import numpy as np
 
-from hmlf.environments.vec_env.base_vec_env import (
-    CloudpickleWrapper,
-    VecEnv,
-    VecEnvIndices,
-    VecEnvObs,
-    VecEnvStepReturn,
-)
 from hmlf import spaces
+from hmlf.environments.vec_env.base_vec_env import CloudpickleWrapper, VecEnv, VecEnvIndices, VecEnvObs, VecEnvStepReturn
 
 
 def _worker(

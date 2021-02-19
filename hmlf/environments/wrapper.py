@@ -1,4 +1,5 @@
 import gym
+
 from hmlf.spaces import OneHotHybrid, SimpleHybrid
 
 

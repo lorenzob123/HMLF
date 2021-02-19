@@ -3,8 +3,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch as th
-from hmlf import spaces
 
+from hmlf import spaces
 from hmlf.common.buffers import ReplayBuffer
 from hmlf.common.type_aliases import ReplayBufferSamples, RolloutBufferSamples
 from hmlf.environments.vec_env import VecNormalize

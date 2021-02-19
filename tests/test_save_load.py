@@ -12,9 +12,9 @@ import torch as th
 
 from hmlf import A2C, DDPG, DQN, PPO, SAC, TD3
 from hmlf.common.base_class import BaseAlgorithm
-from hmlf.environments.identity_env import FakeImageEnv, IdentityEnv, IdentityEnvBox
 from hmlf.common.save_util import load_from_pkl, open_path, save_to_pkl
 from hmlf.common.utils import get_device
+from hmlf.environments.identity_env import FakeImageEnv, IdentityEnv, IdentityEnvBox
 from hmlf.environments.vec_env import DummyVecEnv
 
 MODEL_LIST = [PPO, A2C, TD3, SAC, DQN, DDPG]

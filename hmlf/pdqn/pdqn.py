@@ -1,17 +1,17 @@
-from hmlf.pdqn.policies import PDQNPolicy
-from hmlf.common.buffers import ReplayBuffer
-from hmlf.common.noise import ActionNoise
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-from hmlf import spaces
 import numpy as np
 import torch as th
 from torch.nn import functional as F
 
+from hmlf import spaces
 from hmlf.common import logger
+from hmlf.common.buffers import ReplayBuffer
+from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import get_linear_fn, get_schedule_fn, is_vectorized_observation, polyak_update, update_learning_rate
+from hmlf.pdqn.policies import PDQNPolicy
 
 
 class PDQN(OffPolicyAlgorithm):

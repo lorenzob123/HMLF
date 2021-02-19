@@ -3,8 +3,8 @@ from typing import Union
 
 import gym
 import numpy as np
-from hmlf import spaces
 
+from hmlf import spaces
 from hmlf.environments.vec_env import DummyVecEnv, VecCheckNan
 
 

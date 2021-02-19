@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
-from hmlf.environments.vec_env.base_vec_env import VecEnvObs
 from hmlf import spaces
+from hmlf.environments.vec_env.base_vec_env import VecEnvObs
 
 
 def copy_obs_dict(obs: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:

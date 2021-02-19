@@ -1,8 +1,9 @@
-from hmlf.environments import DummyEnv
-from hmlf.spaces import SimpleHybrid
+import gym
+
 from hmlf import PPO
 from hmlf.common.callbacks import EvalCallback
-import gym
+from hmlf.environments import DummyEnv
+from hmlf.spaces import SimpleHybrid
 
 
 class SimpleHybridWrapper(gym.Wrapper):

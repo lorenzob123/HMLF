@@ -6,8 +6,8 @@ import cloudpickle
 import gym
 import numpy as np
 
-from hmlf.common import logger
 from hmlf import spaces
+from hmlf.common import logger
 
 # Define type aliases here to avoid circular import
 # Used when we want to access one or more VecEnv

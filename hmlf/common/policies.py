@@ -9,25 +9,25 @@ import numpy as np
 import torch as th
 from torch import nn
 
-from hmlf.spaces import SimpleHybrid
+from hmlf import spaces
 from hmlf.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
     DiagGaussianDistribution,
     Distribution,
+    HybridDistribution,
     MultiCategoricalDistribution,
     StateDependentNoiseDistribution,
     TupleDistribution,
-    HybridDistribution,
     make_proba_distribution,
 )
-from hmlf import spaces
 from hmlf.common.preprocessing import get_action_dim, is_image_space, preprocess_obs
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, MlpExtractor, NatureCNN, create_mlp
 from hmlf.common.type_aliases import Schedule
 from hmlf.common.utils import get_device, is_vectorized_observation
 from hmlf.environments.vec_env import VecTransposeImage
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.spaces import SimpleHybrid
 
 
 class BaseModel(nn.Module, ABC):

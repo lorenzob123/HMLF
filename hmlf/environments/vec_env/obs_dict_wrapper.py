@@ -1,8 +1,8 @@
 from typing import Dict
 
 import numpy as np
-from hmlf import spaces
 
+from hmlf import spaces
 from hmlf.environments.vec_env import VecEnv, VecEnvWrapper
 
 

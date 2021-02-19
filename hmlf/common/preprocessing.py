@@ -3,9 +3,9 @@ from typing import Tuple
 
 import numpy as np
 import torch as th
-from hmlf import spaces
-
 from torch.nn import functional as F
+
+from hmlf import spaces
 
 
 def is_image_space_channels_first(observation_space: spaces.Box) -> bool:

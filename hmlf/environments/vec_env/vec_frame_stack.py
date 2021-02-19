@@ -2,8 +2,8 @@ import warnings
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-from hmlf import spaces
 
+from hmlf import spaces
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.environments.vec_env.base_vec_env import VecEnv, VecEnvWrapper
 

@@ -1,18 +1,16 @@
-from hmlf.spaces import SimpleHybrid, Box, Space
-from typing import Any, Dict, List, Optional, Type
-from torch import nn
-
-import torch as th
-import numpy as np
 import copy
+from typing import Any, Dict, List, Optional, Type
 
+import numpy as np
+import torch as th
+from torch import nn
 
 from hmlf.common.policies import BasePolicy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN
 from hmlf.common.type_aliases import Schedule
-
-from hmlf.td3.policies import Actor
 from hmlf.dqn.policies import QNetwork
+from hmlf.spaces import Box, SimpleHybrid, Space
+from hmlf.td3.policies import Actor
 
 
 def build_state_parameter_space(observation_space: Box, action_space: SimpleHybrid) -> Box:

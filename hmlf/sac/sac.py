@@ -4,13 +4,13 @@ import numpy as np
 import torch as th
 from torch.nn import functional as F
 
+from hmlf import spaces
 from hmlf.common import logger
 from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import polyak_update
 from hmlf.sac.policies import SACPolicy
-from hmlf import spaces
 
 
 class SAC(OffPolicyAlgorithm):

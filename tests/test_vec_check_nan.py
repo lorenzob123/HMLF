@@ -1,8 +1,8 @@
 import gym
 import numpy as np
 import pytest
-from hmlf import spaces
 
+from hmlf import spaces
 from hmlf.environments.vec_env import DummyVecEnv, VecCheckNan
 
 

@@ -3,8 +3,8 @@ import pytest
 
 from hmlf import A2C, DDPG, DQN, PPO, SAC, TD3
 from hmlf.common.evaluation import evaluate_policy
-from hmlf.environments.identity_env import IdentityEnv, IdentityEnvBox, IdentityEnvMultiBinary, IdentityEnvMultiDiscrete
 from hmlf.common.noise import NormalActionNoise
+from hmlf.environments.identity_env import IdentityEnv, IdentityEnvBox, IdentityEnvMultiBinary, IdentityEnvMultiDiscrete
 from hmlf.environments.vec_env import DummyVecEnv
 
 DIM = 4
