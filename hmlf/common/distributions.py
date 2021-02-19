@@ -4,10 +4,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch as th
-import numpy as np
 from hmlf import spaces
 from torch import nn
-from torch.distributions import Bernoulli, Categorical, Normal, OneHotCategorical
+from torch.distributions import Bernoulli, Categorical, Normal
 
 from hmlf.common.preprocessing import get_action_dim
 from hmlf.spaces import SimpleHybrid
@@ -331,13 +330,12 @@ class TupleDistribution(Distribution):
 
     def proba_distribution(self, action_logits: th.Tensor, log_std: th.Tensor) -> "CategoricalDistribution":
 
-
         action_std = th.ones_like(action_logits[:, self.params]) * log_std.exp()
         # print(action_logits, self.actions)
         self.action_dist = Categorical(logits=action_logits)
         # print("self.action_dist.sample()", self.action_dist.sample())
         self.action_param_dist = Normal(action_logits[:, self.params], action_std)
-        
+
         # print("\nself.action_param_dist.sample()", self.action_param_dist.sample())
         return self
 
@@ -345,7 +343,6 @@ class TupleDistribution(Distribution):
         # print("actions", actions)
         # print("\nself.actions", self.actions)
         log_prob_actions = self.action_dist.log_prob(actions[:, self.actions])
-
 
         log_prob_param = sum_independent_dims(self.action_param_dist.log_prob(actions[:, self.params]))
         # print("log_prob_param", log_prob_param)
@@ -377,7 +374,7 @@ class TupleDistribution(Distribution):
         actions = self.actions_from_params(action_logits)
         log_prob = self.log_prob(actions)
         return actions, log_prob
-    
+
 
 class HybridDistribution(Distribution):
     """
@@ -443,6 +440,7 @@ class HybridDistribution(Distribution):
         actions = self.actions_from_params(action_logits)
         log_prob = self.log_prob(actions)
         return actions, log_prob
+
 
 class MultiCategoricalDistribution(Distribution):
     """
@@ -816,11 +814,11 @@ def make_proba_distribution(
         return MultiCategoricalDistribution(action_space.nvec, **dist_kwargs)
     elif isinstance(action_space, spaces.MultiBinary):
         return BernoulliDistribution(action_space.n, **dist_kwargs)
-    # elif isinstance(action_space, spaces.Tuple):                
-    #     action_param_dim = sum([np.prod(sub_space.shape) for sub_space in action_space[1:]]) 
+    # elif isinstance(action_space, spaces.Tuple):
+    #     action_param_dim = sum([np.prod(sub_space.shape) for sub_space in action_space[1:]])
     #     return TupleDistribution(action_space[0].n, action_param_dim)
-    elif isinstance(action_space, SimpleHybrid):                
-        action_param_dim = sum([np.prod(sub_space.shape) for sub_space in action_space[1:]]) 
+    elif isinstance(action_space, SimpleHybrid):
+        # action_param_dim = sum([np.prod(sub_space.shape) for sub_space in action_space[1:]])
         return HybridDistribution(action_space)
     else:
         raise NotImplementedError(

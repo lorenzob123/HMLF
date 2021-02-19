@@ -105,7 +105,6 @@ class BaseAlgorithm(ABC):
         else:
             self.policy_class = policy
 
-
         self.device = get_device(device)
         if verbose > 0:
             print(f"Using {self.device} device")

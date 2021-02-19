@@ -92,7 +92,7 @@ class PDQN(OffPolicyAlgorithm):
         super(PDQN, self).__init__(
             policy,
             env,
-            1, #learning_rate. We set it up ourselves, because we have two networks.
+            1,  # learning_rate. We set it up ourselves, because we have two networks.
             buffer_size,
             learning_starts,
             batch_size,
@@ -147,7 +147,8 @@ class PDQN(OffPolicyAlgorithm):
             self.device,
             optimize_memory_usage=self.optimize_memory_usage,
         )
-        self.policy = self.policy_class( # PDQN
+        # PDQNPolicy or MP-DQNPolicy
+        self.policy = self.policy_class(
             self.observation_space,
             self.action_space,
             self.lr_schedule_q,
@@ -160,7 +161,6 @@ class PDQN(OffPolicyAlgorithm):
         self.exploration_schedule = get_linear_fn(
             self.exploration_initial_eps, self.exploration_final_eps, self.exploration_fraction
         )
-
 
     def _create_aliases(self) -> None:
         self.q_net = self.policy.q_net
@@ -188,7 +188,6 @@ class PDQN(OffPolicyAlgorithm):
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)
 
-            #import ipdb; ipdb.set_trace()
             with th.no_grad():
                 # Compute the next Q-values using the target network
                 next_q_values = self.policy.forward_target(replay_data.next_observations)
@@ -344,7 +343,6 @@ class PDQN(OffPolicyAlgorithm):
         # Override from base class, to implement two learning_rates
         self.lr_schedule_q = get_schedule_fn(self.learning_rate_q)
         self.lr_schedule_parameter = get_schedule_fn(self.learning_rate_parameter)
-
 
     def _update_learning_rate(self, optimizer_q: th.optim.Optimizer, optimizer_parameter: th.optim.Optimizer) -> None:
         """

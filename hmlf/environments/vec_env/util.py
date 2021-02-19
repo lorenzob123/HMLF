@@ -9,6 +9,7 @@ import numpy as np
 from hmlf.environments.vec_env.base_vec_env import VecEnvObs
 from hmlf import spaces
 
+
 def copy_obs_dict(obs: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
     """
     Deep-copy a dict of numpy arrays.

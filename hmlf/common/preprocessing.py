@@ -4,7 +4,6 @@ from typing import Tuple
 import numpy as np
 import torch as th
 from hmlf import spaces
-from hmlf.spaces import SimpleHybrid, OneHotHybrid
 
 from torch.nn import functional as F
 
@@ -162,7 +161,7 @@ def get_action_dim(action_space: spaces.Space) -> int:
         all_param_box = True
         for sub_space in action_space[1:]:
             all_param_box = all_param_box and isinstance(sub_space, spaces.Box)
-        # Check if the actions spaces is spaces.Tuple(spaces.Discrete, spaces.Box, ..., spaces.Box)    
+        # Check if the actions spaces is spaces.Tuple(spaces.Discrete, spaces.Box, ..., spaces.Box)
         if isinstance(action_space[0], spaces.Discrete) and all_param_box:
             # We parametrize the action space as hot one encoding
             dim = action_space.get_dimension()

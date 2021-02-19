@@ -15,27 +15,30 @@ class DummyEnv(gym.Env):
         # The first will be a a discrete space with n = 2
         # The second one will be the parameters for skill1
         # The third will be the parameters for skill2
-        self.action_space = spaces.Tuple((spaces.Discrete(2),
-                                            spaces.Box(low=-1, high=1, shape=(4,), dtype=np.float32),
-                                            spaces.Box(low=-1, high=1, shape=(4,), dtype=np.float32)))
+        self.action_space = spaces.Tuple(
+            (
+                spaces.Discrete(2),
+                spaces.Box(low=-1, high=1, shape=(4,), dtype=np.float32),
+                spaces.Box(low=-1, high=1, shape=(4,), dtype=np.float32),
+            )
+        )
         # self.action_space = spaces.Box(low=-1, high=1, shape=(1, ))
         # Example for using image as input:
-        self.observation_space = spaces.Box(low=0, high=255,
-                                            shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=0, high=255, shape=(2,), dtype=np.float32)
 
     def step(self, action):
         observation = np.random.random(size=2).astype(np.float32)
         reward = np.random.rand()
-        done = False if reward < .9 else True
-        
+        done = False if reward < 0.9 else True
+
         return observation, reward, done, {}
 
     def reset(self):
         observation = np.random.random(size=2)
         return observation.astype(np.float32)  # reward, done, info can't be included
 
-    def render(self, mode='human'):
+    def render(self, mode="human"):
         pass
 
-    def close (self):
+    def close(self):
         pass

@@ -183,7 +183,7 @@ class ReplayBuffer(BaseBuffer):
             self.next_observations = None
         else:
             self.next_observations = np.zeros((self.buffer_size, self.n_envs) + self.obs_shape, dtype=observation_space.dtype)
-        #TODO dtype actions should be action_space.dtype unless it is a a Tuple
+        # TODO dtype actions should be action_space.dtype unless it is a a Tuple
         self.actions = np.zeros((self.buffer_size, self.n_envs, self.action_dim), dtype=np.float32)
         self.rewards = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
         self.dones = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)

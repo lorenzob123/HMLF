@@ -13,7 +13,6 @@ from hmlf.common.policies import ActorCriticPolicy
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import safe_mean
 from hmlf.environments.vec_env import VecEnv
-from hmlf.common.hybrid_utils import onehot_hybrid_2_tuple_hybrid
 
 
 class OnPolicyAlgorithm(BaseAlgorithm):
@@ -119,7 +118,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self.action_space,
             self.lr_schedule,
             use_sde=self.use_sde,
-            **self.policy_kwargs  # pytype:disable=not-instantiable
+            **self.policy_kwargs,  # pytype:disable=not-instantiable
         )
         self.policy = self.policy.to(self.device)
 

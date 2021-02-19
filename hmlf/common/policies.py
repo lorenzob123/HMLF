@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 from functools import partial
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 from torch import nn
@@ -20,7 +19,7 @@ from hmlf.common.distributions import (
     StateDependentNoiseDistribution,
     TupleDistribution,
     HybridDistribution,
-    make_proba_distribution
+    make_proba_distribution,
 )
 from hmlf import spaces
 from hmlf.common.preprocessing import get_action_dim, is_image_space, preprocess_obs
@@ -29,7 +28,6 @@ from hmlf.common.type_aliases import Schedule
 from hmlf.common.utils import get_device, is_vectorized_observation
 from hmlf.environments.vec_env import VecTransposeImage
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
-from hmlf.common.hybrid_utils import onehot_hybrid_2_tuple_hybrid
 
 
 class BaseModel(nn.Module, ABC):
@@ -520,11 +518,11 @@ class ActorCriticPolicy(BasePolicy):
         elif isinstance(self.action_dist, BernoulliDistribution):
             self.action_net = self.action_dist.proba_distribution_net(latent_dim=latent_dim_pi)
         elif isinstance(self.action_dist, TupleDistribution):
-            self.action_net, self.log_std  = self.action_dist.proba_distribution_net(
+            self.action_net, self.log_std = self.action_dist.proba_distribution_net(
                 latent_dim=latent_dim_pi, log_std_init=self.log_std_init
             )
         elif isinstance(self.action_dist, HybridDistribution):
-            self.action_net, self.log_std  = self.action_dist.proba_distribution_net(
+            self.action_net, self.log_std = self.action_dist.proba_distribution_net(
                 latent_dim=latent_dim_pi, log_std_init=self.log_std_init
             )
         else:
@@ -814,4 +812,3 @@ def create_sde_features_extractor(
     latent_sde_dim = sde_net_arch[-1] if len(sde_net_arch) > 0 else features_dim
     sde_features_extractor = nn.Sequential(*latent_sde_net)
     return sde_features_extractor, latent_sde_dim
-    

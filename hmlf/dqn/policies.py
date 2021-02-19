@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, Type
 
-import gym
 import torch as th
 from torch import nn
 

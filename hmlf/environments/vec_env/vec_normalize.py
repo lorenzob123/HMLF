@@ -2,7 +2,6 @@ import pickle
 from copy import deepcopy
 from typing import Any, Dict, Union
 
-import gym
 import numpy as np
 
 from hmlf import spaces
