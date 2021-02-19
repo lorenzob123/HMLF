@@ -111,7 +111,7 @@ def test_save_load(tmp_path, model_class, use_sde, online_sampling):
         learning_starts=100,
         n_episodes_rollout=-1,
         max_episode_length=n_bits,
-        **kwargs
+        **kwargs,
     )
 
     model.learn(total_timesteps=300)

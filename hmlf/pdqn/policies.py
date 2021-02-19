@@ -127,8 +127,9 @@ class PDQNPolicy(BasePolicy):
         # Setup optimizer with initial learning rate
         print(self.optimizer_kwargs)
         self.optimizer_q_net = self.optimizer_class(self.q_net.parameters(), lr=lr_schedule_q(1), **self.optimizer_kwargs)
-        self.optimizer_parameter_net = self.optimizer_class(self.parameter_net.parameters(),
-                                                            lr=lr_schedule_parameter(1), **self.optimizer_kwargs)
+        self.optimizer_parameter_net = self.optimizer_class(
+            self.parameter_net.parameters(), lr=lr_schedule_parameter(1), **self.optimizer_kwargs
+        )
 
     def _make_q_net(self) -> QNetwork:
         # Make sure we always have separate networks for features extractors etc
@@ -194,10 +195,7 @@ class PDQNPolicy(BasePolicy):
         return data
 
     def _update_features_extractor(
-        self,
-        net_kwargs: Dict[str, Any],
-        observation_space: Space,
-        features_extractor: Optional[BaseFeaturesExtractor] = None
+        self, net_kwargs: Dict[str, Any], observation_space: Space, features_extractor: Optional[BaseFeaturesExtractor] = None
     ) -> Dict[str, Any]:
         """
         Update the network keyword arguments and create a new features extractor object if needed.

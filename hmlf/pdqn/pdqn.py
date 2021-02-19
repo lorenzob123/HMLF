@@ -153,7 +153,7 @@ class PDQN(OffPolicyAlgorithm):
             self.action_space,
             self.lr_schedule_q,
             self.lr_schedule_parameter,
-            **self.policy_kwargs  # pytype:disable=not-instantiable
+            **self.policy_kwargs,  # pytype:disable=not-instantiable
         )
         self.policy = self.policy.to(self.device)
         # Additional P-DQN _setup_model

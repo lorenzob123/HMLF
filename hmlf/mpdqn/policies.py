@@ -81,7 +81,7 @@ class MPDQNPolicy(PDQNPolicy):
             row_to = (i + 1) * batch_size  # End of current batch
             col_from = self.state_size + self.offsets[i]  # Beginning of current parameter slice
             col_to = self.state_size + self.offsets[i + 1]  # End of current parameter slice
-            observations[row_from : row_to, col_from : col_to] = action_parameters[:, self.offsets[i] : self.offsets[i + 1]]
+            observations[row_from:row_to, col_from:col_to] = action_parameters[:, self.offsets[i] : self.offsets[i + 1]]
 
         return observations
 
