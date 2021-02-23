@@ -86,7 +86,6 @@ class ObstacleCourse_v2(gym.Env):
         else:
             distance_next = 1
             height_next = 1
-        # print(np.array([self.position, distance_next, height_next]))
         return np.array([self.position, distance_next, height_next])
 
     def compute_reward_done(self):

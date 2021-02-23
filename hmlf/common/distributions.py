@@ -331,22 +331,14 @@ class TupleDistribution(Distribution):
     def proba_distribution(self, action_logits: th.Tensor, log_std: th.Tensor) -> "CategoricalDistribution":
 
         action_std = th.ones_like(action_logits[:, self.params]) * log_std.exp()
-        # print(action_logits, self.actions)
         self.action_dist = Categorical(logits=action_logits)
-        # print("self.action_dist.sample()", self.action_dist.sample())
         self.action_param_dist = Normal(action_logits[:, self.params], action_std)
 
-        # print("\nself.action_param_dist.sample()", self.action_param_dist.sample())
         return self
 
     def log_prob(self, actions: th.Tensor) -> th.Tensor:
-        # print("actions", actions)
-        # print("\nself.actions", self.actions)
         log_prob_actions = self.action_dist.log_prob(actions[:, self.actions])
-
         log_prob_param = sum_independent_dims(self.action_param_dist.log_prob(actions[:, self.params]))
-        # print("log_prob_param", log_prob_param)
-        # print("log_prob_actions", log_prob_actions)
 
         return log_prob_actions + log_prob_param
 
@@ -355,8 +347,6 @@ class TupleDistribution(Distribution):
         return self.action_dist.entropy() + sum_independent_dims(self.action_param_dist.entropy())
 
     def sample(self) -> th.Tensor:
-        # print(self.action_dist.sample(), self.action_param_dist.sample())
-
         return th.cat((self.action_dist.sample(), self.action_param_dist.sample()), dim=1)
 
     def mode(self) -> th.Tensor:
@@ -425,7 +415,6 @@ class HybridDistribution(Distribution):
     def sample(self) -> th.Tensor:
         params = self.param_dist.sample()
         action = self.action_dist.sample()
-        # print(action, params)
         return th.cat((action.view(-1, 1), params), dim=1)
 
     def mode(self) -> th.Tensor:
