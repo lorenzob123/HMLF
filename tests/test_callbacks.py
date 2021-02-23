@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from hmlf import A2C, DDPG, DQN, HER, PPO, SAC, TD3
+from hmlf.a2c import MlpPolicy as MlpPolicyA2C
 from hmlf.common.callbacks import (
     CallbackList,
     CheckpointCallback,
@@ -15,20 +16,35 @@ from hmlf.common.callbacks import (
     StopTrainingOnRewardThreshold,
 )
 from hmlf.common.env_util import make_vec_env
+from hmlf.ddpg import MlpPolicy as MlpPolicyDDPG
+from hmlf.dqn import MlpPolicy as MlpPolicyDQN
 from hmlf.environments.bit_flipping_env import BitFlippingEnv
 from hmlf.environments.vec_env import DummyVecEnv
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.sac import MlpPolicy as MlpPolicySAC
+from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 
-@pytest.mark.parametrize("model_class", [A2C, PPO, SAC, TD3, DQN, DDPG])
-def test_callbacks(tmp_path, model_class):
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (A2C, MlpPolicyA2C),
+        (PPO, MlpPolicyPPO),
+        (SAC, MlpPolicySAC),
+        (TD3, MlpPolicyTD3),
+        (DQN, MlpPolicyDQN),
+        (DDPG, MlpPolicyDDPG),
+    ],
+)
+def test_callbacks(tmp_path, model_class, policy_class):
     log_folder = tmp_path / "logs/callbacks/"
 
     # DQN only support discrete actions
     env_name = select_env(model_class)
     # Create RL model
     # Small network for fast test
-    model = model_class("MlpPolicy", env_name, policy_kwargs=dict(net_arch=[32]))
+    model = model_class(policy_class, env_name, policy_kwargs=dict(net_arch=[32]))
 
     checkpoint_callback = CheckpointCallback(save_freq=1000, save_path=log_folder)
 
@@ -80,7 +96,7 @@ def test_callbacks(tmp_path, model_class):
         max_episode_length = 200
         envs = make_vec_env(env_name, n_envs=n_envs, seed=0)
 
-        model = model_class("MlpPolicy", envs, policy_kwargs=dict(net_arch=[32]))
+        model = model_class(policy_class, envs, policy_kwargs=dict(net_arch=[32]))
 
         callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=max_episodes, verbose=1)
         callback = CallbackList([callback_max_episodes])
@@ -113,7 +129,7 @@ def test_eval_success_logging(tmp_path):
         log_path=tmp_path,
         warn=False,
     )
-    model = HER("MlpPolicy", env, DQN, learning_starts=100, seed=0, max_episode_length=n_bits)
+    model = HER(MlpPolicyDQN, env, DQN, learning_starts=100, seed=0, max_episode_length=n_bits)
     model.learn(500, callback=eval_callback)
     assert len(eval_callback._is_success_buffer) > 0
     # More than 50% success rate

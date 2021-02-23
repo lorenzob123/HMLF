@@ -6,14 +6,28 @@ import pytest
 import torch as th
 
 from hmlf import A2C, DQN, PPO, SAC, TD3, spaces
+from hmlf.a2c import CnnPolicy as CnnPolicyA2C
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.utils import zip_strict
+from hmlf.dqn import CnnPolicy as CnnPolicyDQN
 from hmlf.environments.identity_env import FakeImageEnv
 from hmlf.environments.vec_env import VecTransposeImage, is_vecenv_wrapped
+from hmlf.ppo import CnnPolicy as CnnPolicyPPO
+from hmlf.sac import CnnPolicy as CnnPolicySAC
+from hmlf.td3 import CnnPolicy as CnnPolicyTD3
 
 
-@pytest.mark.parametrize("model_class", [A2C, PPO, SAC, TD3, DQN])
-def test_cnn(tmp_path, model_class):
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (A2C, CnnPolicyA2C),
+        (PPO, CnnPolicyPPO),
+        (SAC, CnnPolicySAC),
+        (TD3, CnnPolicyTD3),
+        (DQN, CnnPolicyDQN),
+    ],
+)
+def test_cnn(tmp_path, model_class, policy_class):
     SAVE_NAME = "cnn_model.zip"
     # Fake grayscale with frameskip
     # Atari after preprocessing: 84x84x1, here we are using lower resolution
@@ -25,7 +39,7 @@ def test_cnn(tmp_path, model_class):
         # Avoid memory error when using replay buffer
         # Reduce the size of the features
         kwargs = dict(buffer_size=250, policy_kwargs=dict(features_extractor_kwargs=dict(features_dim=32)))
-    model = model_class("CnnPolicy", env, **kwargs).learn(250)
+    model = model_class(policy_class, env, **kwargs).learn(250)
 
     # FakeImageEnv is channel last by default and should be wrapped
     assert is_vecenv_wrapped(model.get_env(), VecTransposeImage)
@@ -74,9 +88,16 @@ def check_td3_feature_extractor_differ(model):
             assert not th.allclose(actor_param, critic_param), key
 
 
-@pytest.mark.parametrize("model_class", [SAC, TD3, DQN])
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (SAC, CnnPolicySAC),
+        (TD3, CnnPolicyTD3),
+        (DQN, CnnPolicyDQN),
+    ],
+)
 @pytest.mark.parametrize("share_features_extractor", [True, False])
-def test_features_extractor_target_net(model_class, share_features_extractor):
+def test_features_extractor_target_net(model_class, policy_class, share_features_extractor):
     if model_class == DQN and share_features_extractor:
         pytest.skip()
 
@@ -87,7 +108,7 @@ def test_features_extractor_target_net(model_class, share_features_extractor):
     if model_class != DQN:
         kwargs["policy_kwargs"]["share_features_extractor"] = share_features_extractor
 
-    model = model_class("CnnPolicy", env, seed=0, **kwargs)
+    model = model_class(policy_class, env, seed=0, **kwargs)
 
     patch_dqn_names_(model)
 
@@ -126,7 +147,7 @@ def test_features_extractor_target_net(model_class, share_features_extractor):
 
     # Re-initialize and collect some random data (without doing gradient steps,
     # since 10 < learning_starts = 100)
-    model = model_class("CnnPolicy", env, seed=0, **kwargs).learn(10)
+    model = model_class(policy_class, env, seed=0, **kwargs).learn(10)
 
     patch_dqn_names_(model)
 
@@ -191,7 +212,7 @@ def test_channel_first_env(tmp_path):
     # it will raise an error of negative dimension sizes while creating convolutions
     env = FakeImageEnv(screen_height=40, screen_width=40, n_channels=1, discrete=True, channel_first=True)
 
-    model = A2C("CnnPolicy", env, n_steps=100).learn(250)
+    model = A2C(CnnPolicyA2C, env, n_steps=100).learn(250)
 
     assert not is_vecenv_wrapped(model.get_env(), VecTransposeImage)
 

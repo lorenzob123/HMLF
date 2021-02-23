@@ -7,6 +7,7 @@ import pytest
 import torch as th
 
 from hmlf import A2C, PPO
+from hmlf.a2c import MlpPolicy as MlpPolicyA2C
 from hmlf.common.atari_wrappers import ClipRewardEnv
 from hmlf.common.env_util import is_wrapped, make_atari_env, make_vec_env, unwrap_wrapper
 from hmlf.common.evaluation import evaluate_policy
@@ -14,6 +15,7 @@ from hmlf.common.monitor import Monitor
 from hmlf.common.noise import ActionNoise, OrnsteinUhlenbeckActionNoise, VectorizedActionNoise
 from hmlf.common.utils import polyak_update, zip_strict
 from hmlf.environments.vec_env import DummyVecEnv, SubprocVecEnv
+from hmlf.ppo import MlpPolicy as MlpPolicyPPO
 
 
 @pytest.mark.parametrize("env_id", ["CartPole-v1", lambda: gym.make("CartPole-v1")])
@@ -91,14 +93,14 @@ def test_vec_env_monitor_kwargs():
 
 def test_env_auto_monitor_wrap():
     env = gym.make("Pendulum-v0")
-    model = A2C("MlpPolicy", env)
+    model = A2C(MlpPolicyA2C, env)
     assert model.env.env_is_wrapped(Monitor)[0] is True
 
     env = Monitor(env)
-    model = A2C("MlpPolicy", env)
+    model = A2C(MlpPolicyA2C, env)
     assert model.env.env_is_wrapped(Monitor)[0] is True
 
-    model = A2C("MlpPolicy", "Pendulum-v0")
+    model = A2C(MlpPolicyA2C, "Pendulum-v0")
     assert model.env.env_is_wrapped(Monitor)[0] is True
 
 
@@ -130,7 +132,7 @@ def test_custom_vec_env(tmp_path):
 
 
 def test_evaluate_policy():
-    model = A2C("MlpPolicy", "Pendulum-v0", seed=0)
+    model = A2C(MlpPolicyA2C, "Pendulum-v0", seed=0)
     n_steps_per_episode, n_eval_episodes = 200, 2
     model.n_callback_calls = 0
 
@@ -198,7 +200,7 @@ def test_evaluate_policy_monitors(vec_env_class):
     # Also test VecEnvs
     n_eval_episodes = 2
     env_id = "CartPole-v0"
-    model = A2C("MlpPolicy", env_id, seed=0)
+    model = A2C(MlpPolicyA2C, env_id, seed=0)
 
     def make_eval_env(with_monitor, wrapper_class=gym.Wrapper):
         # Make eval environment with or without monitor in root,
@@ -346,8 +348,8 @@ def test_ppo_warnings():
 
     # Only 1 step: advantage normalization will return NaN
     with pytest.raises(AssertionError):
-        PPO("MlpPolicy", "Pendulum-v0", n_steps=1)
+        PPO(MlpPolicyPPO, "Pendulum-v0", n_steps=1)
 
     # Truncated mini-batch
     with pytest.warns(UserWarning):
-        PPO("MlpPolicy", "Pendulum-v0", n_steps=6, batch_size=8)
+        PPO(MlpPolicyPPO, "Pendulum-v0", n_steps=6, batch_size=8)
