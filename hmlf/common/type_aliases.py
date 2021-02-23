@@ -6,7 +6,8 @@ import gym
 import numpy as np
 import torch as th
 
-from hmlf.common import callbacks, vec_env
+from hmlf.common import callbacks
+from hmlf.environments import vec_env
 
 GymEnv = Union[gym.Env, vec_env.VecEnv]
 GymObs = Union[Tuple, Dict[str, Any], np.ndarray, int]

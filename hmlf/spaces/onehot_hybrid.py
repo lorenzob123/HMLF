@@ -2,7 +2,8 @@ from typing import List
 
 import numpy as np
 
-from hmlf.spaces import Box, Discrete, SimpleHybrid, Space, Tuple
+from hmlf.spaces.gym import Box, Discrete, Space, Tuple
+from hmlf.spaces.simple_hybrid import SimpleHybrid
 
 
 class OneHotHybrid(SimpleHybrid):
