@@ -157,7 +157,6 @@ class SDDPG(OffPolicyAlgorithm):
 
             # Get current Q-values estimates for each critic network
             current_q_values = self.critic(replay_data.observations, replay_data.actions)
-
             # Compute critic loss
             critic_loss = sum([F.mse_loss(current_q, target_q_values) for current_q in current_q_values])
             critic_losses.append(critic_loss.item())
@@ -248,9 +247,8 @@ class SDDPG(OffPolicyAlgorithm):
             # Note: when using continuous actions,
             # we assume that the policy uses tanh to scale the action
             # We use non-deterministic action in the case of SAC, for TD3, it does not matter
-            unscaled_action, _ = self.predict(self._last_obs, deterministic=False)
-            buffer_action = unscaled_action
-            action = self.action_space.build_action(self._last_obs[:, 0], unscaled_action)
+            action, _ = self.predict(self._last_obs, deterministic=False)
+            buffer_action = np.hstack(action[0])
 
         # Rescale the action from [low, high] to [-1, 1]
 

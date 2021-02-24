@@ -40,8 +40,6 @@ class SequenceWrapper(gym.Wrapper):
         return np.append(self.current_action, obs)
 
     def step(self, action):
-        print (action)
-        print((self.current_action, *action))
         obs, r, done, info = self.env.step((self.current_action, *action))
         if self.queque:
             self.current_action = self.queque.pop(0)

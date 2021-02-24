@@ -1,11 +1,11 @@
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union, Tuple
 
 import gym
 
 import torch as th
 from torch import nn
 
-from hmlf.common.policies import BasePolicy, ContinuousCritic, register_policy
+from hmlf.common.policies import BasePolicy, ContinuousCritic, register_policy, BaseModel
 from hmlf.common.preprocessing import get_action_dim
 from hmlf.common.torch_layers import (
     BaseFeaturesExtractor,
@@ -16,6 +16,7 @@ from hmlf.common.torch_layers import (
 )
 from hmlf.common.type_aliases import Schedule
 from hmlf.spaces.simple_hybrid import SimpleHybrid
+import numpy as np
 
 
 class Actor(BasePolicy):
@@ -94,6 +95,67 @@ class Actor(BasePolicy):
 
     def _predict(self, observation: th.Tensor, deterministic: bool = False) -> th.Tensor:
         return self.forward(observation, deterministic=deterministic)
+
+
+class MetaCritic(BaseModel):
+
+    def __init__(
+        self,
+        critic_kwargs
+    ):
+
+
+        super().__init__(
+            critic_kwargs["observation_space"],
+            critic_kwargs["action_space"],
+            features_extractor=critic_kwargs["features_extractor"],
+            normalize_images=critic_kwargs["normalize_images"],
+        )
+        critic_list = []
+        #action_dim = self.action_space._get_continous_dims()
+        critic_kwargs["observation_space"] = gym.spaces.Box(critic_kwargs["observation_space"].low[1:],
+                                                            critic_kwargs["observation_space"].high[1:])
+        critic_kwargs["features_dim"] -= 1
+
+        for param_space  in self.action_space.spaces:
+            critic_kwargs["action_space"] = param_space
+            critic_list.append(ContinuousCritic(**critic_kwargs).to(self.device))
+        self.critic_list = nn.ModuleList(critic_list)
+
+
+
+    def forward(self, obs: th.Tensor, actions: th.Tensor) -> Tuple[th.Tensor, ...]:
+        # Learn the features extractor using the policy loss only
+        # when the features_extractor is shared with the actor
+
+        # assert deterministic, 'The TD3 actor only outputs deterministic actions'
+        # TODO: implement a way to use extract_features
+        # features = self.extract_features(obs)
+        
+        # TODO: this is pseudo code and it will not work because of the batched env
+        dims_continous = self.action_space._get_continous_dims()
+        indices = np.hstack((np.array([0]), np.cumsum(dims_continous)))
+        q = []
+
+        if len(obs.shape)==1:
+            obs = obs.view(1,-1)
+        for i in range(obs.shape[0]):
+            discrete_i = int(obs[i,0].item())
+            param_slice = slice (indices[discrete_i], indices[discrete_i+1])
+            # qvalue_input = th.cat((obs[[i], 1:], actions[[i], param_slice]), dim=1)
+            q.append(self.critic_list[discrete_i](obs[[i], 1:], actions[[i], param_slice])[0])
+        return (th.cat(q),)
+
+
+    def q1_forward(self, obs: th.Tensor, actions: th.Tensor) -> th.Tensor:
+        """
+        Only predict the Q-value using the first network.
+        This allows to reduce computation when all the estimates are not needed
+        (e.g. when updating the policy in TD3).
+        """
+        with th.no_grad():
+            features = self.extract_features(obs)
+        return self.forward(obs, actions)[0]
 
 
 class SDDPGPolicy(BasePolicy):
@@ -229,7 +291,7 @@ class SDDPGPolicy(BasePolicy):
     def make_critic(self, features_extractor: Optional[BaseFeaturesExtractor] = None) -> ContinuousCritic:
 
         critic_kwargs = self._update_features_extractor(self.critic_kwargs, features_extractor)
-        return ContinuousCritic(**critic_kwargs).to(self.device)
+        return MetaCritic(critic_kwargs).to(self.device)
 
     def forward(self, observation: th.Tensor, deterministic: bool = False) -> th.Tensor:
         return self._predict(observation, deterministic=deterministic)

@@ -10,7 +10,7 @@ import numpy as np
 import torch as th
 from torch import nn
 
-from hmlf.spaces import SimpleHybrid
+from hmlf.spaces import SimpleHybrid, ContinuosParameters
 from hmlf.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
@@ -303,6 +303,8 @@ class BasePolicy(BaseModel):
                 actions = np.clip(actions, self.action_space.low, self.action_space.high)
         if isinstance(self.action_space, SimpleHybrid):
             actions = self.action_space.format_action(actions)
+        if isinstance(self.action_space, ContinuosParameters):
+            actions = self.action_space.build_action(observation[:, 0], actions)
 
         if not vectorized_env:
             if state is not None:

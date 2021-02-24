@@ -9,7 +9,7 @@ class ObstacleCourse_v2(gym.Env):
     def __init__(self):
 
 
-        self.max_move = np.float32(.2)
+        self.max_move = np.float32(.4)
         self.max_jump = 0.05
         self.n_obstacles = 3
         self.goal_position = .95

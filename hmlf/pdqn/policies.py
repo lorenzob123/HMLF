@@ -122,7 +122,6 @@ class PDQNPolicy(BasePolicy):
 
         #TODO: Separater arguments for parameter net?
         # Setup optimizer with initial learning rate
-        print(self.optimizer_kwargs)
         self.optimizer_q_net = self.optimizer_class(self.q_net.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
         self.optimizer_parameter_net = self.optimizer_class(self.parameter_net.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
 
