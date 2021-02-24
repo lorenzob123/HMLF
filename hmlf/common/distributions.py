@@ -300,7 +300,7 @@ class CategoricalDistribution(Distribution):
 
 class HybridDistribution(Distribution):
     """
-    Tuple distribution for hybrid actions.
+    Hybrid distribution for hybrid actions.
 
     :param action_space: the action  space of the environment being used
     """
