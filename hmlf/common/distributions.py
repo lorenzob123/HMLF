@@ -302,7 +302,7 @@ class HybridDistribution(Distribution):
     """
     Tuple distribution for hybrid actions.
 
-    :param action_dim: Number of discrete actions
+    :param action_space: the action  space of the environment being used
     """
 
     def __init__(self, action_space):
