@@ -306,12 +306,14 @@ class TupleDistribution(Distribution):
     """
 
     def __init__(self, action_dim: int, action_param_dim: int):
-        super(TupleDistribution).__init__()
+        super(TupleDistribution, self).__init__()
         self.distribution = None
         self.action_dim = action_dim
         self.action_param_dim = action_param_dim
         self.params = slice(self.action_dim, self.action_dim + self.action_param_dim)
         self.actions = slice(self.action_dim)
+        self.action_dist = None
+        self.action_param_dist = None
 
     def proba_distribution_net(self, latent_dim: int, log_std_init: float = 0.0) -> nn.Module:
         """
@@ -328,7 +330,7 @@ class TupleDistribution(Distribution):
 
         return action_logits_and_mean, log_std
 
-    def proba_distribution(self, action_logits: th.Tensor, log_std: th.Tensor) -> "CategoricalDistribution":
+    def proba_distribution(self, action_logits: th.Tensor, log_std: th.Tensor) -> "TupleDistribution":
 
         action_std = th.ones_like(action_logits[:, self.params]) * log_std.exp()
         self.action_dist = Categorical(logits=action_logits)
@@ -357,7 +359,8 @@ class TupleDistribution(Distribution):
 
     def actions_from_params(self, action_logits: th.Tensor, deterministic: bool = False) -> th.Tensor:
         # Update the proba distribution
-        self.proba_distribution(action_logits)
+        # TODO: Fix error
+        self.proba_distribution(action_logits)  # pytype: disable=missing-parameter
         return self.get_actions(deterministic=deterministic)
 
     def log_prob_from_params(self, action_logits: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
@@ -374,13 +377,15 @@ class HybridDistribution(Distribution):
     """
 
     def __init__(self, action_space):
-        super(HybridDistribution).__init__()
+        super(HybridDistribution, self).__init__()
         self.distribution = None
         self.action_space = action_space
         self.discrete_dim = action_space.discrete_dim
         self.continuous_dim = action_space.continuous_dim
         self.param_idx = slice(self.discrete_dim, self.discrete_dim + self.continuous_dim)
         self.action_idx = slice(self.discrete_dim)
+        self.action_dist = None
+        self.param_dist = None
 
     def proba_distribution_net(self, latent_dim: int, log_std_init: float = 0.0) -> nn.Module:
         """
@@ -422,7 +427,8 @@ class HybridDistribution(Distribution):
         return th.cat((action.view(-1, 1), self.param_dist.mean), dim=1)
 
     def actions_from_params(self, action_logits: th.Tensor, deterministic: bool = False) -> th.Tensor:
-        self.proba_distribution(action_logits)
+        # TODO: Fix error
+        self.proba_distribution(action_logits)  # pytype: disable=missing-parameter
         return self.get_actions(deterministic=deterministic)
 
     def log_prob_from_params(self, action_logits: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:

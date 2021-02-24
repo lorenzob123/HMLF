@@ -41,12 +41,12 @@ class SimpleHybrid(Tuple):
         dims_continuous = self._get_continuous_dims()
         return 1 + np.sum(dims_continuous)
 
-    def format_action(self, actions: np.ndarray) -> typing.Tuple:
+    def format_action(self, actions: np.ndarray) -> List[typing.Tuple]:
         discrete, parameters = actions[:, 0], actions[:, 1:]
 
         return self.build_action(discrete, parameters)
 
-    def build_action(self, discrete: np.array, parameters: np.ndarray) -> List[typing.Tuple]:
+    def build_action(self, discrete: np.ndarray, parameters: np.ndarray) -> List[typing.Tuple]:
         # We clip the parameters
         parameters = np.clip(parameters, self.continuous_low, self.continuous_high)
 
@@ -57,7 +57,7 @@ class SimpleHybrid(Tuple):
         # We format the full action for each environment
         sample = []
         for i in range(discrete.shape[0]):
-            sample.append([discrete[i]] + np.split(parameters[i], split_indizes))
+            sample.append(tuple([discrete[i]] + np.split(parameters[i], split_indizes)))
 
         return sample
 

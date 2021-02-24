@@ -2,7 +2,7 @@ import gym
 import numpy as np
 from gym import spaces
 
-from hmlf.spaces import ContinuousParameters
+from hmlf.spaces import Tuple
 
 
 class DummySequence(gym.Env):
@@ -17,7 +17,7 @@ class DummySequence(gym.Env):
         # The first will be a a discrete space with n = 2
         # The second one will be the parameters for skill1
         # The third will be the parameters for skill2
-        self.action_space = ContinuousParameters(
+        self.action_space = Tuple(
             (
                 spaces.Box(low=-1, high=11, shape=(10,), dtype=np.float32),
                 spaces.Box(low=-1, high=1, shape=(4,), dtype=np.float32),

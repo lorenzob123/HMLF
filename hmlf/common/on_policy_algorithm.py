@@ -113,12 +113,12 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             gae_lambda=self.gae_lambda,
             n_envs=self.n_envs,
         )
-        self.policy = self.policy_class(
+        self.policy = self.policy_class(  # pytype:disable=not-instantiable
             self.observation_space,
             self.action_space,
             self.lr_schedule,
             use_sde=self.use_sde,
-            **self.policy_kwargs,  # pytype:disable=not-instantiable
+            **self.policy_kwargs,
         )
         self.policy = self.policy.to(self.device)
 

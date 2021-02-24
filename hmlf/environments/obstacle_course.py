@@ -16,7 +16,7 @@ class ObstacleCourse(gym.Env):
         self.max_timesteps = 30
         self.goal_threshold = 0.05
         self.action_space = SimpleHybrid(
-            (Discrete(2), Box(-self.max_move, self.max_move, (1,)), Box(np.float32(0), np.float32(1), (1,)))
+            [Discrete(2), Box(-self.max_move, self.max_move, (1,)), Box(np.float32(0), np.float32(1), (1,))]
         )
         self.observation_space = Box(low=np.zeros(7, dtype=np.float32), high=np.ones(7, dtype=np.float32))
 

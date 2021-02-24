@@ -616,12 +616,11 @@ class BaseAlgorithm(ABC):
             if "env" in data:
                 env = data["env"]
 
-        # noinspection PyArgumentList
-        model = cls(
-            policy=data["policy_class"],
+        model = cls(  # pytype: disable=not-instantiable,wrong-keyword-args
+            policy=data["policy_class"],  # noinspection PyArgumentList
             env=env,
             device=device,
-            _init_setup_model=False,  # pytype: disable=not-instantiable,wrong-keyword-args
+            _init_setup_model=False,
         )
 
         # load parameters
