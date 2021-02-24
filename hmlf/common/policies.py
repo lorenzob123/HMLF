@@ -18,7 +18,6 @@ from hmlf.common.distributions import (
     HybridDistribution,
     MultiCategoricalDistribution,
     StateDependentNoiseDistribution,
-    TupleDistribution,
     make_proba_distribution,
 )
 from hmlf.common.preprocessing import get_action_dim, is_image_space, preprocess_obs
@@ -517,10 +516,6 @@ class ActorCriticPolicy(BasePolicy):
             self.action_net = self.action_dist.proba_distribution_net(latent_dim=latent_dim_pi)
         elif isinstance(self.action_dist, BernoulliDistribution):
             self.action_net = self.action_dist.proba_distribution_net(latent_dim=latent_dim_pi)
-        elif isinstance(self.action_dist, TupleDistribution):
-            self.action_net, self.log_std = self.action_dist.proba_distribution_net(
-                latent_dim=latent_dim_pi, log_std_init=self.log_std_init
-            )
         elif isinstance(self.action_dist, HybridDistribution):
             self.action_net, self.log_std = self.action_dist.proba_distribution_net(
                 latent_dim=latent_dim_pi, log_std_init=self.log_std_init
@@ -606,8 +601,6 @@ class ActorCriticPolicy(BasePolicy):
             return self.action_dist.proba_distribution(action_logits=mean_actions)
         elif isinstance(self.action_dist, StateDependentNoiseDistribution):
             return self.action_dist.proba_distribution(mean_actions, self.log_std, latent_sde)
-        elif isinstance(self.action_dist, TupleDistribution):
-            return self.action_dist.proba_distribution(mean_actions, self.log_std)
         elif isinstance(self.action_dist, HybridDistribution):
             return self.action_dist.proba_distribution(mean_actions, self.log_std)
         else:
