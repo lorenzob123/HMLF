@@ -61,7 +61,7 @@ class SDDPG(OffPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[SDDPGPolicy]],
+        policy: Type[SDDPGPolicy],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule] = 1e-3,
         buffer_size: int = int(1e6),
@@ -89,7 +89,6 @@ class SDDPG(OffPolicyAlgorithm):
         super(SDDPG, self).__init__(
             policy,
             env,
-            SDDPGPolicy,
             learning_rate,
             buffer_size,
             learning_starts,
@@ -110,7 +109,6 @@ class SDDPG(OffPolicyAlgorithm):
             optimize_memory_usage=optimize_memory_usage,
             supported_action_spaces=(gym.spaces.Box, gym.spaces.Tuple),
         )
-
 
         self.policy_delay = policy_delay
         self.target_noise_clip = target_noise_clip
@@ -216,8 +214,6 @@ class SDDPG(OffPolicyAlgorithm):
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
         state_dicts = ["policy", "actor.optimizer", "critic.optimizer"]
         return state_dicts, []
-
-
 
     def _sample_action(
         self, learning_starts: int, action_noise: Optional[ActionNoise] = None

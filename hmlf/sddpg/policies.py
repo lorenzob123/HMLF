@@ -1,22 +1,14 @@
-from typing import Any, Dict, List, Optional, Type, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import gym
-
+import numpy as np
 import torch as th
 from torch import nn
 
-from hmlf.common.policies import BasePolicy, ContinuousCritic, register_policy, BaseModel
-from hmlf.common.preprocessing import get_action_dim
-from hmlf.common.torch_layers import (
-    BaseFeaturesExtractor,
-    FlattenExtractor,
-    NatureCNN,
-    create_mlp,
-    get_actor_critic_arch,
-)
+from hmlf.common.policies import BaseModel, BasePolicy, ContinuousCritic
+from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
 from hmlf.spaces.simple_hybrid import SimpleHybrid
-import numpy as np
 
 
 class Actor(BasePolicy):
@@ -61,7 +53,7 @@ class Actor(BasePolicy):
         action_dim = self.action_space._get_continous_dims()
         actor_list = []
         for action_param_dim in action_dim:
-            actor_net = create_mlp(features_dim -1, action_param_dim, net_arch, activation_fn, squash_output=True)        
+            actor_net = create_mlp(features_dim - 1, action_param_dim, net_arch, activation_fn, squash_output=True)
             actor_list.append(nn.Sequential(*actor_net))
         self.mu_list = nn.ModuleList(actor_list)
 
@@ -82,13 +74,13 @@ class Actor(BasePolicy):
         # assert deterministic, 'The TD3 actor only outputs deterministic actions'
         # TODO: implement a way to use extract_features
         # features = self.extract_features(obs)
-        
+
         # TODO: this is pseudo code and it will not work because of the batched env
         actions = [th.zeros(obs.shape[0], dim).to(self.device) for dim in self.action_space._get_continous_dims()]
 
         for i in range(obs.shape[0]):
-            discrete_i = int(obs[i,0].item())
-            param_i = self.mu_list[discrete_i](obs[i,1:])
+            discrete_i = int(obs[i, 0].item())
+            param_i = self.mu_list[discrete_i](obs[i, 1:])
             actions[discrete_i][i, :] = param_i
 
         return th.cat(actions, dim=1)
@@ -98,12 +90,7 @@ class Actor(BasePolicy):
 
 
 class MetaCritic(BaseModel):
-
-    def __init__(
-        self,
-        critic_kwargs
-    ):
-
+    def __init__(self, critic_kwargs):
 
         super().__init__(
             critic_kwargs["observation_space"],
@@ -112,17 +99,16 @@ class MetaCritic(BaseModel):
             normalize_images=critic_kwargs["normalize_images"],
         )
         critic_list = []
-        #action_dim = self.action_space._get_continous_dims()
-        critic_kwargs["observation_space"] = gym.spaces.Box(critic_kwargs["observation_space"].low[1:],
-                                                            critic_kwargs["observation_space"].high[1:])
+        # action_dim = self.action_space._get_continous_dims()
+        critic_kwargs["observation_space"] = gym.spaces.Box(
+            critic_kwargs["observation_space"].low[1:], critic_kwargs["observation_space"].high[1:]
+        )
         critic_kwargs["features_dim"] -= 1
 
-        for param_space  in self.action_space.spaces:
+        for param_space in self.action_space.spaces:
             critic_kwargs["action_space"] = param_space
             critic_list.append(ContinuousCritic(**critic_kwargs).to(self.device))
         self.critic_list = nn.ModuleList(critic_list)
-
-
 
     def forward(self, obs: th.Tensor, actions: th.Tensor) -> Tuple[th.Tensor, ...]:
         # Learn the features extractor using the policy loss only
@@ -131,21 +117,20 @@ class MetaCritic(BaseModel):
         # assert deterministic, 'The TD3 actor only outputs deterministic actions'
         # TODO: implement a way to use extract_features
         # features = self.extract_features(obs)
-        
+
         # TODO: this is pseudo code and it will not work because of the batched env
         dims_continous = self.action_space._get_continous_dims()
         indices = np.hstack((np.array([0]), np.cumsum(dims_continous)))
         q = []
 
-        if len(obs.shape)==1:
-            obs = obs.view(1,-1)
+        if len(obs.shape) == 1:
+            obs = obs.view(1, -1)
         for i in range(obs.shape[0]):
-            discrete_i = int(obs[i,0].item())
-            param_slice = slice (indices[discrete_i], indices[discrete_i+1])
+            discrete_i = int(obs[i, 0].item())
+            param_slice = slice(indices[discrete_i], indices[discrete_i + 1])
             # qvalue_input = th.cat((obs[[i], 1:], actions[[i], param_slice]), dim=1)
             q.append(self.critic_list[discrete_i](obs[[i], 1:], actions[[i], param_slice])[0])
         return (th.cat(q),)
-
 
     def q1_forward(self, obs: th.Tensor, actions: th.Tensor) -> th.Tensor:
         """
@@ -153,8 +138,8 @@ class MetaCritic(BaseModel):
         This allows to reduce computation when all the estimates are not needed
         (e.g. when updating the policy in TD3).
         """
-        with th.no_grad():
-            features = self.extract_features(obs)
+        # with th.no_grad():
+        #     features = self.extract_features(obs)
         return self.forward(obs, actions)[0]
 
 
@@ -355,7 +340,3 @@ class CnnPolicy(SDDPGPolicy):
             n_critics,
             share_features_extractor,
         )
-
-
-register_policy("MlpPolicy", MlpPolicy)
-register_policy("CnnPolicy", CnnPolicy)
