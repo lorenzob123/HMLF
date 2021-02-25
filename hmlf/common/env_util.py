@@ -5,7 +5,7 @@ import gym
 
 from hmlf.common.atari_wrappers import AtariWrapper
 from hmlf.common.monitor import Monitor
-from hmlf.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv
+from hmlf.environments.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv
 
 
 def unwrap_wrapper(env: gym.Env, wrapper_class: Type[gym.Wrapper]) -> Optional[gym.Wrapper]:

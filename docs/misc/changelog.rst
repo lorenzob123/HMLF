@@ -79,7 +79,7 @@ New Features:
 ^^^^^^^^^^^^^
 - Allow custom actor/critic network architectures using ``net_arch=dict(qf=[400, 300], pi=[64, 64])`` for off-policy algorithms (SAC, TD3, DDPG)
 - Added Hindsight Experience Replay ``HER``. (@megan-klaiber)
-- ``VecNormalize`` now supports ``gym.spaces.Dict`` observation spaces
+- ``VecNormalize`` now supports ``spaces.Dict`` observation spaces
 - Support logging videos to Tensorboard (@SwamyDev)
 - Added ``share_features_extractor`` argument to ``SAC`` and ``TD3`` policies
 

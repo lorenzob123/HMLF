@@ -3,20 +3,25 @@ import pytest
 import torch as th
 
 from hmlf import A2C, DQN, PPO, SAC, TD3
+from hmlf.a2c import MlpPolicy as MlpPolicyA2C
 from hmlf.common.utils import get_device
-from hmlf.common.vec_env import DummyVecEnv
+from hmlf.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.environments.vec_env import DummyVecEnv
+from hmlf.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.sac import MlpPolicy as MlpPolicySAC
+from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 MODEL_LIST = [
-    PPO,
-    A2C,
-    TD3,
-    SAC,
-    DQN,
+    (A2C, MlpPolicyA2C),
+    (PPO, MlpPolicyPPO),
+    (SAC, MlpPolicySAC),
+    (TD3, MlpPolicyTD3),
+    (DQN, MlpPolicyDQN),
 ]
 
 
-@pytest.mark.parametrize("model_class", MODEL_LIST)
-def test_auto_wrap(model_class):
+@pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
+def test_auto_wrap(model_class, policy_class):
     # test auto wrapping of env into a VecEnv
 
     # Use different environment for DQN
@@ -26,14 +31,14 @@ def test_auto_wrap(model_class):
         env_name = "Pendulum-v0"
     env = gym.make(env_name)
     eval_env = gym.make(env_name)
-    model = model_class("MlpPolicy", env)
+    model = model_class(policy_class, env)
     model.learn(100, eval_env=eval_env)
 
 
-@pytest.mark.parametrize("model_class", MODEL_LIST)
+@pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
 @pytest.mark.parametrize("env_id", ["Pendulum-v0", "CartPole-v1"])
 @pytest.mark.parametrize("device", ["cpu", "cuda", "auto"])
-def test_predict(model_class, env_id, device):
+def test_predict(model_class, policy_class, env_id, device):
     if device == "cuda" and not th.cuda.is_available():
         pytest.skip("CUDA not available")
 
@@ -44,7 +49,7 @@ def test_predict(model_class, env_id, device):
         return
 
     # Test detection of different shapes by the predict method
-    model = model_class("MlpPolicy", env_id, device=device)
+    model = model_class(policy_class, env_id, device=device)
     # Check that the policy is on the right device
     assert get_device(device).type == model.policy.device.type
 

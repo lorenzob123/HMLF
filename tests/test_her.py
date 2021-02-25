@@ -9,16 +9,22 @@ import pytest
 import torch as th
 
 from hmlf import DDPG, DQN, HER, SAC, TD3
-from hmlf.common.bit_flipping_env import BitFlippingEnv
-from hmlf.common.vec_env import DummyVecEnv
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.ddpg import MlpPolicy as MlpPolicyDDPG
+from hmlf.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.environments.bit_flipping_env import BitFlippingEnv
+from hmlf.environments.vec_env import DummyVecEnv
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 from hmlf.her.goal_selection_strategy import GoalSelectionStrategy
 from hmlf.her.her import get_time_limit
+from hmlf.sac import MlpPolicy as MlpPolicySAC
+from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 
-@pytest.mark.parametrize("model_class", [SAC, TD3, DDPG, DQN])
+@pytest.mark.parametrize(
+    "model_class,policy_class", [(SAC, MlpPolicySAC), (TD3, MlpPolicyTD3), (DQN, MlpPolicyDQN), (DDPG, MlpPolicyDDPG)]
+)
 @pytest.mark.parametrize("online_sampling", [True, False])
-def test_her(model_class, online_sampling):
+def test_her(model_class, policy_class, online_sampling):
     """
     Test Hindsight Experience Replay.
     """
@@ -26,7 +32,7 @@ def test_her(model_class, online_sampling):
     env = BitFlippingEnv(n_bits=n_bits, continuous=not (model_class == DQN))
 
     model = HER(
-        "MlpPolicy",
+        policy_class,
         env,
         model_class,
         goal_selection_strategy="future",
@@ -61,7 +67,7 @@ def test_goal_selection_strategy(goal_selection_strategy, online_sampling):
     env = BitFlippingEnv(continuous=True)
 
     model = HER(
-        "MlpPolicy",
+        MlpPolicySAC,
         env,
         SAC,
         goal_selection_strategy=goal_selection_strategy,
@@ -76,10 +82,12 @@ def test_goal_selection_strategy(goal_selection_strategy, online_sampling):
     model.learn(total_timesteps=300)
 
 
-@pytest.mark.parametrize("model_class", [SAC, TD3, DDPG, DQN])
+@pytest.mark.parametrize(
+    "model_class,policy_class", [(SAC, MlpPolicySAC), (TD3, MlpPolicyTD3), (DQN, MlpPolicyDQN), (DDPG, MlpPolicyDDPG)]
+)
 @pytest.mark.parametrize("use_sde", [False, True])
 @pytest.mark.parametrize("online_sampling", [False, True])
-def test_save_load(tmp_path, model_class, use_sde, online_sampling):
+def test_save_load(tmp_path, model_class, policy_class, use_sde, online_sampling):
     """
     Test if 'save' and 'load' saves and loads model correctly
     """
@@ -93,7 +101,7 @@ def test_save_load(tmp_path, model_class, use_sde, online_sampling):
 
     # create model
     model = HER(
-        "MlpPolicy",
+        policy_class,
         env,
         model_class,
         n_sampled_goal=5,
@@ -111,7 +119,7 @@ def test_save_load(tmp_path, model_class, use_sde, online_sampling):
         learning_starts=100,
         n_episodes_rollout=-1,
         max_episode_length=n_bits,
-        **kwargs
+        **kwargs,
     )
 
     model.learn(total_timesteps=300)
@@ -185,7 +193,7 @@ def test_save_load_replay_buffer(tmp_path, recwarn, online_sampling, truncate_la
     path.parent.mkdir(exist_ok=True, parents=True)  # to not raise a warning
     env = BitFlippingEnv(n_bits=4, continuous=True)
     model = HER(
-        "MlpPolicy",
+        MlpPolicySAC,
         env,
         SAC,
         goal_selection_strategy="future",
@@ -260,7 +268,7 @@ def test_full_replay_buffer():
 
     # use small buffer size to get the buffer full
     model = HER(
-        "MlpPolicy",
+        MlpPolicySAC,
         env,
         SAC,
         goal_selection_strategy="future",
@@ -302,15 +310,15 @@ def test_get_max_episode_length():
         get_time_limit(vec_env, current_max_episode_length=None)
 
     # Initialize HER and specify max_episode_length, should not raise an issue
-    HER("MlpPolicy", dict_env, DQN, max_episode_length=5)
+    HER(MlpPolicyDQN, dict_env, DQN, max_episode_length=5)
 
     with pytest.raises(ValueError):
-        HER("MlpPolicy", dict_env, DQN)
+        HER(MlpPolicyDQN, dict_env, DQN)
 
     # Wrapped in a timelimit, should be fine
     # Note: it requires env.spec to be defined
     env = DummyVecEnv([lambda: gym.wrappers.TimeLimit(BitFlippingEnv(), 10)])
-    HER("MlpPolicy", env, DQN)
+    HER(MlpPolicyDQN, env, DQN)
 
 
 @pytest.mark.parametrize("online_sampling", [False, True])
@@ -323,7 +331,7 @@ def test_performance_her(online_sampling, n_bits):
     env = BitFlippingEnv(n_bits=n_bits, continuous=False)
 
     model = HER(
-        "MlpPolicy",
+        MlpPolicyDQN,
         env,
         DQN,
         n_sampled_goal=5,

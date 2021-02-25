@@ -8,7 +8,7 @@ import numpy as np
 
 from hmlf.common import base_class, logger  # pytype: disable=pyi-error
 from hmlf.common.evaluation import evaluate_policy
-from hmlf.common.vec_env import DummyVecEnv, VecEnv, sync_envs_normalization
+from hmlf.environments.vec_env import DummyVecEnv, VecEnv, sync_envs_normalization
 
 
 class BaseCallback(ABC):

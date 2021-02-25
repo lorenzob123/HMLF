@@ -11,13 +11,41 @@ import pytest
 import torch as th
 
 from hmlf import A2C, DDPG, DQN, PPO, SAC, TD3
+from hmlf.a2c import CnnPolicy as CnnPolicyA2C
+from hmlf.a2c import MlpPolicy as MlpPolicyA2C
 from hmlf.common.base_class import BaseAlgorithm
-from hmlf.common.identity_env import FakeImageEnv, IdentityEnv, IdentityEnvBox
 from hmlf.common.save_util import load_from_pkl, open_path, save_to_pkl
 from hmlf.common.utils import get_device
-from hmlf.common.vec_env import DummyVecEnv
+from hmlf.ddpg import CnnPolicy as CnnPolicyDDPG
+from hmlf.ddpg import MlpPolicy as MlpPolicyDDPG
+from hmlf.dqn import CnnPolicy as CnnPolicyDQN
+from hmlf.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.environments.identity_env import FakeImageEnv, IdentityEnv, IdentityEnvBox
+from hmlf.environments.vec_env import DummyVecEnv
+from hmlf.ppo import CnnPolicy as CnnPolicyPPO
+from hmlf.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.sac import CnnPolicy as CnnPolicySAC
+from hmlf.sac import MlpPolicy as MlpPolicySAC
+from hmlf.td3 import CnnPolicy as CnnPolicyTD3
+from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
-MODEL_LIST = [PPO, A2C, TD3, SAC, DQN, DDPG]
+MODEL_LIST = [
+    (A2C, MlpPolicyA2C),
+    (PPO, MlpPolicyPPO),
+    (SAC, MlpPolicySAC),
+    (TD3, MlpPolicyTD3),
+    (DQN, MlpPolicyDQN),
+    (DDPG, MlpPolicyDDPG),
+]
+
+MODEL_LIST_CNN = [
+    (A2C, CnnPolicyA2C),
+    (PPO, CnnPolicyPPO),
+    (SAC, CnnPolicySAC),
+    (TD3, CnnPolicyTD3),
+    (DQN, CnnPolicyDQN),
+    (DDPG, CnnPolicyDDPG),
+]
 
 
 def select_env(model_class: BaseAlgorithm) -> gym.Env:
@@ -30,8 +58,8 @@ def select_env(model_class: BaseAlgorithm) -> gym.Env:
         return IdentityEnvBox(10)
 
 
-@pytest.mark.parametrize("model_class", MODEL_LIST)
-def test_save_load(tmp_path, model_class):
+@pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
+def test_save_load(tmp_path, model_class, policy_class):
     """
     Test if 'save' and 'load' saves and loads model correctly
     and if 'get_parameters' and 'set_parameters' and work correctly.
@@ -44,7 +72,7 @@ def test_save_load(tmp_path, model_class):
     env = DummyVecEnv([lambda: select_env(model_class)])
 
     # create model
-    model = model_class("MlpPolicy", env, policy_kwargs=dict(net_arch=[16]), verbose=1)
+    model = model_class(policy_class, env, policy_kwargs=dict(net_arch=[16]), verbose=1)
     model.learn(total_timesteps=500)
 
     env.reset()
@@ -162,8 +190,8 @@ def test_save_load(tmp_path, model_class):
     os.remove(tmp_path / "test_save.zip")
 
 
-@pytest.mark.parametrize("model_class", MODEL_LIST)
-def test_set_env(model_class):
+@pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
+def test_set_env(model_class, policy_class):
     """
     Test if set_env function does work correct
     :param model_class: (BaseAlgorithm) A RL model
@@ -181,7 +209,7 @@ def test_set_env(model_class):
         kwargs = dict(n_steps=100)
 
     # create model
-    model = model_class("MlpPolicy", env, policy_kwargs=dict(net_arch=[16]), **kwargs)
+    model = model_class(policy_class, env, policy_kwargs=dict(net_arch=[16]), **kwargs)
     # learn
     model.learn(total_timesteps=300)
 
@@ -196,8 +224,8 @@ def test_set_env(model_class):
     model.learn(total_timesteps=300)
 
 
-@pytest.mark.parametrize("model_class", MODEL_LIST)
-def test_exclude_include_saved_params(tmp_path, model_class):
+@pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
+def test_exclude_include_saved_params(tmp_path, model_class, policy_class):
     """
     Test if exclude and include parameters of save() work
 
@@ -206,7 +234,7 @@ def test_exclude_include_saved_params(tmp_path, model_class):
     env = DummyVecEnv([lambda: select_env(model_class)])
 
     # create model, set verbose as 2, which is not standard
-    model = model_class("MlpPolicy", env, policy_kwargs=dict(net_arch=[16]), verbose=2)
+    model = model_class(policy_class, env, policy_kwargs=dict(net_arch=[16]), verbose=2)
 
     # Check if exclude works
     model.save(tmp_path / "test_save", exclude=["verbose"])
@@ -227,8 +255,14 @@ def test_exclude_include_saved_params(tmp_path, model_class):
     os.remove(tmp_path / "test_save.zip")
 
 
-@pytest.mark.parametrize("model_class", [A2C, TD3])
-def test_save_load_env_cnn(tmp_path, model_class):
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (A2C, CnnPolicyA2C),
+        (TD3, CnnPolicyTD3),
+    ],
+)
+def test_save_load_env_cnn(tmp_path, model_class, policy_class):
     """
     Test loading with an env that requires a ``CnnPolicy``.
     This is to test wrapping and observation space check.
@@ -240,7 +274,7 @@ def test_save_load_env_cnn(tmp_path, model_class):
     if model_class == TD3:
         kwargs.update(dict(buffer_size=100, learning_starts=50))
 
-    model = model_class("CnnPolicy", env, **kwargs).learn(100)
+    model = model_class(policy_class, env, **kwargs).learn(100)
     model.save(tmp_path / "test_save")
     # Test loading with env and continuing training
     model = model_class.load(str(tmp_path / "test_save.zip"), env=env).learn(100)
@@ -248,12 +282,19 @@ def test_save_load_env_cnn(tmp_path, model_class):
     os.remove(tmp_path / "test_save.zip")
 
 
-@pytest.mark.parametrize("model_class", [SAC, TD3, DQN])
-def test_save_load_replay_buffer(tmp_path, model_class):
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (SAC, MlpPolicySAC),
+        (TD3, MlpPolicyTD3),
+        (DQN, MlpPolicyDQN),
+    ],
+)
+def test_save_load_replay_buffer(tmp_path, model_class, policy_class):
     path = pathlib.Path(tmp_path / "logs/replay_buffer.pkl")
     path.parent.mkdir(exist_ok=True, parents=True)  # to not raise a warning
     model = model_class(
-        "MlpPolicy", select_env(model_class), buffer_size=1000, policy_kwargs=dict(net_arch=[64]), learning_starts=200
+        policy_class, select_env(model_class), buffer_size=1000, policy_kwargs=dict(net_arch=[64]), learning_starts=200
     )
     model.learn(300)
     old_replay_buffer = deepcopy(model.replay_buffer)
@@ -276,9 +317,16 @@ def test_save_load_replay_buffer(tmp_path, model_class):
     )
 
 
-@pytest.mark.parametrize("model_class", [DQN, SAC, TD3])
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (SAC, MlpPolicySAC),
+        (TD3, MlpPolicyTD3),
+        (DQN, MlpPolicyDQN),
+    ],
+)
 @pytest.mark.parametrize("optimize_memory_usage", [False, True])
-def test_warn_buffer(recwarn, model_class, optimize_memory_usage):
+def test_warn_buffer(recwarn, model_class, policy_class, optimize_memory_usage):
     """
     When using memory efficient replay buffer,
     a warning must be emitted when calling `.learn()`
@@ -290,7 +338,7 @@ def test_warn_buffer(recwarn, model_class, optimize_memory_usage):
     warnings.filterwarnings(action="ignore", category=UserWarning, module="gym")
 
     model = model_class(
-        "MlpPolicy",
+        policy_class,
         select_env(model_class),
         buffer_size=100,
         optimize_memory_usage=optimize_memory_usage,
@@ -315,9 +363,12 @@ def test_warn_buffer(recwarn, model_class, optimize_memory_usage):
         assert len(recwarn) == 0
 
 
-@pytest.mark.parametrize("model_class", MODEL_LIST)
-@pytest.mark.parametrize("policy_str", ["MlpPolicy", "CnnPolicy"])
-def test_save_load_policy(tmp_path, model_class, policy_str):
+@pytest.mark.parametrize("model_class,policy_class", MODEL_LIST + MODEL_LIST_CNN)
+def test_save_load_policy(
+    tmp_path,
+    model_class,
+    policy_class,
+):
     """
     Test saving and loading policy only.
 
@@ -325,7 +376,7 @@ def test_save_load_policy(tmp_path, model_class, policy_str):
     :param policy_str: (str) Name of the policy.
     """
     kwargs = dict(policy_kwargs=dict(net_arch=[16]))
-    if policy_str == "MlpPolicy":
+    if "Cnn" not in str(policy_class):  # MlpPolicy
         env = select_env(model_class)
     else:
         if model_class in [SAC, TD3, DQN, DDPG]:
@@ -339,7 +390,7 @@ def test_save_load_policy(tmp_path, model_class, policy_str):
     env = DummyVecEnv([lambda: env])
 
     # create model
-    model = model_class(policy_str, env, verbose=1, **kwargs)
+    model = model_class(policy_class, env, verbose=1, **kwargs)
     model.learn(total_timesteps=300)
 
     env.reset()
@@ -408,9 +459,14 @@ def test_save_load_policy(tmp_path, model_class, policy_str):
         os.remove(tmp_path / "actor.pkl")
 
 
-@pytest.mark.parametrize("model_class", [DQN])
-@pytest.mark.parametrize("policy_str", ["MlpPolicy", "CnnPolicy"])
-def test_save_load_q_net(tmp_path, model_class, policy_str):
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (DQN, MlpPolicyDQN),
+        (DQN, CnnPolicyDQN),
+    ],
+)
+def test_save_load_q_net(tmp_path, model_class, policy_class):
     """
     Test saving and loading q-network/quantile net only.
 
@@ -418,7 +474,7 @@ def test_save_load_q_net(tmp_path, model_class, policy_str):
     :param policy_str: (str) Name of the policy.
     """
     kwargs = dict(policy_kwargs=dict(net_arch=[16]))
-    if policy_str == "MlpPolicy":
+    if "Cnn" not in str(policy_class):  # MlpPolicy
         env = select_env(model_class)
     else:
         if model_class in [DQN]:
@@ -434,7 +490,7 @@ def test_save_load_q_net(tmp_path, model_class, policy_str):
     env = DummyVecEnv([lambda: env])
 
     # create model
-    model = model_class(policy_str, env, verbose=1, **kwargs)
+    model = model_class(policy_class, env, verbose=1, **kwargs)
     model.learn(total_timesteps=300)
 
     env.reset()

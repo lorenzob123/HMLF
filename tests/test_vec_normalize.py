@@ -1,18 +1,13 @@
 import gym
 import numpy as np
 import pytest
-from gym import spaces
 
-from hmlf import HER, SAC, TD3
+from hmlf import HER, SAC, TD3, spaces
 from hmlf.common.monitor import Monitor
 from hmlf.common.running_mean_std import RunningMeanStd
-from hmlf.common.vec_env import (
-    DummyVecEnv,
-    VecFrameStack,
-    VecNormalize,
-    sync_envs_normalization,
-    unwrap_vec_normalize,
-)
+from hmlf.environments.vec_env import DummyVecEnv, VecFrameStack, VecNormalize, sync_envs_normalization, unwrap_vec_normalize
+from hmlf.sac import MlpPolicy as MlpPolicySAC
+from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 ENV_ID = "Pendulum-v0"
 
@@ -217,8 +212,15 @@ def test_normalize_external():
     assert np.all(norm_rewards < 1)
 
 
-@pytest.mark.parametrize("model_class", [SAC, TD3, HER])
-def test_offpolicy_normalization(model_class):
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (SAC, MlpPolicySAC),
+        (TD3, MlpPolicyTD3),
+        (HER, MlpPolicySAC),
+    ],
+)
+def test_offpolicy_normalization(model_class, policy_class):
     make_env_ = make_dict_env if model_class == HER else make_env
     env = DummyVecEnv([make_env_])
     env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.0, clip_reward=10.0)
@@ -227,7 +229,7 @@ def test_offpolicy_normalization(model_class):
     eval_env = VecNormalize(eval_env, training=False, norm_obs=True, norm_reward=False, clip_obs=10.0, clip_reward=10.0)
 
     kwargs = dict(model_class=SAC, max_episode_length=200, online_sampling=True) if model_class == HER else {}
-    model = model_class("MlpPolicy", env, verbose=1, learning_starts=100, policy_kwargs=dict(net_arch=[64]), **kwargs)
+    model = model_class(policy_class, env, verbose=1, learning_starts=100, policy_kwargs=dict(net_arch=[64]), **kwargs)
     model.learn(total_timesteps=500, eval_env=eval_env, eval_freq=250)
     # Check getter
     assert isinstance(model.get_vec_normalize_env(), VecNormalize)

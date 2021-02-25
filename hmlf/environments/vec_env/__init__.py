@@ -3,14 +3,14 @@ import typing
 from copy import deepcopy
 from typing import Optional, Type, Union
 
-from hmlf.common.vec_env.base_vec_env import CloudpickleWrapper, VecEnv, VecEnvWrapper
-from hmlf.common.vec_env.dummy_vec_env import DummyVecEnv
-from hmlf.common.vec_env.subproc_vec_env import SubprocVecEnv
-from hmlf.common.vec_env.vec_check_nan import VecCheckNan
-from hmlf.common.vec_env.vec_frame_stack import VecFrameStack
-from hmlf.common.vec_env.vec_normalize import VecNormalize
-from hmlf.common.vec_env.vec_transpose import VecTransposeImage
-from hmlf.common.vec_env.vec_video_recorder import VecVideoRecorder
+from hmlf.environments.vec_env.base_vec_env import CloudpickleWrapper, VecEnv, VecEnvWrapper
+from hmlf.environments.vec_env.dummy_vec_env import DummyVecEnv
+from hmlf.environments.vec_env.subproc_vec_env import SubprocVecEnv
+from hmlf.environments.vec_env.vec_check_nan import VecCheckNan
+from hmlf.environments.vec_env.vec_frame_stack import VecFrameStack
+from hmlf.environments.vec_env.vec_normalize import VecNormalize
+from hmlf.environments.vec_env.vec_transpose import VecTransposeImage
+from hmlf.environments.vec_env.vec_video_recorder import VecVideoRecorder
 
 # Avoid circular import
 if typing.TYPE_CHECKING:

@@ -2,6 +2,7 @@ import pytest
 import torch as th
 
 from hmlf import A2C, PPO
+from hmlf.a2c import MlpPolicy as MlpPolicyA2C
 from hmlf.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
@@ -12,6 +13,7 @@ from hmlf.common.distributions import (
     TanhBijector,
 )
 from hmlf.common.utils import set_random_seed
+from hmlf.ppo import MlpPolicy as MlpPolicyPPO
 
 N_ACTIONS = 2
 N_FEATURES = 3
@@ -32,12 +34,18 @@ def test_bijector():
     assert th.isclose(TanhBijector.inverse(squashed_actions), actions).all()
 
 
-@pytest.mark.parametrize("model_class", [A2C, PPO])
-def test_squashed_gaussian(model_class):
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (A2C, MlpPolicyA2C),
+        (PPO, MlpPolicyPPO),
+    ],
+)
+def test_squashed_gaussian(model_class, policy_class):
     """
     Test run with squashed Gaussian (notably entropy computation)
     """
-    model = model_class("MlpPolicy", "Pendulum-v0", use_sde=True, n_steps=100, policy_kwargs=dict(squash_output=True))
+    model = model_class(policy_class, "Pendulum-v0", use_sde=True, n_steps=100, policy_kwargs=dict(squash_output=True))
     model.learn(500)
 
     gaussian_mean = th.rand(N_SAMPLES, N_ACTIONS)

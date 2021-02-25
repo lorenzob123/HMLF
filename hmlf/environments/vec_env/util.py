@@ -4,10 +4,10 @@ Helpers for dealing with vectorized environments.
 from collections import OrderedDict
 from typing import Any, Dict, List, Tuple
 
-import gym
 import numpy as np
 
-from hmlf.common.vec_env.base_vec_env import VecEnvObs
+from hmlf import spaces
+from hmlf.environments.vec_env.base_vec_env import VecEnvObs
 
 
 def copy_obs_dict(obs: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
@@ -21,7 +21,7 @@ def copy_obs_dict(obs: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
     return OrderedDict([(k, np.copy(v)) for k, v in obs.items()])
 
 
-def dict_to_obs(space: gym.spaces.Space, obs_dict: Dict[Any, np.ndarray]) -> VecEnvObs:
+def dict_to_obs(space: spaces.Space, obs_dict: Dict[Any, np.ndarray]) -> VecEnvObs:
     """
     Convert an internal representation raw_obs into the appropriate type
     specified by space.
@@ -32,9 +32,9 @@ def dict_to_obs(space: gym.spaces.Space, obs_dict: Dict[Any, np.ndarray]) -> Vec
         If space is Dict, function is identity; if space is Tuple, converts dict to Tuple;
         otherwise, space is unstructured and returns the value raw_obs[None].
     """
-    if isinstance(space, gym.spaces.Dict):
+    if isinstance(space, spaces.Dict):
         return obs_dict
-    elif isinstance(space, gym.spaces.Tuple):
+    elif isinstance(space, spaces.Tuple):
         assert len(obs_dict) == len(space.spaces), "size of observation does not match size of observation space"
         return tuple((obs_dict[i] for i in range(len(space.spaces))))
     else:
@@ -42,9 +42,9 @@ def dict_to_obs(space: gym.spaces.Space, obs_dict: Dict[Any, np.ndarray]) -> Vec
         return obs_dict[None]
 
 
-def obs_space_info(obs_space: gym.spaces.Space) -> Tuple[List[str], Dict[Any, Tuple[int, ...]], Dict[Any, np.dtype]]:
+def obs_space_info(obs_space: spaces.Space) -> Tuple[List[str], Dict[Any, Tuple[int, ...]], Dict[Any, np.dtype]]:
     """
-    Get dict-structured information about a gym.Space.
+    Get dict-structured information about a hmlf.Space.
 
     Dict spaces are represented directly by their dict of subspaces.
     Tuple spaces are converted into a dict with keys indexing into the tuple.
@@ -56,10 +56,10 @@ def obs_space_info(obs_space: gym.spaces.Space) -> Tuple[List[str], Dict[Any, Tu
         shapes: a dict mapping keys to shapes.
         dtypes: a dict mapping keys to dtypes.
     """
-    if isinstance(obs_space, gym.spaces.Dict):
+    if isinstance(obs_space, spaces.Dict):
         assert isinstance(obs_space.spaces, OrderedDict), "Dict space must have ordered subspaces"
         subspaces = obs_space.spaces
-    elif isinstance(obs_space, gym.spaces.Tuple):
+    elif isinstance(obs_space, spaces.Tuple):
         subspaces = {i: space for i, space in enumerate(obs_space.spaces)}
     else:
         assert not hasattr(obs_space, "spaces"), f"Unsupported structured space '{type(obs_space)}'"

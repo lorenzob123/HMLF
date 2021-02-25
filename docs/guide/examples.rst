@@ -109,7 +109,7 @@ Multiprocessing: Unleashing the Power of Vectorized Environments
   import numpy as np
 
   from hmlf import PPO
-  from hmlf.common.vec_env import SubprocVecEnv
+  from hmlf.environments.vec_env import SubprocVecEnv
   from hmlf.common.env_util import make_vec_env
   from hmlf.common.utils import set_random_seed
 
@@ -272,7 +272,7 @@ and multiprocessing for you.
 .. code-block:: python
 
   from hmlf.common.env_util import make_atari_env
-  from hmlf.common.vec_env import VecFrameStack
+  from hmlf.environments.vec_env import VecFrameStack
   from hmlf import A2C
 
   # There already exists an environment generator
@@ -315,7 +315,7 @@ will compute a running average and standard deviation of input features (it can 
   import gym
   import pybullet_envs
 
-  from hmlf.common.vec_env import DummyVecEnv, VecNormalize
+  from hmlf.environments.vec_env import DummyVecEnv, VecNormalize
   from hmlf import PPO
 
   env = DummyVecEnv([lambda: gym.make("HalfCheetahBulletEnv-v0")])
@@ -643,7 +643,7 @@ Record a mp4 video (here using a random agent).
 .. code-block:: python
 
   import gym
-  from hmlf.common.vec_env import VecVideoRecorder, DummyVecEnv
+  from hmlf.environments.vec_env import VecVideoRecorder, DummyVecEnv
 
   env_id = 'CartPole-v1'
   video_folder = 'logs/videos/'

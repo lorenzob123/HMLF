@@ -1,9 +1,9 @@
 from typing import Any, Dict, Optional, Type, Union
 
 import torch as th
-from gym import spaces
 from torch.nn import functional as F
 
+from hmlf import spaces
 from hmlf.common import logger
 from hmlf.common.on_policy_algorithm import OnPolicyAlgorithm
 from hmlf.common.policies import ActorCriticPolicy
@@ -54,7 +54,7 @@ class A2C(OnPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[ActorCriticPolicy]],
+        policy: Type[ActorCriticPolicy],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule] = 7e-4,
         n_steps: int = 5,

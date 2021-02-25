@@ -11,23 +11,18 @@ import gym
 import numpy as np
 import torch as th
 
+from hmlf import spaces
 from hmlf.common import logger, utils
 from hmlf.common.callbacks import BaseCallback, CallbackList, ConvertCallback, EvalCallback
 from hmlf.common.env_util import is_wrapped
 from hmlf.common.monitor import Monitor
 from hmlf.common.noise import ActionNoise
-from hmlf.common.policies import BasePolicy, get_policy_from_name
+from hmlf.common.policies import BasePolicy
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.save_util import load_from_zip_file, recursive_getattr, recursive_setattr, save_to_zip_file
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
-from hmlf.common.utils import (
-    check_for_correct_spaces,
-    get_device,
-    get_schedule_fn,
-    set_random_seed,
-    update_learning_rate,
-)
-from hmlf.common.vec_env import (
+from hmlf.common.utils import check_for_correct_spaces, get_device, get_schedule_fn, set_random_seed, update_learning_rate
+from hmlf.environments.vec_env import (
     DummyVecEnv,
     VecEnv,
     VecNormalize,
@@ -35,7 +30,7 @@ from hmlf.common.vec_env import (
     is_vecenv_wrapped,
     unwrap_vec_normalize,
 )
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 
 
 def maybe_make_env(env: Union[GymEnv, str, None], verbose: int) -> Optional[GymEnv]:
@@ -59,7 +54,6 @@ class BaseAlgorithm(ABC):
     :param policy: Policy object
     :param env: The environment to learn from
                 (if registered in Gym, can be str. Can be None for loading trained models)
-    :param policy_base: The base policy used by this method
     :param learning_rate: learning rate for the optimizer,
         it can be a function of the current progress remaining (from 1 to 0)
     :param policy_kwargs: Additional arguments to be passed to the policy on creation
@@ -86,7 +80,6 @@ class BaseAlgorithm(ABC):
         self,
         policy: Type[BasePolicy],
         env: Union[GymEnv, str, None],
-        policy_base: Type[BasePolicy],
         learning_rate: Union[float, Schedule],
         policy_kwargs: Dict[str, Any] = None,
         tensorboard_log: Optional[str] = None,
@@ -98,11 +91,11 @@ class BaseAlgorithm(ABC):
         seed: Optional[int] = None,
         use_sde: bool = False,
         sde_sample_freq: int = -1,
-        supported_action_spaces: Optional[Tuple[gym.spaces.Space, ...]] = None,
+        supported_action_spaces: Optional[Tuple[spaces.Space, ...]] = None,
     ):
 
-        if isinstance(policy, str) and policy_base is not None:
-            self.policy_class = get_policy_from_name(policy_base, policy)
+        if isinstance(policy, str):
+            raise ValueError("Policy needs to be of Type[BasePolicy], not String.")
         else:
             self.policy_class = policy
 
@@ -115,8 +108,8 @@ class BaseAlgorithm(ABC):
         self._vec_normalize_env = unwrap_vec_normalize(env)
         self.verbose = verbose
         self.policy_kwargs = {} if policy_kwargs is None else policy_kwargs
-        self.observation_space = None  # type: Optional[gym.spaces.Space]
-        self.action_space = None  # type: Optional[gym.spaces.Space]
+        self.observation_space = None  # type: Optional[spaces.Space]
+        self.action_space = None  # type: Optional[spaces.Space]
         self.n_envs = None
         self.num_timesteps = 0
         # Used for updating schedules
@@ -171,7 +164,7 @@ class BaseAlgorithm(ABC):
                     "Error: the model does not support multiple envs; it requires " "a single vectorized environment."
                 )
 
-            if self.use_sde and not isinstance(self.action_space, gym.spaces.Box):
+            if self.use_sde and not isinstance(self.action_space, spaces.Box):
                 raise ValueError("generalized State-Dependent Exploration (gSDE) can only be used with continuous actions.")
 
     @staticmethod
@@ -205,7 +198,7 @@ class BaseAlgorithm(ABC):
             env = VecTransposeImage(env)
 
         # check if wrapper for dict support is needed when using HER
-        if isinstance(env.observation_space, gym.spaces.dict.Dict):
+        if isinstance(env.observation_space, spaces.Dict):
             env = ObsDictWrapper(env)
 
         return env
@@ -623,12 +616,11 @@ class BaseAlgorithm(ABC):
             if "env" in data:
                 env = data["env"]
 
-        # noinspection PyArgumentList
-        model = cls(
-            policy=data["policy_class"],
+        model = cls(  # pytype: disable=not-instantiable,wrong-keyword-args
+            policy=data["policy_class"],  # noinspection PyArgumentList
             env=env,
             device=device,
-            _init_setup_model=False,  # pytype: disable=not-instantiable,wrong-keyword-args
+            _init_setup_model=False,
         )
 
         # load parameters

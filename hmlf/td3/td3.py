@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 from torch.nn import functional as F
 
+from hmlf import spaces
 from hmlf.common import logger
 from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
@@ -61,7 +61,7 @@ class TD3(OffPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[TD3Policy]],
+        policy: Type[TD3Policy],
         env: Union[GymEnv, str],
         learning_rate: Union[float, Schedule] = 1e-3,
         buffer_size: int = int(1e6),
@@ -89,7 +89,6 @@ class TD3(OffPolicyAlgorithm):
         super(TD3, self).__init__(
             policy,
             env,
-            TD3Policy,
             learning_rate,
             buffer_size,
             learning_starts,
@@ -108,7 +107,7 @@ class TD3(OffPolicyAlgorithm):
             seed=seed,
             sde_support=False,
             optimize_memory_usage=optimize_memory_usage,
-            supported_action_spaces=(gym.spaces.Box, gym.spaces.Tuple),
+            supported_action_spaces=(spaces.Box, spaces.Tuple),
         )
 
         self.policy_delay = policy_delay
@@ -145,7 +144,6 @@ class TD3(OffPolicyAlgorithm):
                 noise = replay_data.actions.clone().data.normal_(0, self.target_policy_noise)
                 noise = noise.clamp(-self.target_noise_clip, self.target_noise_clip)
                 next_actions = (self.actor_target(replay_data.next_observations) + noise).clamp(-1, 1)
-                # print(replay_data.next_observations, next_actions, noise)
                 # Compute the next Q-values: min over all critics targets
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions), dim=1)
                 next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)

@@ -4,7 +4,8 @@ from typing import Dict, Generator, Optional, Union
 
 import numpy as np
 import torch as th
-from gym import spaces
+
+from hmlf import spaces
 
 try:
     # Check memory used by replay buffer when possible
@@ -14,7 +15,7 @@ except ImportError:
 
 from hmlf.common.preprocessing import get_action_dim, get_obs_shape
 from hmlf.common.type_aliases import ReplayBufferSamples, RolloutBufferSamples
-from hmlf.common.vec_env import VecNormalize
+from hmlf.environments.vec_env import VecNormalize
 
 
 class BaseBuffer(ABC):
@@ -183,7 +184,7 @@ class ReplayBuffer(BaseBuffer):
             self.next_observations = None
         else:
             self.next_observations = np.zeros((self.buffer_size, self.n_envs) + self.obs_shape, dtype=observation_space.dtype)
-        #TODO dtype actions should be action_space.dtype unless it is a a Tuple
+        # TODO dtype actions should be action_space.dtype unless it is a a Tuple
         self.actions = np.zeros((self.buffer_size, self.n_envs, self.action_dim), dtype=np.float32)
         self.rewards = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
         self.dones = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)

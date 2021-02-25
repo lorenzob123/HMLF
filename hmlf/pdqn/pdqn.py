@@ -1,16 +1,16 @@
-import os
-from hmlf.common.noise import ActionNoise
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 from torch.nn import functional as F
 
+from hmlf import spaces
 from hmlf.common import logger
+from hmlf.common.buffers import ReplayBuffer
+from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
-from hmlf.common.utils import get_linear_fn, is_vectorized_observation, polyak_update
+from hmlf.common.utils import get_linear_fn, get_schedule_fn, is_vectorized_observation, polyak_update, update_learning_rate
 from hmlf.pdqn.policies import PDQNPolicy
 
 
@@ -24,7 +24,9 @@ class PDQN(OffPolicyAlgorithm):
 
     :param policy: The policy model to use (MlpPolicy, CnnPolicy, ...)
     :param env: The environment to learn from (if registered in Gym, can be str)
-    :param learning_rate: The learning rate, it can be a function
+    :param learning_rate_q: The learning rate for the Q-Network, it can be a function
+        of the current progress remaining (from 1 to 0)
+    :param learning_rate_parameter: The learning rate for the parameter network, it can be a function
         of the current progress remaining (from 1 to 0)
     :param buffer_size: size of the replay buffer
     :param learning_starts: how many steps of the model to collect transitions for before learning starts
@@ -60,9 +62,10 @@ class PDQN(OffPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[PDQNPolicy]],
+        policy: Type[PDQNPolicy],
         env: Union[GymEnv, str],
-        learning_rate: Union[float, Schedule] = 1e-4,
+        learning_rate_q: Union[float, Schedule] = 1e-4,
+        learning_rate_parameter: Union[float, Schedule] = 1e-4,
         buffer_size: int = 1000000,
         learning_starts: int = 50000,
         batch_size: Optional[int] = 32,
@@ -89,8 +92,7 @@ class PDQN(OffPolicyAlgorithm):
         super(PDQN, self).__init__(
             policy,
             env,
-            PDQNPolicy,
-            learning_rate,
+            1,  # learning_rate. We set it up ourselves, because we have two networks.
             buffer_size,
             learning_starts,
             batch_size,
@@ -108,7 +110,7 @@ class PDQN(OffPolicyAlgorithm):
             seed=seed,
             sde_support=False,
             optimize_memory_usage=optimize_memory_usage,
-            supported_action_spaces=(gym.spaces.Tuple,),
+            supported_action_spaces=(spaces.Tuple,),
         )
 
         self.exploration_initial_eps = exploration_initial_eps
@@ -121,13 +123,40 @@ class PDQN(OffPolicyAlgorithm):
         # Linear schedule will be defined in `_setup_model()`
         self.exploration_schedule = None
 
+        # Set up learning_rates
+        self.learning_rate = None
+        self.learning_rate_q = learning_rate_q
+        self.learning_rate_parameter = learning_rate_parameter
+        self.lr_schedule_q = None  # type: Optional[Schedule]
+        self.lr_schedule_parameter = None  # type: Optional[Schedule]
+
         self.q_net, self.q_net_target, self.parameter_net = None, None, None
 
         if _init_setup_model:
             self._setup_model()
 
     def _setup_model(self) -> None:
-        super(PDQN, self)._setup_model()
+        # _setup_model from super
+        # Need to change policy initialization to implement two different learning_rates
+        self._setup_lr_schedule()
+        self.set_random_seed(self.seed)
+        self.replay_buffer = ReplayBuffer(
+            self.buffer_size,
+            self.observation_space,
+            self.action_space,
+            self.device,
+            optimize_memory_usage=self.optimize_memory_usage,
+        )
+        # PDQNPolicy or MP-DQNPolicy
+        self.policy = self.policy_class(  # pytype:disable=not-instantiable
+            self.observation_space,
+            self.action_space,
+            self.lr_schedule_q,
+            self.lr_schedule_parameter,
+            **self.policy_kwargs,
+        )
+        self.policy = self.policy.to(self.device)
+        # Additional P-DQN _setup_model
         self._create_aliases()
         self.exploration_schedule = get_linear_fn(
             self.exploration_initial_eps, self.exploration_final_eps, self.exploration_fraction
@@ -151,7 +180,7 @@ class PDQN(OffPolicyAlgorithm):
 
     def train(self, gradient_steps: int, batch_size: int = 100) -> None:
         # Update learning rate according to schedule
-        self._update_learning_rate([self.policy.optimizer_q_net, self.policy.optimizer_parameter_net])
+        self._update_learning_rate(self.policy.optimizer_q_net, self.policy.optimizer_parameter_net)
 
         loss_q = []
         loss_parameter = []
@@ -159,7 +188,6 @@ class PDQN(OffPolicyAlgorithm):
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)
 
-            #import ipdb; ipdb.set_trace()
             with th.no_grad():
                 # Compute the next Q-values using the target network
                 next_q_values = self.policy.forward_target(replay_data.next_observations)
@@ -170,11 +198,8 @@ class PDQN(OffPolicyAlgorithm):
                 # 1-step TD target
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
-            # Append parameters to observation
-            observations = th.cat([replay_data.observations, replay_data.actions[:, 1:]], dim=1)
             # Get current Q-values estimates
-            current_q_values = self.policy.q_net(observations)
-
+            current_q_values = self.policy.forward_q(replay_data.observations, replay_data.actions[:, 1:])
             # Retrieve the q-values for the actions from the replay buffer
             # Need to do actions[:, 0].reshape(-1, 1) to get the discrete and not include parameters.
             current_q_values = th.gather(current_q_values, dim=1, index=replay_data.actions[:, 0].reshape(-1, 1).long())
@@ -224,7 +249,6 @@ class PDQN(OffPolicyAlgorithm):
             (used in recurrent policies)
         """
         if not deterministic and np.random.rand() < self.exploration_rate:
-            #TODO: Fix
             if is_vectorized_observation(observation, self.observation_space):
                 n_batch = observation.shape[0]
                 action = np.array([self.action_space.sample() for _ in range(n_batch)])
@@ -266,7 +290,7 @@ class PDQN(OffPolicyAlgorithm):
         return super(PDQN, self)._excluded_save_params() + ["q_net", "q_net_target"]
 
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
-        state_dicts = ["policy", "policy.optimizer"]
+        state_dicts = ["policy", "policy.optimizer_q_net", "policy.optimizer_parameter_net"]
 
         return state_dicts, []
 
@@ -298,7 +322,7 @@ class PDQN(OffPolicyAlgorithm):
             unscaled_action, _ = self.predict(self._last_obs)
 
         # Rescale the action from [low, high] to [-1, 1]
-        if isinstance(self.action_space, gym.spaces.Box):
+        if isinstance(self.action_space, spaces.Box):
             scaled_action = self.policy.scale_action(unscaled_action)
 
             # Add noise to the action (improve exploration)
@@ -313,3 +337,24 @@ class PDQN(OffPolicyAlgorithm):
             buffer_action = np.hstack((np.array([unscaled_action[0][0]]), *unscaled_action[0][1:]))
             action = unscaled_action
         return action, buffer_action
+
+    def _setup_lr_schedule(self) -> None:
+        """Transform to callable if needed."""
+        # Override from base class, to implement two learning_rates
+        self.lr_schedule_q = get_schedule_fn(self.learning_rate_q)
+        self.lr_schedule_parameter = get_schedule_fn(self.learning_rate_parameter)
+
+    def _update_learning_rate(self, optimizer_q: th.optim.Optimizer, optimizer_parameter: th.optim.Optimizer) -> None:
+        """
+        Update the optimizers learning rate using the current learning rate schedule
+        and the current progress remaining (from 1 to 0).
+
+        :param optimizers:
+            An optimizer or a list of optimizers.
+        """
+        # Log the current learning rate
+        logger.record("train/learning_rate_q", self.lr_schedule_q(self._current_progress_remaining))
+        logger.record("train/learning_rate_parameter", self.lr_schedule_parameter(self._current_progress_remaining))
+
+        update_learning_rate(optimizer_q, self.lr_schedule_q(self._current_progress_remaining))
+        update_learning_rate(optimizer_parameter, self.lr_schedule_parameter(self._current_progress_remaining))

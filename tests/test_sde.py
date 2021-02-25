@@ -3,6 +3,9 @@ import torch as th
 from torch.distributions import Normal
 
 from hmlf import A2C, PPO, SAC
+from hmlf.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.sac import MlpPolicy as MlpPolicySAC
 
 
 def test_state_dependent_exploration_grad():
@@ -59,12 +62,19 @@ def test_sde_check():
         PPO("MlpPolicy", "CartPole-v1", use_sde=True)
 
 
-@pytest.mark.parametrize("model_class", [SAC, A2C, PPO])
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (A2C, MlpPolicyA2C),
+        (PPO, MlpPolicyPPO),
+        (SAC, MlpPolicySAC),
+    ],
+)
 @pytest.mark.parametrize("sde_net_arch", [None, [32, 16], []])
 @pytest.mark.parametrize("use_expln", [False, True])
-def test_state_dependent_offpolicy_noise(model_class, sde_net_arch, use_expln):
+def test_state_dependent_offpolicy_noise(model_class, policy_class, sde_net_arch, use_expln):
     model = model_class(
-        "MlpPolicy",
+        policy_class,
         "Pendulum-v0",
         use_sde=True,
         seed=None,

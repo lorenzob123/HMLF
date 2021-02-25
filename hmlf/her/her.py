@@ -14,8 +14,8 @@ from hmlf.common.policies import BasePolicy
 from hmlf.common.save_util import load_from_zip_file, recursive_setattr
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, RolloutReturn
 from hmlf.common.utils import check_for_correct_spaces
-from hmlf.common.vec_env import VecEnv
-from hmlf.common.vec_env.obs_dict_wrapper import ObsDictWrapper
+from hmlf.environments.vec_env import VecEnv
+from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 from hmlf.her.goal_selection_strategy import KEY_TO_GOAL_STRATEGY, GoalSelectionStrategy
 from hmlf.her.her_replay_buffer import HerReplayBuffer
 
@@ -77,7 +77,7 @@ class HER(BaseAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[BasePolicy]],
+        policy: Type[BasePolicy],
         env: Union[GymEnv, str],
         model_class: Type[OffPolicyAlgorithm],
         n_sampled_goal: int = 4,
@@ -89,7 +89,7 @@ class HER(BaseAlgorithm):
     ):
 
         # we will use the policy and learning rate from the model
-        super(HER, self).__init__(policy=BasePolicy, env=env, policy_base=BasePolicy, learning_rate=0.0)
+        super(HER, self).__init__(policy=BasePolicy, env=env, learning_rate=0.0)
         del self.policy, self.learning_rate
 
         if self.get_vec_normalize_env() is not None:
