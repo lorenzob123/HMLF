@@ -83,8 +83,8 @@ class MPDQN(PDQN):
     ):
 
         super(MPDQN, self).__init__(
-            policy=policy,  # :Union[str, Type[MPDQNPolicy]],
-            env=env,  # :Union[GymEnv, str],
+            policy=policy,
+            env=env,
             learning_rate_q=learning_rate_q,  # :Union[float, Schedule] = 1e-4,
             learning_rate_parameter=learning_rate_parameter,  # :Union[float, Schedule] = 1e-4,
             buffer_size=buffer_size,  # :int = 1000000,
