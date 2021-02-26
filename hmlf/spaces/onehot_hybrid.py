@@ -63,7 +63,7 @@ class OneHotHybrid(SimpleHybrid):
         for i in range(discrete.shape[0]):
             sample.append([discrete[i]] + np.split(parameters[i], split_indizes))
 
-        return sample
+        return tuple(sample)
 
     def __repr__(self) -> str:
         return "SimpleHybrid(" + ", ".join([str(s) for s in self.spaces]) + ")"
