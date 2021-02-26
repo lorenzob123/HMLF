@@ -44,12 +44,12 @@ class ContinuosParameters(gym.spaces.Tuple):
 
         # We prepare the split of the parameters for each discrete action
         dims_continous = self._get_continous_dims()
-        split_indizes = np.cumsum(dims_continous[:-1])
+        split_indices = np.cumsum(dims_continous[:-1])
 
         # We format the full action for each environment
         sample = []
         for i in range(discrete.shape[0]):
-            sample.append(np.split(parameters[i], split_indizes))
+            sample.append(np.split(parameters[i], split_indices))
 
         return sample
 
