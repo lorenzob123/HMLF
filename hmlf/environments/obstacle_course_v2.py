@@ -7,7 +7,7 @@ from hmlf.spaces import Box, Discrete, SimpleHybrid
 class ObstacleCourse_v2(gym.Env):
     def __init__(self):
 
-        self.max_move = np.float32(0.2)
+        self.max_move = np.float32(0.4)
         self.max_jump = 0.05
         self.n_obstacles = 3
         self.goal_position = 0.95

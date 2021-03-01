@@ -56,14 +56,14 @@ class OneHotHybrid(SimpleHybrid):
 
         # We prepare the split of the parameters for each discrete action
         dims_continuous = self._get_continuous_dims()
-        split_indizes = np.cumsum(dims_continuous[:-1])
+        split_indices = np.cumsum(dims_continuous[:-1])
 
         # We format the full action for each environment
         sample = []
         for i in range(discrete.shape[0]):
-            sample.append([discrete[i]] + np.split(parameters[i], split_indizes))
+            sample.append([discrete[i]] + np.split(parameters[i], split_indices))
 
-        return sample
+        return tuple(sample)
 
     def __repr__(self) -> str:
         return "SimpleHybrid(" + ", ".join([str(s) for s in self.spaces]) + ")"
