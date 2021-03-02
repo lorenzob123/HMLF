@@ -101,6 +101,11 @@ def test_reward_not_positive(parameters):
 )
 def test_is_done(steps):
     env = DummyHybrid([2])
+    random_value = np.random.random(size=0)
+    _, _, is_done, _ = env.step((0, [random_value, -random_value]))
+    assert is_done
+    env.reset()
+
     for _ in range(steps):
         _, _, is_done, _ = env.step((env.action_space.sample()))
 
