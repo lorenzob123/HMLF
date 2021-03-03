@@ -6,7 +6,6 @@ import pytest
 from hmlf.spaces import Box, Discrete, SimpleHybrid, Tuple
 
 
-# def make_box(low: Optional[np.ndarray] = None, high: Optional[np.ndarray] = None, shape: Optional[Tuple[int]] = None) -> Box:
 def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Optional[Tuple] = None) -> Box:
     if shape is None:
         if (low is None) and (high is None):
