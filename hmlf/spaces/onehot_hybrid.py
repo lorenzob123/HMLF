@@ -3,10 +3,9 @@ from typing import List
 import numpy as np
 
 from hmlf.spaces.gym import Box, Discrete, Space, Tuple
-from hmlf.spaces.simple_hybrid import SimpleHybrid
 
 
-class OneHotHybrid(SimpleHybrid):
+class OneHotHybrid(Tuple):
     """
     A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
     Samples have the form (int, Box1.sample(), ..., BoxN.sample())
@@ -66,14 +65,7 @@ class OneHotHybrid(SimpleHybrid):
         return tuple(sample)
 
     def __repr__(self) -> str:
-        return "SimpleHybrid(" + ", ".join([str(s) for s in self.spaces]) + ")"
+        return "OneHotHybrid(" + ", ".join([str(s) for s in self.spaces]) + ")"
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, SimpleHybrid) and self.spaces == other.spaces
-
-
-if __name__ == "__main__":
-
-    action_space = OneHotHybrid((Discrete(2), Box(-1, 1, shape=(1,)), Box(-1, 1, shape=(1,))))
-    actions = np.vstack((action_space.sample(), action_space.sample()))
-    print(action_space.format_action(actions))
+        return isinstance(other, OneHotHybrid) and self.spaces == other.spaces
