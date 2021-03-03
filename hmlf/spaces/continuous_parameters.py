@@ -1,12 +1,12 @@
-from typing import List, Tuple
+import typing
+from typing import List
 
-import gym
 import numpy as np
 
-from hmlf import spaces
+from hmlf.spaces.gym import Box, Tuple
 
 
-class ContinuosParameters(gym.spaces.Tuple):
+class ContinuosParameters(Tuple):
     """
     A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
     Samples have the form (int, Box1.sample(), ..., BoxN.sample())
@@ -18,7 +18,7 @@ class ContinuosParameters(gym.spaces.Tuple):
         self.spaces = spaces_list
         for i, space in enumerate(spaces_list):
             assert isinstance(
-                space, spaces.Box
+                space, Box
             ), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
 
         dims_continous = self._get_continous_dims()
@@ -36,7 +36,7 @@ class ContinuosParameters(gym.spaces.Tuple):
         dims_continous = self._get_continous_dims()
         return np.sum(dims_continous)
 
-    def build_action(self, discrete, parameters: np.ndarray) -> List[Tuple]:
+    def build_action(self, discrete, parameters: np.ndarray) -> List[typing.Tuple]:
         # We clip the parameters
         # param_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
         # param_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
