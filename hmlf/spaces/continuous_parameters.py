@@ -6,7 +6,7 @@ import numpy as np
 from hmlf.spaces.gym import Box, Tuple
 
 
-class ContinuosParameters(Tuple):
+class ContinuousParameters(Tuple):
     """
     A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
     Samples have the form (int, Box1.sample(), ..., BoxN.sample())
@@ -54,7 +54,7 @@ class ContinuosParameters(Tuple):
         return sample
 
     def __repr__(self) -> str:
-        return "ContinuosParameters(" + ", ".join([str(s) for s in self.spaces]) + ")"
+        return "ContinuousParameters(" + ", ".join([str(s) for s in self.spaces]) + ")"
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, ContinuosParameters) and self.spaces == other.spaces
+        return isinstance(other, ContinuousParameters) and self.spaces == other.spaces
