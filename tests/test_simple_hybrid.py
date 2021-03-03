@@ -32,12 +32,7 @@ def test_invalid_arguments():
         SimpleHybrid([make_box(shape=(1,)), make_box(shape=(1,))])
         continuous_spaces = [
             make_box([-1, 2.3], [45, 4.3]),
-            make_box(
-                [-10],
-                [
-                    45,
-                ],
-            ),
+            make_box([-10], [45]),
             make_box([50, 34, 0], [100, 120, 2]),
         ]
         SimpleHybrid([Discrete(3)] + continuous_spaces)
@@ -49,25 +44,14 @@ def test_dimensions():
     assert space.discrete_dim == 3
     assert space.continuous_dim == (1 + 3 + 2)
     assert space._get_continuous_dims() == [1, 3, 2]
-    assert np.array_equal(
-        space.split_indices,
-        [
-            1,
-            4,
-        ],
-    )
+    assert np.array_equal(space.split_indices, [1, 4])
     assert space.get_dimension() == (1 + 1 + 3 + 2)
 
 
 def test_low_high_concatination():
     continuous_spaces = [
         make_box([-1, 2.3], [45, 4.3]),
-        make_box(
-            [-10],
-            [
-                45,
-            ],
-        ),
+        make_box([-10], [45]),
         make_box([50, 34, 0], [100, 120, 2]),
     ]
     space = SimpleHybrid([Discrete(3)] + continuous_spaces)
@@ -79,15 +63,7 @@ def test_low_high_concatination():
 
 
 def test_build_action():
-    continuous_spaces = [
-        make_box([-1, 2.3], [45, 4.3]),
-        make_box(
-            [-10],
-            [
-                45,
-            ],
-        ),
-    ]
+    continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
     space = SimpleHybrid([Discrete(2)] + continuous_spaces)
 
     discrete = np.array([2, 0, 1])
@@ -114,15 +90,7 @@ def test_build_action():
 
 
 def test_repr_does_not_throw_error():
-    continuous_spaces = [
-        make_box([-1, 2.3], [45, 4.3]),
-        make_box(
-            [-10],
-            [
-                45,
-            ],
-        ),
-    ]
+    continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
     space = SimpleHybrid([Discrete(2)] + continuous_spaces)
     represensation_string = repr(space)
     represensation_string = represensation_string.replace(", float32", "")
@@ -130,25 +98,9 @@ def test_repr_does_not_throw_error():
 
 
 def test_comparison():
-    continuous_spaces = [
-        make_box([-1, 2.3], [45, 4.3]),
-        make_box(
-            [-10],
-            [
-                45,
-            ],
-        ),
-    ]
+    continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
     space = SimpleHybrid([Discrete(2)] + continuous_spaces)
-    continuous_spaces2 = [
-        make_box([-1, 54], [45, 4.3]),
-        make_box(
-            [-10],
-            [
-                445,
-            ],
-        ),
-    ]
+    continuous_spaces2 = [make_box([-1, 54], [45, 4.3]), make_box([-10], [445])]
     space2 = SimpleHybrid([Discrete(2)] + continuous_spaces2)
 
     assert space == space
