@@ -3,7 +3,7 @@ from typing import List, Optional
 import numpy as np
 import pytest
 
-from hmlf.spaces import Box, Discrete, SimpleHybrid, Tuple
+from hmlf.spaces import Box, Discrete, OneHotHybrid, SimpleHybrid, Tuple
 
 
 def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Optional[Tuple] = None) -> Box:
@@ -24,28 +24,28 @@ def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Opt
 
 def test_invalid_arguments():
     with pytest.raises(AssertionError):
-        SimpleHybrid("string")
-        SimpleHybrid(1.343)
-        SimpleHybrid([])
-        SimpleHybrid([1, 2])
-        SimpleHybrid([make_box(shape=(1,)), 2])
-        SimpleHybrid([make_box(shape=(1,)), make_box(shape=(1,))])
+        OneHotHybrid("string")
+        OneHotHybrid(1.343)
+        OneHotHybrid([])
+        OneHotHybrid([1, 2])
+        OneHotHybrid([make_box(shape=(1,)), 2])
+        OneHotHybrid([make_box(shape=(1,)), make_box(shape=(1,))])
         continuous_spaces = [
             make_box([-1, 2.3], [45, 4.3]),
             make_box([-10], [45]),
             make_box([50, 34, 0], [100, 120, 2]),
         ]
-        SimpleHybrid([Discrete(3)] + continuous_spaces)
+        OneHotHybrid([Discrete(3)] + continuous_spaces)
 
 
 def test_dimensions():
-    space = SimpleHybrid([Discrete(3), make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))])
+    space = OneHotHybrid([Discrete(3), make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))])
 
     assert space.discrete_dim == 3
     assert space.continuous_dim == (1 + 3 + 2)
     assert space._get_continuous_dims() == [1, 3, 2]
     assert np.array_equal(space.split_indices, [1, 4])
-    assert space.get_dimension() == (1 + 1 + 3 + 2)
+    assert space.get_dimension() == (3 + 1 + 3 + 2)
 
 
 def test_low_high_concatination():
@@ -54,7 +54,7 @@ def test_low_high_concatination():
         make_box([-10], [45]),
         make_box([50, 34, 0], [100, 120, 2]),
     ]
-    space = SimpleHybrid([Discrete(3)] + continuous_spaces)
+    space = OneHotHybrid([Discrete(3)] + continuous_spaces)
 
     print(space.continuous_low)
     print(space.continuous_high)
@@ -64,7 +64,7 @@ def test_low_high_concatination():
 
 def test_build_action():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = SimpleHybrid([Discrete(2)] + continuous_spaces)
+    space = OneHotHybrid([Discrete(2)] + continuous_spaces)
 
     discrete = np.array([2, 0, 1])
     parameters = np.array(
@@ -91,19 +91,21 @@ def test_build_action():
 
 def test_repr_does_not_throw_error():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = SimpleHybrid([Discrete(2)] + continuous_spaces)
+    space = OneHotHybrid([Discrete(2)] + continuous_spaces)
     represensation_string = repr(space)
     represensation_string = represensation_string.replace(", float32", "")
     eval(represensation_string)
-    assert "SimpleHybrid" in represensation_string
+    assert "OneHotHybrid" in represensation_string
 
 
 def test_comparison():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = SimpleHybrid([Discrete(2)] + continuous_spaces)
+    space = OneHotHybrid([Discrete(2)] + continuous_spaces)
     continuous_spaces2 = [make_box([-1, 54], [45, 4.3]), make_box([-10], [445])]
-    space2 = SimpleHybrid([Discrete(2)] + continuous_spaces2)
+    space2 = OneHotHybrid([Discrete(2)] + continuous_spaces2)
+    space3 = SimpleHybrid([Discrete(2)] + continuous_spaces)
 
     assert space == space
     assert space != "hi"
     assert space != space2
+    assert space != space3

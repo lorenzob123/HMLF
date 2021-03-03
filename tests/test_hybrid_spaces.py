@@ -8,19 +8,19 @@ from hmlf.spaces import OneHotHybrid, SimpleHybrid
 @pytest.mark.parametrize(
     "space_list",
     [
-        (
+        [
             Discrete(5),
             Box(low=-1, high=143, shape=(1,)),
             Box(low=1, high=1.2, shape=(2,)),
             Box(low=11, high=13, shape=(3,)),
             Box(low=-1, high=1, shape=(4,)),
             Box(low=-1, high=1, shape=(5,)),
-        ),
-        (
+        ],
+        [
             Discrete(2),
             Box(low=-1, high=143, shape=(1,)),
             Box(low=1, high=1.2, shape=(0,)),
-        ),
+        ],
     ],
 )
 def test_init_simple_hybrid(space_list):
@@ -47,19 +47,19 @@ def test_init_simple_hybrid(space_list):
 @pytest.mark.parametrize(
     "space_list",
     [
-        (
+        [
             Discrete(5),
             Box(low=-1, high=143, shape=(1,)),
             Box(low=1, high=1.2, shape=(2,)),
             Box(low=11, high=13, shape=(3,)),
             Box(low=-1, high=1, shape=(4,)),
             Box(low=-1, high=1, shape=(5,)),
-        ),
-        (
+        ],
+        [
             Discrete(2),
             Box(low=-1, high=143, shape=(1,)),
             Box(low=1, high=1.2, shape=(0,)),
-        ),
+        ],
     ],
 )
 def test_init_onehot_hybrid(space_list):
