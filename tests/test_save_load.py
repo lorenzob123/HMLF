@@ -10,24 +10,24 @@ import numpy as np
 import pytest
 import torch as th
 
-from hmlf import A2C, DDPG, DQN, PPO, SAC, TD3
-from hmlf.a2c import CnnPolicy as CnnPolicyA2C
-from hmlf.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms import A2C, DDPG, DQN, PPO, SAC, TD3
+from hmlf.algorithms.a2c import CnnPolicy as CnnPolicyA2C
+from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms.ddpg import CnnPolicy as CnnPolicyDDPG
+from hmlf.algorithms.ddpg import MlpPolicy as MlpPolicyDDPG
+from hmlf.algorithms.dqn import CnnPolicy as CnnPolicyDQN
+from hmlf.algorithms.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.algorithms.ppo import CnnPolicy as CnnPolicyPPO
+from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.algorithms.sac import CnnPolicy as CnnPolicySAC
+from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
+from hmlf.algorithms.td3 import CnnPolicy as CnnPolicyTD3
+from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
 from hmlf.common.base_class import BaseAlgorithm
 from hmlf.common.save_util import load_from_pkl, open_path, save_to_pkl
 from hmlf.common.utils import get_device
-from hmlf.ddpg import CnnPolicy as CnnPolicyDDPG
-from hmlf.ddpg import MlpPolicy as MlpPolicyDDPG
-from hmlf.dqn import CnnPolicy as CnnPolicyDQN
-from hmlf.dqn import MlpPolicy as MlpPolicyDQN
 from hmlf.environments.identity_env import FakeImageEnv, IdentityEnv, IdentityEnvBox
 from hmlf.environments.vec_env import DummyVecEnv
-from hmlf.ppo import CnnPolicy as CnnPolicyPPO
-from hmlf.ppo import MlpPolicy as MlpPolicyPPO
-from hmlf.sac import CnnPolicy as CnnPolicySAC
-from hmlf.sac import MlpPolicy as MlpPolicySAC
-from hmlf.td3 import CnnPolicy as CnnPolicyTD3
-from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 MODEL_LIST = [
     (A2C, MlpPolicyA2C),

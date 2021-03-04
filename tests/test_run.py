@@ -1,14 +1,14 @@
 import numpy as np
 import pytest
 
-from hmlf import A2C, DDPG, DQN, PPO, SAC, TD3
-from hmlf.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms import A2C, DDPG, DQN, PPO, SAC, TD3
+from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms.ddpg import MlpPolicy as MlpPolicyDDPG
+from hmlf.algorithms.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
+from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
 from hmlf.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
-from hmlf.ddpg import MlpPolicy as MlpPolicyDDPG
-from hmlf.dqn import MlpPolicy as MlpPolicyDQN
-from hmlf.ppo import MlpPolicy as MlpPolicyPPO
-from hmlf.sac import MlpPolicy as MlpPolicySAC
-from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 normal_action_noise = NormalActionNoise(np.zeros(1), 0.1 * np.ones(1))
 

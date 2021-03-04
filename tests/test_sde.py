@@ -2,10 +2,10 @@ import pytest
 import torch as th
 from torch.distributions import Normal
 
-from hmlf import A2C, PPO, SAC
-from hmlf.a2c import MlpPolicy as MlpPolicyA2C
-from hmlf.ppo import MlpPolicy as MlpPolicyPPO
-from hmlf.sac import MlpPolicy as MlpPolicySAC
+from hmlf.algorithms import A2C, PPO, SAC
+from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
 
 
 def test_state_dependent_exploration_grad():

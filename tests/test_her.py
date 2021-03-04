@@ -8,16 +8,16 @@ import numpy as np
 import pytest
 import torch as th
 
-from hmlf import DDPG, DQN, HER, SAC, TD3
-from hmlf.ddpg import MlpPolicy as MlpPolicyDDPG
-from hmlf.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.algorithms import DDPG, DQN, HER, SAC, TD3
+from hmlf.algorithms.ddpg import MlpPolicy as MlpPolicyDDPG
+from hmlf.algorithms.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.algorithms.her.goal_selection_strategy import GoalSelectionStrategy
+from hmlf.algorithms.her.her import get_time_limit
+from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
+from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
 from hmlf.environments.bit_flipping_env import BitFlippingEnv
 from hmlf.environments.vec_env import DummyVecEnv
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
-from hmlf.her.goal_selection_strategy import GoalSelectionStrategy
-from hmlf.her.her import get_time_limit
-from hmlf.sac import MlpPolicy as MlpPolicySAC
-from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 
 @pytest.mark.parametrize(

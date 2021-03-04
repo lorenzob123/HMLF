@@ -1,8 +1,9 @@
 import pytest
 import torch as th
 
-from hmlf import A2C, PPO
-from hmlf.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms import A2C, PPO
+from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
 from hmlf.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
@@ -13,7 +14,6 @@ from hmlf.common.distributions import (
     TanhBijector,
 )
 from hmlf.common.utils import set_random_seed
-from hmlf.ppo import MlpPolicy as MlpPolicyPPO
 
 N_ACTIONS = 2
 N_FEATURES = 3

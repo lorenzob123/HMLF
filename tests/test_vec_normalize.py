@@ -2,12 +2,13 @@ import gym
 import numpy as np
 import pytest
 
-from hmlf import HER, SAC, TD3, spaces
+from hmlf import spaces
+from hmlf.algorithms import HER, SAC, TD3
+from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
+from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
 from hmlf.common.monitor import Monitor
 from hmlf.common.running_mean_std import RunningMeanStd
 from hmlf.environments.vec_env import DummyVecEnv, VecFrameStack, VecNormalize, sync_envs_normalization, unwrap_vec_normalize
-from hmlf.sac import MlpPolicy as MlpPolicySAC
-from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 ENV_ID = "Pendulum-v0"
 

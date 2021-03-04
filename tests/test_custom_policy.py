@@ -1,13 +1,13 @@
 import pytest
 import torch as th
 
-from hmlf import A2C, DQN, PPO, SAC, TD3
-from hmlf.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms import A2C, DQN, PPO, SAC, TD3
+from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
+from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
 from hmlf.common.sb2_compat.rmsprop_tf_like import RMSpropTFLike
-from hmlf.dqn import MlpPolicy as MlpPolicyDQN
-from hmlf.ppo import MlpPolicy as MlpPolicyPPO
-from hmlf.sac import MlpPolicy as MlpPolicySAC
-from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 
 @pytest.mark.parametrize(

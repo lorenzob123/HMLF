@@ -5,16 +5,17 @@ import numpy as np
 import pytest
 import torch as th
 
-from hmlf import A2C, DQN, PPO, SAC, TD3, spaces
-from hmlf.a2c import CnnPolicy as CnnPolicyA2C
+from hmlf import spaces
+from hmlf.algorithms import A2C, DQN, PPO, SAC, TD3
+from hmlf.algorithms.a2c import CnnPolicy as CnnPolicyA2C
+from hmlf.algorithms.dqn import CnnPolicy as CnnPolicyDQN
+from hmlf.algorithms.ppo import CnnPolicy as CnnPolicyPPO
+from hmlf.algorithms.sac import CnnPolicy as CnnPolicySAC
+from hmlf.algorithms.td3 import CnnPolicy as CnnPolicyTD3
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.utils import zip_strict
-from hmlf.dqn import CnnPolicy as CnnPolicyDQN
 from hmlf.environments.identity_env import FakeImageEnv
 from hmlf.environments.vec_env import VecTransposeImage, is_vecenv_wrapped
-from hmlf.ppo import CnnPolicy as CnnPolicyPPO
-from hmlf.sac import CnnPolicy as CnnPolicySAC
-from hmlf.td3 import CnnPolicy as CnnPolicyTD3
 
 
 @pytest.mark.parametrize(

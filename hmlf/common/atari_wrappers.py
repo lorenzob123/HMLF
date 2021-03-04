@@ -10,7 +10,10 @@ try:
 except ImportError:
     cv2 = None
 
-from hmlf.common.type_aliases import GymObs, GymStepReturn
+import typing
+
+if typing.TYPE_CHECKING:
+    from hmlf.common.type_aliases import GymObs, GymStepReturn
 
 
 class NoopResetEnv(gym.Wrapper):
@@ -80,7 +83,7 @@ class EpisodicLifeEnv(gym.Wrapper):
         self.lives = 0
         self.was_real_done = True
 
-    def step(self, action: int) -> GymStepReturn:
+    def step(self, action: int) -> "GymStepReturn":
         obs, reward, done, info = self.env.step(action)
         self.was_real_done = done
         # check current lives, make loss of life terminal,
@@ -126,7 +129,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         self._obs_buffer = np.zeros((2,) + env.observation_space.shape, dtype=env.observation_space.dtype)
         self._skip = skip
 
-    def step(self, action: int) -> GymStepReturn:
+    def step(self, action: int) -> "GymStepReturn":
         """
         Step the environment with the given action
         Repeat action, sum reward, and max over last observations.
@@ -151,7 +154,7 @@ class MaxAndSkipEnv(gym.Wrapper):
 
         return max_frame, total_reward, done, info
 
-    def reset(self, **kwargs) -> GymObs:
+    def reset(self, **kwargs) -> "GymObs":
         return self.env.reset(**kwargs)
 
 

@@ -6,8 +6,9 @@ import numpy as np
 import pytest
 import torch as th
 
-from hmlf import A2C, PPO
-from hmlf.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms import A2C, PPO
+from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
 from hmlf.common.atari_wrappers import ClipRewardEnv
 from hmlf.common.env_util import is_wrapped, make_atari_env, make_vec_env, unwrap_wrapper
 from hmlf.common.evaluation import evaluate_policy
@@ -15,7 +16,6 @@ from hmlf.common.monitor import Monitor
 from hmlf.common.noise import ActionNoise, OrnsteinUhlenbeckActionNoise, VectorizedActionNoise
 from hmlf.common.utils import polyak_update, zip_strict
 from hmlf.environments.vec_env import DummyVecEnv, SubprocVecEnv
-from hmlf.ppo import MlpPolicy as MlpPolicyPPO
 
 
 @pytest.mark.parametrize("env_id", ["CartPole-v1", lambda: gym.make("CartPole-v1")])

@@ -5,8 +5,13 @@ import gym
 import numpy as np
 import pytest
 
-from hmlf import A2C, DDPG, DQN, HER, PPO, SAC, TD3
-from hmlf.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms import A2C, DDPG, DQN, HER, PPO, SAC, TD3
+from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
+from hmlf.algorithms.ddpg import MlpPolicy as MlpPolicyDDPG
+from hmlf.algorithms.dqn import MlpPolicy as MlpPolicyDQN
+from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
+from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
+from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
 from hmlf.common.callbacks import (
     CallbackList,
     CheckpointCallback,
@@ -16,14 +21,9 @@ from hmlf.common.callbacks import (
     StopTrainingOnRewardThreshold,
 )
 from hmlf.common.env_util import make_vec_env
-from hmlf.ddpg import MlpPolicy as MlpPolicyDDPG
-from hmlf.dqn import MlpPolicy as MlpPolicyDQN
 from hmlf.environments.bit_flipping_env import BitFlippingEnv
 from hmlf.environments.vec_env import DummyVecEnv
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
-from hmlf.ppo import MlpPolicy as MlpPolicyPPO
-from hmlf.sac import MlpPolicy as MlpPolicySAC
-from hmlf.td3 import MlpPolicy as MlpPolicyTD3
 
 
 @pytest.mark.parametrize(
