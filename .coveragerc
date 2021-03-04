@@ -1,5 +1,6 @@
 [run]
 branch = False
+source=hmlf
 omit =
     tests/*
     setup.py

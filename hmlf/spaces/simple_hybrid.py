@@ -16,7 +16,21 @@ class SimpleHybrid(Tuple):
 
     def __init__(self, spaces_list: List[Space]):
         self.spaces = spaces_list
-        for i, space in enumerate(spaces_list):
+        self._validate_arguments()
+
+        self.discrete_dim = self._get_discrete_dim()
+        dims_continuous = self._get_continuous_dims()
+        self.continuous_dim = np.sum(dims_continuous)
+        self.split_indices = np.cumsum(dims_continuous[:-1])
+
+        self.continuous_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
+        self.continuous_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
+
+    def _validate_arguments(self):
+        assert isinstance(self.spaces, list), f"spaces_list arguments needs to of type list. Found {type(self.spaces)}."
+        assert len(self.spaces) > 0, f"spaces_list arguments needs to be non empty. Found {self.spaces}."
+
+        for i, space in enumerate(self.spaces):
             assert isinstance(space, Space), "Elements of the SimpleHybrid must be instances of hmlf.Space"
             if i == 0:
                 assert isinstance(space, Discrete), "First element of SimpleHybrid has to be of type hmlf.spaces.Discrete"
@@ -25,12 +39,14 @@ class SimpleHybrid(Tuple):
                     space, Box
                 ), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
 
-        self.discrete_dim = self.spaces[0].n
-        dims_continuous = self._get_continuous_dims()
-        self.continuous_dim = np.sum(dims_continuous)
+        discrete_dimension = self._get_discrete_dim()
+        n_parameter_spaces = len(self.spaces) - 1
+        assert (
+            discrete_dimension == n_parameter_spaces
+        ), f"Discrete dimension should be len(spaces_list) - 1. Found {discrete_dimension}, {n_parameter_spaces}."
 
-        self.continuous_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
-        self.continuous_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
+    def _get_discrete_dim(self):
+        return self.spaces[0].n
 
     def _get_continuous_dims(self) -> List[int]:
         # Since each space is one dimensional, shape[0] gets the dimension
@@ -50,19 +66,15 @@ class SimpleHybrid(Tuple):
         # We clip the parameters
         parameters = np.clip(parameters, self.continuous_low, self.continuous_high)
 
-        # We prepare the split of the parameters for each discrete action
-        dims_continuous = self._get_continuous_dims()
-        split_indices = np.cumsum(dims_continuous[:-1])
-
         # We format the full action for each environment
         sample = []
         for i in range(discrete.shape[0]):
-            sample.append(tuple([discrete[i]] + np.split(parameters[i], split_indices)))
+            sample.append(tuple([discrete[i]] + np.split(parameters[i], self.split_indices)))
 
         return sample
 
     def __repr__(self) -> str:
-        return "SimpleHybrid(" + ", ".join([str(s) for s in self.spaces]) + ")"
+        return "SimpleHybrid([" + ", ".join([repr(s) for s in self.spaces]) + "])"
 
     def __eq__(self, other) -> bool:
         return isinstance(other, SimpleHybrid) and self.spaces == other.spaces

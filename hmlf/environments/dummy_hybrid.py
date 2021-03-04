@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import gym
 import numpy as np
@@ -17,6 +17,8 @@ class DummyHybrid(gym.Env):
         self.N_MAX_STEPS = 50
         self.REWARD_CUTOFF = 0.995 - 1
 
+        self._validate_arguments(parameter_dimensions, observation_dimension)
+
         self.n_steps = 0
         self.n_parameter_spaces = len(parameter_dimensions)
         self.parameter_dimensions = parameter_dimensions
@@ -24,6 +26,22 @@ class DummyHybrid(gym.Env):
 
         self.action_space = self._build_action_space()
         self.observation_space = self._build_observation_space()
+
+    def _validate_arguments(self, parameter_dimensions: List[int], observation_dimension: int):
+        assert (
+            type(parameter_dimensions) is list
+        ), f"Please input parameter_dimensions of type list. Found {type(parameter_dimensions)}"
+        assert (
+            type(observation_dimension) is int
+        ), f"Please input observation_dimension of type int. Found {type(observation_dimension)}"
+        for dimension in parameter_dimensions:
+            assert type(dimension) is int, f"Please input dimension of type int. Found {type(dimension)}"
+            if dimension <= 0:
+                raise ValueError(f"Dimensions have to be > 0. Found {dimension}")
+        if len(parameter_dimensions) == 0:
+            raise ValueError("Please parameter_dimensions of length >0. Found 0")
+
+        assert observation_dimension > 0, f"Observation dimension has to be greater than 0. Found {observation_dimension}"
 
     def _build_action_space(self) -> SimpleHybrid:
         parameter_spaces = self._build_parameter_spaces()
@@ -40,7 +58,7 @@ class DummyHybrid(gym.Env):
         self.n_steps = 0
         return self._get_observation()
 
-    def step(self, action: Tuple[int, List[np.ndarray]]):
+    def step(self, action: Tuple[int, List[np.ndarray]]) -> Tuple[np.ndarray, float, bool, Dict]:
         self.n_steps += 1
 
         observation = self._get_observation()
@@ -60,7 +78,7 @@ class DummyHybrid(gym.Env):
 
         reward = np.exp(-difference_to_target)
         reward = reward - 1
-        return reward
+        return float(reward)
 
     def _get_discrete(self, action: Tuple[int, List[np.ndarray]]) -> int:
         return action[0]

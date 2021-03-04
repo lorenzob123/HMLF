@@ -163,7 +163,7 @@ class PADDPG(TD3):
         if self.num_timesteps < learning_starts and not (self.use_sde and self.use_sde_at_warmup):
             # Warmup phase
             # unscaled_action = np.hstack(self.action_space.sample()).astype(np.float32)
-            unscaled_action = self.action_space.sample()
+            unscaled_action = np.hstack(self.action_space.sample())
         else:
             # Note: when using continuous actions,
             # we assume that the policy uses tanh to scale the action
