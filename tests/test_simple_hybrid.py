@@ -25,17 +25,23 @@ def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Opt
 def test_invalid_arguments():
     with pytest.raises(AssertionError):
         SimpleHybrid("string")
+    with pytest.raises(AssertionError):
         SimpleHybrid(1.343)
+    with pytest.raises(AssertionError):
         SimpleHybrid([])
+    with pytest.raises(AssertionError):
         SimpleHybrid([1, 2])
+    with pytest.raises(AssertionError):
         SimpleHybrid([make_box(shape=(1,)), 2])
+    with pytest.raises(AssertionError):
         SimpleHybrid([make_box(shape=(1,)), make_box(shape=(1,))])
+    with pytest.raises(AssertionError):
         continuous_spaces = [
             make_box([-1, 2.3], [45, 4.3]),
             make_box([-10], [45]),
             make_box([50, 34, 0], [100, 120, 2]),
         ]
-        SimpleHybrid([Discrete(3)] + continuous_spaces)
+        SimpleHybrid([Discrete(10)] + continuous_spaces)
 
 
 def test_dimensions():

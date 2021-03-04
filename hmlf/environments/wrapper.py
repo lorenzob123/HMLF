@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 
-from hmlf.spaces import ContinuosParameters, OneHotHybrid, SimpleHybrid
+from hmlf.spaces import ContinuousParameters, OneHotHybrid, SimpleHybrid
 
 
 class OneHotWrapper(gym.Wrapper):
@@ -24,7 +24,7 @@ class SequenceWrapper(gym.Wrapper):
         self.env = env
 
         # The action space does not need to include the discrete action
-        self.action_space = ContinuosParameters(env.action_space.spaces[1:])
+        self.action_space = ContinuousParameters(env.action_space.spaces[1:])
 
         # We append the discrete action as an obseration
         low = np.append(0, self.env.observation_space.low)

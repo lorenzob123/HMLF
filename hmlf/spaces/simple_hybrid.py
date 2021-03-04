@@ -29,20 +29,22 @@ class SimpleHybrid(Tuple):
     def _validate_arguments(self):
         assert isinstance(self.spaces, list), f"spaces_list arguments needs to of type list. Found {type(self.spaces)}."
         assert len(self.spaces) > 0, f"spaces_list arguments needs to be non empty. Found {self.spaces}."
-        discrete_dimension = self._get_discrete_dim()
-        n_parameter_spaces = len(self.spaces) - 1
-        assert (
-            discrete_dimension == n_parameter_spaces
-        ), f"Discrete dimension should be len(spaces_list) - 1. Found {discrete_dimension}, {n_parameter_spaces}."
 
         for i, space in enumerate(self.spaces):
             assert isinstance(space, Space), "Elements of the SimpleHybrid must be instances of hmlf.Space"
+            print(i, space)
             if i == 0:
                 assert isinstance(space, Discrete), "First element of SimpleHybrid has to be of type hmlf.spaces.Discrete"
             else:
                 assert isinstance(
                     space, Box
                 ), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
+
+        discrete_dimension = self._get_discrete_dim()
+        n_parameter_spaces = len(self.spaces) - 1
+        assert (
+            discrete_dimension == n_parameter_spaces
+        ), f"Discrete dimension should be len(spaces_list) - 1. Found {discrete_dimension}, {n_parameter_spaces}."
 
     def _get_discrete_dim(self):
         return self.spaces[0].n
