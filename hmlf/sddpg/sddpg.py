@@ -248,4 +248,4 @@ class SDDPG(OffPolicyAlgorithm):
 
         # Rescale the action from [low, high] to [-1, 1]
 
-        return action, buffer_action
+        return np.array(action), np.array(buffer_action)
