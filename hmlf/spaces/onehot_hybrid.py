@@ -3,10 +3,10 @@ from typing import List
 
 import numpy as np
 
-from hmlf.spaces.simple_hybrid import SimpleHybrid
+from hmlf.spaces.gym import Tuple
 
 
-class OneHotHybrid(SimpleHybrid):
+class OneHotHybrid(Tuple):
     """
     A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
     Samples have the form (int, Box1.sample(), ..., BoxN.sample())
