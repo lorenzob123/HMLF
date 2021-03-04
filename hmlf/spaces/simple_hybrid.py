@@ -32,7 +32,6 @@ class SimpleHybrid(Tuple):
 
         for i, space in enumerate(self.spaces):
             assert isinstance(space, Space), "Elements of the SimpleHybrid must be instances of hmlf.Space"
-            print(i, space)
             if i == 0:
                 assert isinstance(space, Discrete), "First element of SimpleHybrid has to be of type hmlf.spaces.Discrete"
             else:
