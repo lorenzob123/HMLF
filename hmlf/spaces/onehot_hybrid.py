@@ -3,15 +3,19 @@ from typing import List
 
 import numpy as np
 
-from hmlf.spaces.gym import Tuple
+from hmlf.spaces.simple_hybrid import SimpleHybrid
 
 
-class OneHotHybrid(Tuple):
+class OneHotHybrid(SimpleHybrid):
     """
-    A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
-    Samples have the form (int, Box1.sample(), ..., BoxN.sample())
+    A tuple (i.e., product) of simpler spaces, where the first space is Discrete encoded as hot one econding
+     and the other are Box. Samples have the form ((0, 0, ..., 1, 0, .., 0), Box1.sample(), ..., BoxN.sample())
     Example usage:
-    self.observation_space = spaces.Tuple((spaces.Discrete(2), hmlf.spaces.Box(np.array((0, 1)), np.array((2, 3)))))
+    action_space = OneHotHybrid(spaces.Tuple((spaces.Discrete(2), hmlf.spaces.Box(np.array((0, 1)), np.array((2, 3)))
+                                hmlf.spaces.Box(0, 1, shape=(2,)))))
+    action_space.sample() -> np.array([0, 1, .2, 21.3, .3, .6])
+
+    :param tuple of spaces, where the first is a Discrete space and the rest Box(es) spaces
     """
 
     def __init__(self, spaces):
@@ -24,7 +28,7 @@ class OneHotHybrid(Tuple):
     def sample(self):
         discrete_action = np.zeros(self.spaces[0].n)
         np.put(discrete_action, self.spaces[0].sample(), 1)
-        return np.hstack([discrete_action] + [space.sample() for space in self.spaces[1:]])
+        return (discrete_action,) + tuple(space.sample() for space in self.spaces[1:])
 
     def format_action(self, actions) -> List:
         discrete, parameters = actions[:, : self.discrete_dim], actions[:, self.discrete_dim :]
