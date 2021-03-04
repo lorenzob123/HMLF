@@ -68,13 +68,14 @@ def test_init_onehot_hybrid(space_list):
     sample = hybrid_space.sample()
 
     # check type and dimensions
-    assert type(sample) == np.ndarray
-    for s in sample[: hybrid_space.discrete_dim]:
-        assert s == 1 or s == 0
-    assert len(sample) == hybrid_space.get_dimension()
+    assert type(sample) == tuple
+    assert sum(sample[0]) == 1
+    assert sum(sample[0] == 1) == 1
+    assert sum(sample[0] == 0) == hybrid_space.discrete_dim - 1
+    assert np.hstack(sample).shape[0] == hybrid_space.get_dimension()
 
     # check that sample and format_action work correctly
-    sample_list = [hybrid_space.sample(), hybrid_space.sample()]
+    sample_list = [np.hstack(hybrid_space.sample()), np.hstack(hybrid_space.sample())]
     new_sample_list = hybrid_space.format_action(np.vstack(sample_list))
 
     for sample, new_sample in zip(sample_list, new_sample_list):
