@@ -5,6 +5,10 @@ from hmlf import spaces
 
 
 class PaAcBipedalWalker(gym.Wrapper):
+    """Wrapper for the BipedalWalker, where you can only move one leg per time step
+       making the environment effectivly a hybrid space.
+
+    """
     def __init__(self, env):
         super().__init__(env)
         self.env = env
