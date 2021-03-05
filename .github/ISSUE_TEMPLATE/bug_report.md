@@ -5,10 +5,6 @@ labels: bug
 title: "[Bug] bug title"
 ---
 
-**Important Note: We do not do technical support, nor consulting** and don't answer personal questions per email.
-Please post your question on [reddit](https://www.reddit.com/r/reinforcementlearning/) or [stack overflow](https://stackoverflow.com/) in that case.
-
-
 If your issue is related to a **custom gym environment**, please use the custom gym env template.
 
 ### 🐛 Bug
@@ -52,9 +48,3 @@ Describe the characteristic of your environment:
 
 ### Additional context
 Add any other context about the problem here.
-
-### Checklist
-
-- [ ] I have checked that there is no similar [issue](https://github.com/DLR-RM/stable-baselines3/issues) in the repo (**required**)
-- [ ] I have read the [documentation](https://stable-baselines3.readthedocs.io/en/master/) (**required**)
-- [ ] I have provided a minimal working example to reproduce the bug (**required**)
