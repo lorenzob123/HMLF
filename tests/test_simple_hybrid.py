@@ -23,18 +23,14 @@ def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Opt
 
 
 def test_invalid_arguments():
-    with pytest.raises(AssertionError):
+    with pytest.raises(TypeError):
         SimpleHybrid("string")
-    with pytest.raises(AssertionError):
+    with pytest.raises(TypeError):
         SimpleHybrid(1.343)
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         SimpleHybrid([])
     with pytest.raises(AssertionError):
         SimpleHybrid([1, 2])
-    with pytest.raises(AssertionError):
-        SimpleHybrid([make_box(shape=(1,)), 2])
-    with pytest.raises(AssertionError):
-        SimpleHybrid([make_box(shape=(1,)), make_box(shape=(1,))])
     with pytest.raises(AssertionError):
         continuous_spaces = [
             make_box([-1, 2.3], [45, 4.3]),
@@ -45,11 +41,19 @@ def test_invalid_arguments():
 
 
 def test_dimensions():
-    space = SimpleHybrid([Discrete(3), make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))])
+    space = SimpleHybrid([make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))])
 
-    assert space.discrete_dim == 3
-    assert space.continuous_dim == (1 + 3 + 2)
-    assert space._get_continuous_dims() == [1, 3, 2]
+    assert space.n_discrete_options == 3
+    assert space.get_n_discrete_spaces() == 1
+    assert space.get_n_discrete_options() == 3
+
+    assert isinstance(space._get_continuous_spaces(), list)
+    assert len(space._get_continuous_spaces()) == 3
+
+    assert space.get_n_continuous_spaces() == 3
+    assert space.get_n_continuous_options() == (1 + 3 + 2)
+    assert space._get_dimensions_of_continuous_spaces() == [1, 3, 2]
+
     assert np.array_equal(space.split_indices, [1, 4])
     assert space.get_dimension() == (1 + 1 + 3 + 2)
 
@@ -60,7 +64,7 @@ def test_low_high_concatination():
         make_box([-10], [45]),
         make_box([50, 34, 0], [100, 120, 2]),
     ]
-    space = SimpleHybrid([Discrete(3)] + continuous_spaces)
+    space = SimpleHybrid(continuous_spaces)
 
     print(space.continuous_low)
     print(space.continuous_high)
@@ -70,7 +74,7 @@ def test_low_high_concatination():
 
 def test_build_action():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = SimpleHybrid([Discrete(2)] + continuous_spaces)
+    space = SimpleHybrid(continuous_spaces)
 
     discrete = np.array([2, 0, 1])
     parameters = np.array(
@@ -97,7 +101,7 @@ def test_build_action():
 
 def test_repr_does_not_throw_error():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = SimpleHybrid([Discrete(2)] + continuous_spaces)
+    space = SimpleHybrid(continuous_spaces)
     represensation_string = repr(space)
     represensation_string = represensation_string.replace(", float32", "")
     eval(represensation_string)
@@ -106,9 +110,9 @@ def test_repr_does_not_throw_error():
 
 def test_comparison():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = SimpleHybrid([Discrete(2)] + continuous_spaces)
+    space = SimpleHybrid(continuous_spaces)
     continuous_spaces2 = [make_box([-1, 54], [45, 4.3]), make_box([-10], [445])]
-    space2 = SimpleHybrid([Discrete(2)] + continuous_spaces2)
+    space2 = SimpleHybrid(continuous_spaces2)
 
     assert space == space
     assert space != "hi"

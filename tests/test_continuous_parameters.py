@@ -3,7 +3,7 @@ from typing import List, Optional
 import numpy as np
 import pytest
 
-from hmlf.spaces import Box, Discrete, OneHotHybrid, SimpleHybrid, Tuple
+from hmlf.spaces import Box, ContinuousParameters, Discrete, SimpleHybrid, Tuple
 
 
 def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Optional[Tuple] = None) -> Box:
@@ -23,29 +23,30 @@ def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Opt
 
 
 def test_invalid_arguments():
-    with pytest.raises(TypeError):
-        OneHotHybrid("string")
-    with pytest.raises(TypeError):
-        OneHotHybrid(1.343)
-    with pytest.raises(ValueError):
-        OneHotHybrid([])
     with pytest.raises(AssertionError):
-        OneHotHybrid([1, 2])
+        ContinuousParameters("string")
+    with pytest.raises(AssertionError):
+        ContinuousParameters(1.343)
+    with pytest.raises(AssertionError):
+        ContinuousParameters([])
+    with pytest.raises(AssertionError):
+        ContinuousParameters([1, 2])
+    with pytest.raises(AssertionError):
+        ContinuousParameters([make_box(shape=(1,)), 2])
     with pytest.raises(AssertionError):
         continuous_spaces = [
             make_box([-1, 2.3], [45, 4.3]),
             make_box([-10], [45]),
             make_box([50, 34, 0], [100, 120, 2]),
         ]
-        OneHotHybrid([Discrete(5)] + continuous_spaces)
+        ContinuousParameters([Discrete(1)] + continuous_spaces)
 
 
 def test_dimensions():
-    space = OneHotHybrid([make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))])
+    space = ContinuousParameters([make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))])
 
-    assert space.n_discrete_options == 3
-    assert space.get_n_discrete_spaces() == 3
-    assert space.get_n_discrete_options() == 3
+    assert space.get_n_discrete_spaces() == 0
+    assert space.get_n_discrete_options() == 0
 
     assert isinstance(space._get_continuous_spaces(), list)
     assert len(space._get_continuous_spaces()) == 3
@@ -55,26 +56,12 @@ def test_dimensions():
     assert space._get_dimensions_of_continuous_spaces() == [1, 3, 2]
 
     assert np.array_equal(space.split_indices, [1, 4])
-    assert space.get_dimension() == (3 + 1 + 3 + 2)
-
-
-def test_low_high_concatination():
-    continuous_spaces = [
-        make_box([-1, 2.3], [45, 4.3]),
-        make_box([-10], [45]),
-        make_box([50, 34, 0], [100, 120, 2]),
-    ]
-    space = OneHotHybrid(continuous_spaces)
-
-    print(space.continuous_low)
-    print(space.continuous_high)
-    assert np.allclose(space.continuous_low, [-1.0, 2.3, -10.0, 50.0, 34.0, 0.0])
-    assert np.allclose(space.continuous_high, [45.0, 4.3, 45.0, 100.0, 120.0, 2.0])
+    assert space.get_dimension() == (0 + 1 + 3 + 2)
 
 
 def test_build_action():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = OneHotHybrid(continuous_spaces)
+    space = ContinuousParameters(continuous_spaces)
 
     discrete = np.array([2, 0, 1])
     parameters = np.array(
@@ -86,36 +73,30 @@ def test_build_action():
     )
 
     action = space.build_action(discrete, parameters)
+    print(action)
+
     assert isinstance(action, list)
     assert len(action) == 3
-    assert len(action[0]) == 3
+    assert len(action[0]) == 2
     assert isinstance(action[0], tuple)
-    assert action[0][0] == 2
-    assert action[1][0] == 0
-    assert action[2][0] == 1
-    assert np.allclose(action[0][1], [0.0, 3.0])
-    assert np.allclose(action[0][2], [2])
-    assert np.allclose(action[1][1], [-1, 3])
-    assert np.allclose(action[1][2], [45])
+    assert len(action[0]) == 2
 
 
 def test_repr_does_not_throw_error():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = OneHotHybrid(continuous_spaces)
+    space = ContinuousParameters(continuous_spaces)
     represensation_string = repr(space)
     represensation_string = represensation_string.replace(", float32", "")
     eval(represensation_string)
-    assert "OneHotHybrid" in represensation_string
+    assert "ContinuousParameters" in represensation_string
 
 
 def test_comparison():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = OneHotHybrid(continuous_spaces)
+    space = ContinuousParameters(continuous_spaces)
     continuous_spaces2 = [make_box([-1, 54], [45, 4.3]), make_box([-10], [445])]
-    space2 = OneHotHybrid(continuous_spaces2)
-    space3 = SimpleHybrid(continuous_spaces)
+    space2 = SimpleHybrid(continuous_spaces2)
 
     assert space == space
     assert space != "hi"
     assert space != space2
-    assert space != space3
