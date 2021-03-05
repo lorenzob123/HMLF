@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from hmlf.spaces import Box, Discrete, SimpleHybrid, Tuple
+from hmlf.spaces.hybrid_base import HybridBase
 
 
 def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Optional[Tuple] = None) -> Box:
@@ -117,3 +118,4 @@ def test_comparison():
     assert space == space
     assert space != "hi"
     assert space != space2
+    assert issubclass(SimpleHybrid, HybridBase)
