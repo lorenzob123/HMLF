@@ -8,12 +8,15 @@ from hmlf.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
     DiagGaussianDistribution,
+    HybridDistribution,
     MultiCategoricalDistribution,
     SquashedDiagGaussianDistribution,
     StateDependentNoiseDistribution,
     TanhBijector,
 )
 from hmlf.common.utils import set_random_seed
+from hmlf.spaces import SimpleHybrid
+from hmlf.spaces.gym import Box,Discrete
 
 N_ACTIONS = 2
 N_FEATURES = 3
@@ -115,6 +118,45 @@ def test_categorical(dist, CAT_ACTIONS):
     set_random_seed(1)
     action_logits = th.rand(N_SAMPLES, CAT_ACTIONS)
     dist = dist.proba_distribution(action_logits)
+    actions = dist.get_actions()
+    entropy = dist.entropy()
+    log_prob = dist.log_prob(actions)
+    assert th.allclose(entropy.mean(), -log_prob.mean(), rtol=5e-3)
+
+
+@pytest.mark.parametrize(
+    "action_space",
+    [
+        SimpleHybrid([
+            Discrete(5),
+            Box(low=-1, high=143, shape=(1,)),
+            Box(low=1, high=1.2, shape=(2,)),
+            Box(low=11, high=13, shape=(3,)),
+            Box(low=-1, high=1, shape=(4,)),
+            Box(low=-1, high=1, shape=(5,)),
+        ]),
+
+        SimpleHybrid([
+            Discrete(2),
+            Box(low=-1, high=143, shape=(1,)),
+            Box(low=1, high=1.2, shape=(0,)),
+        ]),
+    ],
+)
+def test_hybrid(action_space):
+    # The entropy can be approximated by averaging the negative log likelihood
+    # mean negative log likelihood == entropy
+    set_random_seed(1)
+    dist = HybridDistribution(action_space)
+
+    set_random_seed(1)
+    #
+    dim = action_space.continuous_dim + action_space.discrete_dim
+    deterministic_actions = th.rand(N_SAMPLES, dim)
+    _, log_std = dist.proba_distribution_net(N_FEATURES, log_std_init=th.log(th.tensor(0.2)))
+
+    dist = dist.proba_distribution(deterministic_actions, log_std)
+
     actions = dist.get_actions()
     entropy = dist.entropy()
     log_prob = dist.log_prob(actions)
