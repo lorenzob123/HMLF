@@ -27,7 +27,7 @@ class SimpleHybrid(Tuple):
         self.continuous_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
 
     def _validate_arguments(self):
-        assert isinstance(self.spaces, list), f"spaces_list arguments needs to of type list. Found {type(self.spaces)}."
+        assert isinstance(self.spaces, list, tuple), f"spaces_list arguments needs to of type list. Found {type(self.spaces)}."
         assert len(self.spaces) > 0, f"spaces_list arguments needs to be non empty. Found {self.spaces}."
 
         for i, space in enumerate(self.spaces):
