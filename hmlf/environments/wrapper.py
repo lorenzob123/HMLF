@@ -8,7 +8,11 @@ class OneHotWrapper(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)
         self.env = env
-        self.action_space = OneHotHybrid(env.action_space.spaces)
+        self.action_space = OneHotHybrid(env.action_space.spaces[1:])
+
+    def step(self, action):
+        discrete = np.argmax(action[0])
+        return self.env.step((discrete, *action[1:]))
 
 
 class SimpleHybridWrapper(gym.Wrapper):

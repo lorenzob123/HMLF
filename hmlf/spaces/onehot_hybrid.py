@@ -1,8 +1,8 @@
-import typing
-from typing import List
+from typing import List, Tuple, Union
 
 import numpy as np
 
+from hmlf.spaces.gym import Space
 from hmlf.spaces.simple_hybrid import SimpleHybrid
 
 
@@ -18,42 +18,20 @@ class OneHotHybrid(SimpleHybrid):
     :param tuple of spaces, where the first is a Discrete space and the rest Box(es) spaces
     """
 
-    def __init__(self, spaces):
+    def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
         super().__init__(spaces)
 
-    def get_dimension(self) -> int:
-        dims_continuous = self._get_continuous_dims()
-        return self.discrete_dim + np.sum(dims_continuous)
+    def get_n_discrete_spaces(self) -> int:
+        return self.n_discrete_options
 
-    def sample(self):
+    def sample(self) -> Tuple:
         discrete_action = np.zeros(self.spaces[0].n)
         np.put(discrete_action, self.spaces[0].sample(), 1)
         return (discrete_action,) + tuple(space.sample() for space in self.spaces[1:])
 
-    def format_action(self, actions) -> List:
-        discrete, parameters = actions[:, : self.discrete_dim], actions[:, self.discrete_dim :]
-        discrete = np.argmax(discrete, axis=1)
+    def format_action(self, actions) -> List[Tuple]:
+        discrete, parameters = actions[:, : self.get_n_discrete_options()], actions[:, self.get_n_discrete_options() :]
         return self.build_action(discrete, parameters)
 
-    def build_action(self, discrete: np.ndarray, parameters: np.ndarray) -> List[typing.Tuple]:
-        # We clip the parameters
-        param_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
-        param_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
-        parameters = np.clip(parameters, param_low, param_high)
-
-        # We prepare the split of the parameters for each discrete action
-        dims_continuous = self._get_continuous_dims()
-        split_indices = np.cumsum(dims_continuous[:-1])
-
-        # We format the full action for each environment
-        sample = []
-        for i in range(discrete.shape[0]):
-            sample.append(tuple([discrete[i]] + np.split(parameters[i], split_indices)))
-
-        return sample
-
     def __repr__(self) -> str:
-        return "OneHotHybrid([" + ", ".join([str(s) for s in self.spaces]) + "])"
-
-    def __eq__(self, other) -> bool:
-        return isinstance(other, OneHotHybrid) and self.spaces == other.spaces
+        return "OneHotHybrid([" + ", ".join([str(space) for space in self._get_continuous_spaces()]) + "])"

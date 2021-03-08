@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 
-from hmlf.spaces import Box, Discrete, SimpleHybrid
+from hmlf.spaces import Box, SimpleHybrid
 
 
 class ObstacleCourse_v2(gym.Env):
@@ -15,7 +15,7 @@ class ObstacleCourse_v2(gym.Env):
         self.jump_threshold = 0.1
         self.max_timesteps = 100
         self.goal_threshold = 0.05
-        self.action_space = SimpleHybrid([Discrete(2), Box(0, self.max_move, (1,)), Box(np.float32(0), np.float32(1), (1,))])
+        self.action_space = SimpleHybrid([Box(0, self.max_move, (1,)), Box(np.float32(0), np.float32(1), (1,))])
         self.observation_space = Box(low=np.zeros(3), high=np.ones(3), dtype=np.float32)
 
         self.position = 0

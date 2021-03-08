@@ -10,9 +10,13 @@ N_MAX_STEPS = 50
 def test_type_assertions():
     with pytest.raises(AssertionError):
         DummyHybrid("hello")
+    with pytest.raises(AssertionError):
         DummyHybrid([1, 2, 3.4])
+    with pytest.raises(AssertionError):
         DummyHybrid([1, 2], 2.3)
+    with pytest.raises(ValueError):
         DummyHybrid([-1, 2], 2)
+    with pytest.raises(AssertionError):
         DummyHybrid([1, 2], -2)
 
 

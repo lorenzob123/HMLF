@@ -6,7 +6,7 @@ import torch as th
 from gym import spaces
 from torch.nn import functional as F
 
-from hmlf.spaces import ContinuousParameters
+from hmlf.spaces import HybridBase
 
 
 def is_image_space_channels_first(observation_space: spaces.Box) -> bool:
@@ -158,19 +158,7 @@ def get_action_dim(action_space: spaces.Space) -> int:
     elif isinstance(action_space, spaces.MultiBinary):
         # Number of binary actions
         return int(action_space.n)
-    elif isinstance(action_space, ContinuousParameters):
-        dim = action_space.get_dimension()
-        return int(dim)
-    elif isinstance(action_space, spaces.Tuple):
-        all_param_box = True
-        for sub_space in action_space[1:]:
-            all_param_box = all_param_box and isinstance(sub_space, spaces.Box)
-        # Check if the actions spaces is spaces.Tuple(spaces.Discrete, spaces.Box, ..., spaces.Box)
-        if isinstance(action_space[0], spaces.Discrete) and all_param_box:
-            # We parametrize the action space as hot one encoding
-            dim = action_space.get_dimension()
-            return int(dim)
-        else:
-            raise NotImplementedError(f"{action_space} action space is not supported")
+    elif isinstance(action_space, HybridBase):
+        return action_space.get_dimension()
     else:
         raise NotImplementedError(f"{action_space} action space is not supported")
