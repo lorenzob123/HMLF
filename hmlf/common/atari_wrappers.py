@@ -10,9 +10,9 @@ try:
 except ImportError:
     cv2 = None
 
-import typing
+from typing import TYPE_CHECKING
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from hmlf.common.type_aliases import GymObs, GymStepReturn
 
 

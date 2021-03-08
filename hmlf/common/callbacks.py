@@ -1,13 +1,12 @@
 import os
-import typing
 import warnings
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import gym
 import numpy as np
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from hmlf.common import base_class
 
 from hmlf.common import logger  # pytype: disable=pyi-error

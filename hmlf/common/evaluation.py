@@ -1,11 +1,10 @@
-import typing
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 import gym
 import numpy as np
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from hmlf.common import base_class
 
 from hmlf.environments.vec_env import VecEnv
