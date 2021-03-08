@@ -41,6 +41,14 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
     def __repr__(self) -> str:
         pass
 
+    def _validate_arguments(self) -> None:
+        assert isinstance(
+            self.spaces, (list, tuple)
+        ), f"spaces arguments needs to of type list/tuple. Found {type(self.spaces)}."
+        assert len(self.spaces) > 0, f"spaces arguments needs to be non empty. Found {self.spaces}."
+        for space in self.spaces:
+            assert isinstance(space, Space), "Elements of spaces argument have to be subclasses of hmlf.spaces.Space"
+
     def build_action(self, discrete: np.ndarray, parameters: np.ndarray) -> List[typing.Tuple]:
         # We clip the parameters
         parameters = self._preprocess_parameters(parameters)
@@ -52,14 +60,6 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
 
     def _preprocess_parameters(self, parameters: np.ndarray) -> np.ndarray:
         return parameters
-
-    def _validate_arguments(self) -> None:
-        assert isinstance(
-            self.spaces, (list, tuple)
-        ), f"spaces arguments needs to of type list/tuple. Found {type(self.spaces)}."
-        assert len(self.spaces) > 0, f"spaces arguments needs to be non empty. Found {self.spaces}."
-        for space in self.spaces:
-            assert isinstance(space, Space), "Elements of spaces argument have to be subclasses of hmlf.spaces.Space"
 
     def _get_split_indices_for_continuous_spaces(self) -> np.ndarray:
         return np.cumsum(self._get_dimensions_of_continuous_spaces()[:-1])
