@@ -49,14 +49,18 @@ class SimpleHybrid(HybridBase):
 
     def build_action(self, discrete: np.ndarray, parameters: np.ndarray) -> List[typing.Tuple]:
         # We clip the parameters
-        parameters = np.clip(parameters, self.continuous_low, self.continuous_high)
-
+        parameters = self._clip_parameters(parameters)
         # We format the full action for each environment
         sample = []
         for i in range(discrete.shape[0]):
-            sample.append(tuple([discrete[i]] + np.split(parameters[i], self.split_indices)))
-
+            sample.append(self._build_single_action(discrete[i], parameters[i]))
         return sample
+
+    def _clip_parameters(self, parameters: np.ndarray) -> np.ndarray:
+        return np.clip(parameters, self.continuous_low, self.continuous_high)
+
+    def _build_single_action(self, current_discrete: int, current_parameters: List) -> Tuple:
+        return tuple([current_discrete] + np.split(current_parameters, self.split_indices))
 
     def __repr__(self) -> str:
         return "SimpleHybrid([" + ", ".join([repr(space) for space in self._get_continuous_spaces()]) + "])"
