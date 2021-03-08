@@ -50,7 +50,7 @@ class Actor(BasePolicy):
         self.features_dim = features_dim
         self.activation_fn = activation_fn
 
-        action_dim = self.action_space._get_continous_dims()
+        action_dim = self.action_space._get_dimensions_of_continuous_spaces()
         actor_list = []
         for action_param_dim in action_dim:
             actor_net = create_mlp(features_dim - 1, action_param_dim, net_arch, activation_fn, squash_output=True)
@@ -76,7 +76,7 @@ class Actor(BasePolicy):
         # features = self.extract_features(obs)
 
         # TODO: this is pseudo code and it will not work because of the batched env
-        actions = [th.zeros(obs.shape[0], dim).to(self.device) for dim in self.action_space._get_continous_dims()]
+        actions = [th.zeros(obs.shape[0], dim).to(self.device) for dim in self.action_space._get_dimensions_of_continuous_spaces()]
 
         for i in range(obs.shape[0]):
             discrete_i = int(obs[i, 0].item())
@@ -119,7 +119,7 @@ class MetaCritic(BaseModel):
         # features = self.extract_features(obs)
 
         # TODO: this is pseudo code and it will not work because of the batched env
-        dims_continous = self.action_space._get_continous_dims()
+        dims_continous = self.action_space._get_dimensions_of_continuous_spaces()
         indices = np.hstack((np.array([0]), np.cumsum(dims_continous)))
         q = []
 
