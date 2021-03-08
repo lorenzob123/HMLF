@@ -76,7 +76,9 @@ class Actor(BasePolicy):
         # features = self.extract_features(obs)
 
         # TODO: this is pseudo code and it will not work because of the batched env
-        actions = [th.zeros(obs.shape[0], dim).to(self.device) for dim in self.action_space._get_dimensions_of_continuous_spaces()]
+        actions = [
+            th.zeros(obs.shape[0], dim).to(self.device) for dim in self.action_space._get_dimensions_of_continuous_spaces()
+        ]
 
         for i in range(obs.shape[0]):
             discrete_i = int(obs[i, 0].item())

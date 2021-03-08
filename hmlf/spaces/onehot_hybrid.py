@@ -1,7 +1,8 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
+from hmlf.spaces.gym import Space
 from hmlf.spaces.simple_hybrid import SimpleHybrid
 
 
@@ -17,7 +18,7 @@ class OneHotHybrid(SimpleHybrid):
     :param tuple of spaces, where the first is a Discrete space and the rest Box(es) spaces
     """
 
-    def __init__(self, spaces):
+    def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
         super().__init__(spaces)
 
     def get_n_discrete_spaces(self) -> int:

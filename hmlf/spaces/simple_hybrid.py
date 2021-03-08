@@ -1,5 +1,5 @@
 import typing
-from typing import List
+from typing import List, Tuple, Union
 
 import numpy as np
 
@@ -15,7 +15,7 @@ class SimpleHybrid(HybridBase):
     self.observation_space = spaces.Tuple((spaces.Discrete(2), hmlf.spaces.Box(np.array((0, 1)), np.array((2, 3)))))
     """
 
-    def __init__(self, spaces: List[Space]):
+    def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
         self.n_discrete_options = len(spaces)
         spaces = [Discrete(self.n_discrete_options)] + spaces
         super().__init__(spaces)

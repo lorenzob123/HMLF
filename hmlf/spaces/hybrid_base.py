@@ -1,6 +1,6 @@
 import typing
 from abc import ABCMeta, abstractmethod
-from typing import List
+from typing import List, Union
 
 import numpy as np
 
@@ -8,7 +8,7 @@ from hmlf.spaces.gym import Box, Space, Tuple
 
 
 class HybridBase(Tuple, metaclass=ABCMeta):
-    def __init__(self, spaces: List[Space]):
+    def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
         self.spaces = spaces
         self._validate_arguments()
 
@@ -39,7 +39,9 @@ class HybridBase(Tuple, metaclass=ABCMeta):
         pass
 
     def _validate_arguments(self) -> None:
-        assert isinstance(self.spaces, list), f"spaces arguments needs to of type list. Found {type(self.spaces)}."
+        assert isinstance(
+            self.spaces, (list, tuple)
+        ), f"spaces arguments needs to of type list/tuple. Found {type(self.spaces)}."
         assert len(self.spaces) > 0, f"spaces arguments needs to be non empty. Found {self.spaces}."
         for space in self.spaces:
             assert isinstance(space, Space), "Elements of spaces argument have to be subclasses of hmlf.spaces.Space"

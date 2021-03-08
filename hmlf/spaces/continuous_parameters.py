@@ -1,9 +1,9 @@
 import typing
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 
-from hmlf.spaces.gym import Box
+from hmlf.spaces.gym import Box, Space
 from hmlf.spaces.hybrid_base import HybridBase
 
 
@@ -15,7 +15,7 @@ class ContinuousParameters(HybridBase):
     self.observation_space = spaces.Tuple((spaces.Discrete(2), gym.spaces.Box(np.array((0, 1)), np.array((2, 3)))))
     """
 
-    def __init__(self, spaces):
+    def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
         super().__init__(spaces)
 
     def _validate_arguments(self) -> None:
