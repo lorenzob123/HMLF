@@ -34,12 +34,24 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def build_action(self, discrete: np.ndarray, parameters: np.ndarray) -> List[typing.Tuple]:
+    def _build_single_action(self, current_discrete: int, current_parameters: List) -> Tuple:
         pass
 
     @abstractmethod
     def __repr__(self) -> str:
         pass
+
+    def build_action(self, discrete: np.ndarray, parameters: np.ndarray) -> List[typing.Tuple]:
+        # We clip the parameters
+        parameters = self._preprocess_parameters(parameters)
+        # We format the full action for each environment
+        sample = []
+        for i in range(discrete.shape[0]):
+            sample.append(self._build_single_action(discrete[i], parameters[i]))
+        return sample
+
+    def _preprocess_parameters(self, parameters: np.ndarray) -> np.ndarray:
+        return parameters
 
     def _validate_arguments(self) -> None:
         assert isinstance(

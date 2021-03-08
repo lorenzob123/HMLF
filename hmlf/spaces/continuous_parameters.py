@@ -36,13 +36,8 @@ class ContinuousParameters(HybridBase):
     def format_action(self, actions: np.ndarray) -> List[typing.Tuple]:
         raise NotImplementedError("Not implemented for ContinuousParameters")
 
-    def build_action(self, discrete, parameters: np.ndarray) -> List[Tuple]:
-        # We format the full action for each environment
-        sample = []
-        for i in range(discrete.shape[0]):
-            sample.append(tuple([x for x in np.split(parameters[i], self.split_indices)]))
-
-        return sample
+    def _build_single_action(self, current_discrete: int, current_parameters: List) -> Tuple:
+        return tuple([x for x in np.split(current_parameters, self.split_indices)])
 
     def __repr__(self) -> str:
         return "ContinuousParameters([" + ", ".join([str(s) for s in self.spaces]) + "])"
