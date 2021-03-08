@@ -31,7 +31,6 @@ class OneHotHybrid(SimpleHybrid):
 
     def format_action(self, actions) -> List[Tuple]:
         discrete, parameters = actions[:, : self.get_n_discrete_options()], actions[:, self.get_n_discrete_options() :]
-        discrete = np.argmax(discrete, axis=1)
         return self.build_action(discrete, parameters)
 
     def __repr__(self) -> str:

@@ -75,7 +75,6 @@ def test_init_onehot_hybrid(spaces):
     new_sample_list = hybrid_space.format_action(np.vstack(sample_list))
 
     for sample, new_sample in zip(sample_list, new_sample_list):
-        assert sample[new_sample[0]] == 1
         assert np.sum(np.abs(sample[hybrid_space.get_n_discrete_options() :] - np.hstack(new_sample[1:]))) < 1e-6
 
         for action_p, action_space in zip(new_sample[1:], spaces):
