@@ -16,8 +16,9 @@ class SimpleHybrid(HybridBase):
     """
 
     def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
+        assert isinstance(spaces, (list, tuple)), "spaces argument needs to be of type list/tuple"
         self.n_discrete_options = len(spaces)
-        spaces = [Discrete(self.n_discrete_options)] + spaces
+        spaces = [Discrete(self.n_discrete_options)] + list(spaces)
         super().__init__(spaces)
 
         self.continuous_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))

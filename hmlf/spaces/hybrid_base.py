@@ -1,14 +1,17 @@
 import typing
 from abc import ABCMeta, abstractmethod
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import numpy as np
 
-from hmlf.spaces.gym import Box, Space, Tuple
+from hmlf.spaces.gym import Box, Space
+from hmlf.spaces.gym import Tuple as GymTuple
 
 
-class HybridBase(Tuple, metaclass=ABCMeta):
-    def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
+class HybridBase(GymTuple, metaclass=ABCMeta):
+    def __init__(self, spaces: Union[List[Space], Tuple]):
+        if isinstance(spaces, tuple):
+            spaces = list(spaces)
         self.spaces = spaces
         self._validate_arguments()
 

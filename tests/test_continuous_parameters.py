@@ -1,26 +1,10 @@
-from typing import List, Optional
-
 import numpy as np
 import pytest
 
-from hmlf.spaces import Box, ContinuousParameters, Discrete, SimpleHybrid, Tuple
+from hmlf.spaces import ContinuousParameters, Discrete, SimpleHybrid
 from hmlf.spaces.hybrid_base import HybridBase
 
-
-def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Optional[Tuple] = None) -> Box:
-    if shape is None:
-        if (low is None) and (high is None):
-            raise ValueError("Some value needs to be not none")
-        else:
-            low = np.array(low)
-            high = np.array(high)
-            return Box(low, high)
-    else:
-        if low is None:
-            low = -np.inf
-        if high is None:
-            high = np.inf
-        return Box(low, high, shape)
+from .utils import make_box
 
 
 def test_invalid_arguments():
@@ -41,6 +25,21 @@ def test_invalid_arguments():
             make_box([50, 34, 0], [100, 120, 2]),
         ]
         ContinuousParameters([Discrete(1)] + continuous_spaces)
+
+
+@pytest.mark.parametrize(
+    "spaces",
+    [
+        [make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))],
+        [make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,)), make_box(shape=(334,)), make_box(shape=(30,))],
+    ],
+)
+def test_input_tuple(spaces):
+    space_list = ContinuousParameters(spaces)
+    space_tuple = ContinuousParameters(tuple(spaces))
+    print(space_tuple)
+    print(space_list)
+    assert space_list == space_tuple
 
 
 def test_dimensions():
@@ -84,6 +83,8 @@ def test_build_action():
 
 
 def test_repr_does_not_throw_error():
+    from hmlf.spaces import Box
+
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
     space = ContinuousParameters(continuous_spaces)
     represensation_string = repr(space)
