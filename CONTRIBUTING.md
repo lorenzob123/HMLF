@@ -1,17 +1,17 @@
-## Contributing to Stable-Baselines3
+## Contributing to HMLF
 
-If you are interested in contributing to Stable-Baselines, your contributions will fall
+If you are interested in contributing to HMLF, your contributions will fall
 into two categories:
 1. You want to propose a new Feature and implement it
     - Create an issue about your intended feature, and we shall discuss the design and
     implementation. Once we agree that the plan looks good, go ahead and implement it.
 2. You want to implement a feature or bug-fix for an outstanding issue
-    - Look at the outstanding issues here: https://github.com/DLR-RM/stable-baselines3/issues
+    - Look at the outstanding issues here: https://github.tik.uni-stuttgart.de/IFF/HMLF/issues
     - Pick an issue or feature and comment on the task that you want to work on this feature.
     - If you need more context on a particular issue, please ask and we shall provide.
 
 Once you finish implementing a feature or bug-fix, please send a Pull Request to
-https://github.com/DLR-RM/stable-baselines3
+https://github.tik.uni-stuttgart.de/IFF/HMLF
 
 
 If you are not familiar with creating a Pull Request, here are some guides:
@@ -19,18 +19,18 @@ If you are not familiar with creating a Pull Request, here are some guides:
 - https://help.github.com/articles/creating-a-pull-request/
 
 
-## Developing Stable-Baselines3
+## Developing HMLF
 
-To develop Stable-Baselines3 on your machine, here are some tips:
+To develop HMLF on your machine, here are some tips:
 
-1. Clone a copy of Stable-Baselines3 from source:
+1. Clone a copy of HMLF from source:
 
 ```bash
-git clone https://github.com/DLR-RM/stable-baselines3
-cd stable-baselines3/
+git clone https://github.tik.uni-stuttgart.de/IFF/HMLF
+cd HMLF/
 ```
 
-2. Install Stable-Baselines3 in develop mode, with support for building the docs and running tests:
+2. Install HMLF in develop mode, with support for building the docs and running tests:
 
 ```bash
 pip install -e .[docs,tests,extra]
@@ -62,7 +62,6 @@ def my_function(arg1: type1, arg2: type2) -> returntype:
 
 Before proposing a PR, please open an issue, where the feature will be discussed. This prevent from duplicated PR to be proposed and also ease the code review process.
 
-Each PR need to be reviewed and accepted by at least one of the maintainers (@hill-a, @araffin, @ernestum, @AdamGleave or @Miffyli).
 A PR must pass the Continuous Integration tests to be merged with the master branch.
 
 

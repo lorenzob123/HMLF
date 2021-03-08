@@ -1,6 +1,6 @@
 ---
 name: ❓Question
-about: How to ask a question regarding Stable-Baselines3
+about: How to ask a question regarding HMLF
 labels: question
 title: "[Question] question title"
 ---

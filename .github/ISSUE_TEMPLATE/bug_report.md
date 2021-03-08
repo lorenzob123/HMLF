@@ -1,6 +1,6 @@
 ---
 name: "\U0001F41B Bug Report"
-about: Submit a bug report to help us improve Stable-Baselines3
+about: Submit a bug report to help us improve HMLF
 labels: bug
 title: "[Bug] bug title"
 ---

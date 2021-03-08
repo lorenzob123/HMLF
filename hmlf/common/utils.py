@@ -3,7 +3,7 @@ import os
 import random
 from collections import deque
 from itertools import zip_longest
-from typing import Iterable, Optional, Union
+from typing import TYPE_CHECKING, Iterable, Optional, Union
 
 import numpy as np
 import torch as th
@@ -14,12 +14,11 @@ try:
 except ImportError:
     SummaryWriter = None
 
-import typing
 
 from hmlf import spaces
 from hmlf.common import logger
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from hmlf.common.type_aliases import GymEnv, Schedule
 
 

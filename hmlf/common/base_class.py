@@ -3,10 +3,9 @@
 import io
 import pathlib
 import time
-import typing
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 import gym
 import numpy as np
@@ -22,7 +21,7 @@ from hmlf.common.policies import BasePolicy
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.save_util import load_from_zip_file, recursive_getattr, recursive_setattr, save_to_zip_file
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 
 from hmlf.common.utils import check_for_correct_spaces, get_device, get_schedule_fn, set_random_seed, update_learning_rate
