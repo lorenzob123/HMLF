@@ -47,6 +47,8 @@ MODEL_LIST_CNN = [
     (DDPG, CnnPolicyDDPG),
 ]
 
+N_STEPS_SMALL = 120
+
 
 def select_env(model_class: BaseAlgorithm) -> gym.Env:
     """
@@ -73,7 +75,7 @@ def test_save_load(tmp_path, model_class, policy_class):
 
     # create model
     model = model_class(policy_class, env, policy_kwargs=dict(net_arch=[16]), verbose=1)
-    model.learn(total_timesteps=500)
+    model.learn(total_timesteps=N_STEPS_SMALL)
 
     env.reset()
     observations = np.concatenate([env.step([env.action_space.sample()])[0] for _ in range(10)], axis=0)
@@ -182,7 +184,7 @@ def test_save_load(tmp_path, model_class, policy_class):
         assert np.allclose(selected_actions, new_selected_actions, 1e-4)
 
         # check if learn still works
-        model.learn(total_timesteps=500)
+        model.learn(total_timesteps=N_STEPS_SMALL)
 
         del model
 
@@ -204,24 +206,24 @@ def test_set_env(model_class, policy_class):
 
     kwargs = {}
     if model_class in {DQN, DDPG, SAC, TD3}:
-        kwargs = dict(learning_starts=100)
+        kwargs = dict(learning_starts=0)
     elif model_class in {A2C, PPO}:
         kwargs = dict(n_steps=100)
 
     # create model
     model = model_class(policy_class, env, policy_kwargs=dict(net_arch=[16]), **kwargs)
     # learn
-    model.learn(total_timesteps=300)
+    model.learn(total_timesteps=N_STEPS_SMALL)
 
     # change env
     model.set_env(env2)
     # learn again
-    model.learn(total_timesteps=300)
+    model.learn(total_timesteps=N_STEPS_SMALL)
 
     # change env test wrapping
     model.set_env(env3)
     # learn again
-    model.learn(total_timesteps=300)
+    model.learn(total_timesteps=N_STEPS_SMALL)
 
 
 @pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
@@ -296,7 +298,7 @@ def test_save_load_replay_buffer(tmp_path, model_class, policy_class):
     model = model_class(
         policy_class, select_env(model_class), buffer_size=1000, policy_kwargs=dict(net_arch=[64]), learning_starts=200
     )
-    model.learn(300)
+    model.learn(N_STEPS_SMALL)
     old_replay_buffer = deepcopy(model.replay_buffer)
     model.save_replay_buffer(path)
     model.replay_buffer = None
@@ -346,14 +348,14 @@ def test_warn_buffer(recwarn, model_class, policy_class, optimize_memory_usage):
         learning_starts=10,
     )
 
-    model.learn(150)
+    model.learn(N_STEPS_SMALL)
 
-    model.learn(150, reset_num_timesteps=False)
+    model.learn(N_STEPS_SMALL, reset_num_timesteps=False)
 
     # Check that there is no warning
     assert len(recwarn) == 0
 
-    model.learn(150)
+    model.learn(N_STEPS_SMALL)
 
     if optimize_memory_usage:
         assert len(recwarn) == 1
@@ -383,7 +385,7 @@ def test_save_load_policy(
             # Avoid memory error when using replay buffer
             # Reduce the size of the features
             kwargs = dict(
-                buffer_size=250, learning_starts=100, policy_kwargs=dict(features_extractor_kwargs=dict(features_dim=32))
+                buffer_size=250, learning_starts=0, policy_kwargs=dict(features_extractor_kwargs=dict(features_dim=32))
             )
         env = FakeImageEnv(screen_height=40, screen_width=40, n_channels=2, discrete=model_class == DQN)
 
@@ -391,7 +393,7 @@ def test_save_load_policy(
 
     # create model
     model = model_class(policy_class, env, verbose=1, **kwargs)
-    model.learn(total_timesteps=300)
+    model.learn(total_timesteps=N_STEPS_SMALL)
 
     env.reset()
     observations = np.concatenate([env.step([env.action_space.sample()])[0] for _ in range(10)], axis=0)
@@ -491,7 +493,7 @@ def test_save_load_q_net(tmp_path, model_class, policy_class):
 
     # create model
     model = model_class(policy_class, env, verbose=1, **kwargs)
-    model.learn(total_timesteps=300)
+    model.learn(total_timesteps=N_STEPS_SMALL)
 
     env.reset()
     observations = np.concatenate([env.step([env.action_space.sample()])[0] for _ in range(10)], axis=0)
