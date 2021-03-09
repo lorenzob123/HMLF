@@ -311,7 +311,7 @@ class HybridDistribution(Distribution):
         self.distribution = None
         self.action_space = action_space
         self.discrete_dim = action_space.get_n_discrete_options()
-        self.continuous_dim = action_space.continuous_dim
+        self.continuous_dim = action_space.get_n_continuous_options()
         # param_idx keeps track where the parameters are in the logits/mean_actions
         self.param_idx = slice(self.discrete_dim, self.discrete_dim + self.continuous_dim)
         # action_idx keeps track where the parameters are in the logits/mean_actions

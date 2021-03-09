@@ -7,7 +7,7 @@ import gym
 import numpy as np
 
 if TYPE_CHECKING:
-    from hmlf.common import base_class
+    from hmlf.common import base_class  # pytype: disable=pyi-error
 
 from hmlf.common import logger  # pytype: disable=pyi-error
 from hmlf.common.evaluation import evaluate_policy
