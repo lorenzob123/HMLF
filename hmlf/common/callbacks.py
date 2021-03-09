@@ -1,12 +1,15 @@
 import os
 import warnings
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import gym
 import numpy as np
 
-from hmlf.common import base_class, logger  # pytype: disable=pyi-error
+if TYPE_CHECKING:
+    from hmlf.common import base_class
+
+from hmlf.common import logger  # pytype: disable=pyi-error
 from hmlf.common.evaluation import evaluate_policy
 from hmlf.environments.vec_env import DummyVecEnv, VecEnv, sync_envs_normalization
 

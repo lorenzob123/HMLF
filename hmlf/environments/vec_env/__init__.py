@@ -1,7 +1,6 @@
 # flake8: noqa F401
-import typing
 from copy import deepcopy
-from typing import Optional, Type, Union
+from typing import TYPE_CHECKING, Optional, Type, Union
 
 from hmlf.environments.vec_env.base_vec_env import CloudpickleWrapper, VecEnv, VecEnvWrapper
 from hmlf.environments.vec_env.dummy_vec_env import DummyVecEnv
@@ -13,7 +12,7 @@ from hmlf.environments.vec_env.vec_transpose import VecTransposeImage
 from hmlf.environments.vec_env.vec_video_recorder import VecVideoRecorder
 
 # Avoid circular import
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from hmlf.common.type_aliases import GymEnv
 
 
