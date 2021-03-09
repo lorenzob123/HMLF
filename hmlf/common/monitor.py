@@ -4,15 +4,14 @@ import csv
 import json
 import os
 import time
-import typing
 from glob import glob
-from typing import List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import gym
 import numpy as np
 import pandas
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from hmlf.common.type_aliases import GymObs, GymStepReturn
 
 

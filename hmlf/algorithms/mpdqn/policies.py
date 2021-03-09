@@ -66,7 +66,7 @@ class MPDQNPolicy(PDQNPolicy):
         # For formatting inside forward Q
         self.discrete_action_size = self.action_space_q.n
         self.state_size = observation_space.shape[0]
-        self.offsets = np.cumsum(action_space._get_continuous_dims())
+        self.offsets = np.cumsum(action_space._get_dimensions_of_continuous_spaces())
         self.offsets = np.insert(self.offsets, 0, 0)
 
     def _format_q_observation(self, obs: th.Tensor, action_parameters: th.Tensor, batch_size: int) -> th.Tensor:

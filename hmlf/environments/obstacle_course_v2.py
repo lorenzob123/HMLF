@@ -1,23 +1,24 @@
 import gym
 import numpy as np
 
-from hmlf.spaces import Box, Discrete, SimpleHybrid
+from hmlf.spaces import Box, SimpleHybrid
 
 
 class ObstacleCourse_v2(gym.Env):
     """
-       Version of the ObstacleCourse environment, where the agent only sees the next obstacle and can only move forward.
-       Simple environment for benchmarking hybrid methods. It is an obsticle course the agent has to traverse by either
-       jumping of running. When running you move longer distances but you get blocked by obstacles, when jumping with the
-       correct height you can skip over an obstacle. The objective for the agent is to traverse this obstacle course in
-       the least time possible, while getting over 3 obstacles. These are placed randomly between the agent's starting position
-       and the goal.
-       The action space includes 2 tasks (jump, run) and one parameter for each task (jump height, run distance).
-       The observation space includes :
-           - current position
-           - goal position
-           - goal target height
+    Version of the ObstacleCourse environment, where the agent only sees the next obstacle and can only move forward.
+    Simple environment for benchmarking hybrid methods. It is an obsticle course the agent has to traverse by either
+    jumping of running. When running you move longer distances but you get blocked by obstacles, when jumping with the
+    correct height you can skip over an obstacle. The objective for the agent is to traverse this obstacle course in
+    the least time possible, while getting over 3 obstacles. These are placed randomly between the agent's starting position
+    and the goal.
+    The action space includes 2 tasks (jump, run) and one parameter for each task (jump height, run distance).
+    The observation space includes :
+        - current position
+        - goal position
+        - goal target height
     """
+
     def __init__(self):
 
         self.max_move = np.float32(0.4)
@@ -28,7 +29,7 @@ class ObstacleCourse_v2(gym.Env):
         self.jump_threshold = 0.1
         self.max_timesteps = 100
         self.goal_threshold = 0.05
-        self.action_space = SimpleHybrid([Discrete(2), Box(0, self.max_move, (1,)), Box(np.float32(0), np.float32(1), (1,))])
+        self.action_space = SimpleHybrid([Box(0, self.max_move, (1,)), Box(np.float32(0), np.float32(1), (1,))])
         self.observation_space = Box(low=np.zeros(3), high=np.ones(3), dtype=np.float32)
 
         self.position = 0

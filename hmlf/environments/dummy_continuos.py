@@ -11,7 +11,7 @@ class DummySequence(gym.Env):
     def __init__(self):
         super(DummySequence, self).__init__()
 
-        # First entry in teh spaces.Tuple to be the selection of the skill
+        # First entry in the spaces.Tuple to be the selection of the skill
         # the remaining entries are the paramters for the specific skills
         # So if you have 2 skills the tuple will need 3 entries in total:
         # The first will be a a discrete space with n = 2

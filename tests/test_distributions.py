@@ -16,7 +16,7 @@ from hmlf.common.distributions import (
 )
 from hmlf.common.utils import set_random_seed
 from hmlf.spaces import SimpleHybrid
-from hmlf.spaces.gym import Box,Discrete
+from hmlf.spaces.gym import Box, Discrete
 
 N_ACTIONS = 2
 N_FEATURES = 3
@@ -127,20 +127,23 @@ def test_categorical(dist, CAT_ACTIONS):
 @pytest.mark.parametrize(
     "action_space",
     [
-        SimpleHybrid([
-            Discrete(5),
-            Box(low=-1, high=143, shape=(1,)),
-            Box(low=1, high=1.2, shape=(2,)),
-            Box(low=11, high=13, shape=(3,)),
-            Box(low=-1, high=1, shape=(4,)),
-            Box(low=-1, high=1, shape=(5,)),
-        ]),
-
-        SimpleHybrid([
-            Discrete(2),
-            Box(low=-1, high=143, shape=(1,)),
-            Box(low=1, high=1.2, shape=(0,)),
-        ]),
+        SimpleHybrid(
+            [
+                Discrete(5),
+                Box(low=-1, high=143, shape=(1,)),
+                Box(low=1, high=1.2, shape=(2,)),
+                Box(low=11, high=13, shape=(3,)),
+                Box(low=-1, high=1, shape=(4,)),
+                Box(low=-1, high=1, shape=(5,)),
+            ]
+        ),
+        SimpleHybrid(
+            [
+                Discrete(2),
+                Box(low=-1, high=143, shape=(1,)),
+                Box(low=1, high=1.2, shape=(0,)),
+            ]
+        ),
     ],
 )
 def test_hybrid(action_space):

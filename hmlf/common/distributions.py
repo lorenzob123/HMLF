@@ -10,6 +10,7 @@ from torch.distributions import Bernoulli, Categorical, Normal
 from hmlf import spaces
 from hmlf.common.preprocessing import get_action_dim
 from hmlf.spaces import SimpleHybrid
+from hmlf.spaces.hybrid_base import HybridBase
 
 
 class Distribution(ABC):
@@ -305,11 +306,11 @@ class HybridDistribution(Distribution):
     :param action_space: the action  space of the environment being used
     """
 
-    def __init__(self, action_space):
+    def __init__(self, action_space: HybridBase):
         super(HybridDistribution, self).__init__()
         self.distribution = None
         self.action_space = action_space
-        self.discrete_dim = action_space.discrete_dim
+        self.discrete_dim = action_space.get_n_discrete_options()
         self.continuous_dim = action_space.continuous_dim
         # param_idx keeps track where the parameters are in the logits/mean_actions
         self.param_idx = slice(self.discrete_dim, self.discrete_dim + self.continuous_dim)

@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 import gym
 import numpy as np
 
-from hmlf.spaces import Box, Discrete, SimpleHybrid
+from hmlf.spaces import Box, SimpleHybrid
 
 
 class DummyHybrid(gym.Env):
@@ -45,7 +45,7 @@ class DummyHybrid(gym.Env):
 
     def _build_action_space(self) -> SimpleHybrid:
         parameter_spaces = self._build_parameter_spaces()
-        spaces = [Discrete(self.n_parameter_spaces)] + parameter_spaces
+        spaces = parameter_spaces
         return SimpleHybrid(spaces)
 
     def _build_parameter_spaces(self) -> List[Box]:

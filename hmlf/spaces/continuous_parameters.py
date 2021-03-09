@@ -1,12 +1,13 @@
 import typing
-from typing import List
+from typing import List, Tuple, Union
 
 import numpy as np
 
-from hmlf.spaces.gym import Box, Tuple
+from hmlf.spaces.gym import Box, Space
+from hmlf.spaces.hybrid_base import HybridBase
 
 
-class ContinuousParameters(Tuple):
+class ContinuousParameters(HybridBase):
     """
     A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
     Samples have the form (int, Box1.sample(), ..., BoxN.sample())
@@ -14,47 +15,29 @@ class ContinuousParameters(Tuple):
     self.observation_space = spaces.Tuple((spaces.Discrete(2), gym.spaces.Box(np.array((0, 1)), np.array((2, 3)))))
     """
 
-    def __init__(self, spaces_list):
-        self.spaces = spaces_list
-        for i, space in enumerate(spaces_list):
-            assert isinstance(
-                space, Box
-            ), f"Later (index > 0) elements of SimpleHybrid has to be of type hmlf.spaces.Box. Failed for index {i}."
+    def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
+        super().__init__(spaces)
 
-        dims_continous = self._get_continous_dims()
-        self.continuous_dim = np.sum(dims_continous)
+    def _validate_arguments(self) -> None:
+        super()._validate_arguments()
 
-        self.continuous_low = np.hstack(tuple(self.spaces[i].low for i in range(len(self.spaces))))
-        self.continuous_high = np.hstack(tuple(self.spaces[i].high for i in range(len(self.spaces))))
+        for i, space in enumerate(self.spaces):
+            assert isinstance(space, Box), f"Spaces have to be of type hmlf.spaces.Box. Failed for index {i}."
 
-    def _get_continous_dims(self) -> List[int]:
-        # Since each space is one dimensional, shape[0] gets the dimension
-        dims = [space.shape[0] for space in self.spaces]
-        return dims
+    def get_n_discrete_spaces(self) -> int:
+        return 0
 
-    def get_dimension(self) -> int:
-        dims_continous = self._get_continous_dims()
-        return np.sum(dims_continous)
+    def get_n_discrete_options(self) -> int:
+        return 0
 
-    def build_action(self, discrete, parameters: np.ndarray) -> List[typing.Tuple]:
-        # We clip the parameters
-        # param_low = np.hstack(tuple(self.spaces[i].low for i in range(1, len(self.spaces))))
-        # param_high = np.hstack(tuple(self.spaces[i].high for i in range(1, len(self.spaces))))
-        # parameters = np.clip(parameters, param_low, param_high)
+    def _get_continuous_spaces(self) -> List[Box]:
+        return self.spaces
 
-        # We prepare the split of the parameters for each discrete action
-        dims_continous = self._get_continous_dims()
-        split_indices = np.cumsum(dims_continous[:-1])
+    def format_action(self, actions: np.ndarray) -> List[typing.Tuple]:
+        raise NotImplementedError("Not implemented for ContinuousParameters")
 
-        # We format the full action for each environment
-        sample = []
-        for i in range(discrete.shape[0]):
-            sample.append(np.split(parameters[i], split_indices))
-
-        return sample
+    def _build_single_action(self, current_discrete: int, current_parameters: List) -> Tuple:
+        return tuple([x for x in np.split(current_parameters, self.split_indices)])
 
     def __repr__(self) -> str:
-        return "ContinuousParameters(" + ", ".join([str(s) for s in self.spaces]) + ")"
-
-    def __eq__(self, other) -> bool:
-        return isinstance(other, ContinuousParameters) and self.spaces == other.spaces
+        return "ContinuousParameters([" + ", ".join([str(s) for s in self.spaces]) + "])"

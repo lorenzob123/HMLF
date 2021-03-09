@@ -1,21 +1,21 @@
 import gym
 import numpy as np
 
-from hmlf.spaces import Box, Discrete, SimpleHybrid
+from hmlf.spaces import Box, SimpleHybrid
 
 
 class ObstacleCourse(gym.Env):
     """Simple environment for benchmarking hybrid methods. It is an obsticle course the agent has to traverse by either
-     jumping of running. When running you move longer distances but you get blocked by obstacles, when jumping with the
-     correct height you can skip over an obstacle. The objective for the agent is to traverse this obstacle course in
-     the least time possible, while getting over 3 obstacles. These are placed randomly between the agent's starting position
-     and the goal.
+    jumping of running. When running you move longer distances but you get blocked by obstacles, when jumping with the
+    correct height you can skip over an obstacle. The objective for the agent is to traverse this obstacle course in
+    the least time possible, while getting over 3 obstacles. These are placed randomly between the agent's starting position
+    and the goal.
 
-     The action space includes 2 tasks (jump, run) and one parameter for each task (jump height, run distance).
-     The observation space includes :
-        - current position
-        - goal position x3
-        - goal target height
+    The action space includes 2 tasks (jump, run) and one parameter for each task (jump height, run distance).
+    The observation space includes :
+       - current position
+       - goal position x3
+       - goal target height
     """
 
     def __init__(self):
@@ -28,10 +28,7 @@ class ObstacleCourse(gym.Env):
         self.jump_threshold = 0.1
         self.max_timesteps = 30
         self.goal_threshold = 0.05
-
-        self.action_space = SimpleHybrid(
-            [Discrete(2), Box(-self.max_move, self.max_move, (1,)), Box(np.float32(0), np.float32(1), (1,))]
-        )
+        self.action_space = SimpleHybrid([Box(-self.max_move, self.max_move, (1,)), Box(np.float32(0), np.float32(1), (1,))])
         self.observation_space = Box(low=np.zeros(7, dtype=np.float32), high=np.ones(7, dtype=np.float32))
 
         self.position = 0

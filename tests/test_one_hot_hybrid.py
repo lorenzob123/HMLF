@@ -1,25 +1,10 @@
-from typing import List, Optional
-
 import numpy as np
 import pytest
 
-from hmlf.spaces import Box, Discrete, OneHotHybrid, SimpleHybrid, Tuple
+from hmlf.spaces import Discrete, OneHotHybrid, SimpleHybrid
+from hmlf.spaces.hybrid_base import HybridBase
 
-
-def make_box(low: Optional[List] = None, high: Optional[List] = None, shape: Optional[Tuple] = None) -> Box:
-    if shape is None:
-        if (low is None) and (high is None):
-            raise ValueError("Some value needs to be not none")
-        else:
-            low = np.array(low)
-            high = np.array(high)
-            return Box(low, high)
-    else:
-        if low is None:
-            low = -np.inf
-        if high is None:
-            high = np.inf
-        return Box(low, high, shape)
+from .utils import make_box
 
 
 def test_invalid_arguments():
@@ -27,29 +12,46 @@ def test_invalid_arguments():
         OneHotHybrid("string")
     with pytest.raises(AssertionError):
         OneHotHybrid(1.343)
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         OneHotHybrid([])
     with pytest.raises(AssertionError):
         OneHotHybrid([1, 2])
-    with pytest.raises(AssertionError):
-        OneHotHybrid([make_box(shape=(1,)), 2])
-    with pytest.raises(AssertionError):
-        OneHotHybrid([make_box(shape=(1,)), make_box(shape=(1,))])
     with pytest.raises(AssertionError):
         continuous_spaces = [
             make_box([-1, 2.3], [45, 4.3]),
             make_box([-10], [45]),
             make_box([50, 34, 0], [100, 120, 2]),
         ]
-        OneHotHybrid([Discrete(10)] + continuous_spaces)
+        OneHotHybrid([Discrete(5)] + continuous_spaces)
+
+
+@pytest.mark.parametrize(
+    "spaces",
+    [
+        [make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))],
+        [make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,)), make_box(shape=(334,)), make_box(shape=(30,))],
+    ],
+)
+def test_input_tuple(spaces):
+    space_list = OneHotHybrid(spaces)
+    space_tuple = OneHotHybrid(tuple(spaces))
+    assert space_list == space_tuple
 
 
 def test_dimensions():
-    space = OneHotHybrid([Discrete(3), make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))])
+    space = OneHotHybrid([make_box(shape=(1,)), make_box(shape=(3,)), make_box(shape=(2,))])
 
-    assert space.discrete_dim == 3
-    assert space.continuous_dim == (1 + 3 + 2)
-    assert space._get_continuous_dims() == [1, 3, 2]
+    assert space.n_discrete_options == 3
+    assert space.get_n_discrete_spaces() == 3
+    assert space.get_n_discrete_options() == 3
+
+    assert isinstance(space._get_continuous_spaces(), list)
+    assert len(space._get_continuous_spaces()) == 3
+
+    assert space.get_n_continuous_spaces() == 3
+    assert space.get_n_continuous_options() == (1 + 3 + 2)
+    assert space._get_dimensions_of_continuous_spaces() == [1, 3, 2]
+
     assert np.array_equal(space.split_indices, [1, 4])
     assert space.get_dimension() == (3 + 1 + 3 + 2)
 
@@ -60,7 +62,7 @@ def test_low_high_concatination():
         make_box([-10], [45]),
         make_box([50, 34, 0], [100, 120, 2]),
     ]
-    space = OneHotHybrid([Discrete(3)] + continuous_spaces)
+    space = OneHotHybrid(continuous_spaces)
 
     print(space.continuous_low)
     print(space.continuous_high)
@@ -70,7 +72,7 @@ def test_low_high_concatination():
 
 def test_build_action():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = OneHotHybrid([Discrete(2)] + continuous_spaces)
+    space = OneHotHybrid(continuous_spaces)
 
     discrete = np.array([2, 0, 1])
     parameters = np.array(
@@ -96,8 +98,10 @@ def test_build_action():
 
 
 def test_repr_does_not_throw_error():
+    from hmlf.spaces import Box
+
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = OneHotHybrid([Discrete(2)] + continuous_spaces)
+    space = OneHotHybrid(continuous_spaces)
     represensation_string = repr(space)
     represensation_string = represensation_string.replace(", float32", "")
     eval(represensation_string)
@@ -106,12 +110,13 @@ def test_repr_does_not_throw_error():
 
 def test_comparison():
     continuous_spaces = [make_box([-1, 2.3], [45, 4.3]), make_box([-10], [45])]
-    space = OneHotHybrid([Discrete(2)] + continuous_spaces)
+    space = OneHotHybrid(continuous_spaces)
     continuous_spaces2 = [make_box([-1, 54], [45, 4.3]), make_box([-10], [445])]
-    space2 = OneHotHybrid([Discrete(2)] + continuous_spaces2)
-    space3 = SimpleHybrid([Discrete(2)] + continuous_spaces)
+    space2 = OneHotHybrid(continuous_spaces2)
+    space3 = SimpleHybrid(continuous_spaces)
 
     assert space == space
     assert space != "hi"
     assert space != space2
     assert space != space3
+    assert issubclass(SimpleHybrid, HybridBase)
