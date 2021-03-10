@@ -1,7 +1,7 @@
 # Hmlf Project
 <img src="docs/\_static/img/hmlf.png" align="right" width="40%"/>
 This library is a fork of StableBaselines3 with the focus on parametrized action spaces.
-This library makes it easier to work with environments where the tasks to perform have a discrete componente and a continuos one. The main focus for us is to use the HMLF in controlling robots through human-embedded skills with parameters to tune.
+The objective of this work is to make it easier to work with environments where the tasks to perform have a discrete components and a continuos ones, while maintaing state of the art implementations and user freindliness. 
 
 # Algorithms available
 
