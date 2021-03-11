@@ -30,10 +30,6 @@ def test_circular_imports_evaluation():
     from hmlf.common import evaluation
 
 
-def test_circular_imports_hybrid_utils():
-    from hmlf.common import hybrid_utils
-
-
 def test_circular_imports_logger():
     from hmlf.common import logger
 
