@@ -18,6 +18,7 @@ from hmlf.environments.identity_env import FakeImageEnv
 from hmlf.environments.vec_env import VecTransposeImage, is_vecenv_wrapped
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [
@@ -89,6 +90,7 @@ def check_td3_feature_extractor_differ(model):
             assert not th.allclose(actor_param, critic_param), key
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [

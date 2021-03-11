@@ -14,10 +14,6 @@ def test_circular_imports_callbacks():
     from hmlf.common import callbacks
 
 
-def test_circular_imports_cmd_util():
-    from hmlf.common import cmd_util
-
-
 def test_circular_imports_distributions():
     from hmlf.common import distributions
 

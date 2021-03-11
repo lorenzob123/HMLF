@@ -97,6 +97,7 @@ def test_is_running(model: Type[PDQN], policy_class: Type[PDQNMlpPolicy], simple
     alg.learn(10)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model,policy_class",
     [

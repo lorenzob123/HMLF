@@ -323,6 +323,7 @@ def test_get_max_episode_length():
     HER(MlpPolicyDQN, env, DQN)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("online_sampling", [False, True])
 @pytest.mark.parametrize("n_bits", [10])
 def test_performance_her(online_sampling, n_bits):

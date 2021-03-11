@@ -12,6 +12,7 @@ N_STEPS_TRAINING = 100
 SEED = 0
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [

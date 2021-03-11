@@ -61,6 +61,7 @@ class CustomGymEnv(gym.Env):
         return np.ones((dim_0, dim_1))
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("vec_env_class", VEC_ENV_CLASSES)
 @pytest.mark.parametrize("vec_env_wrapper", VEC_ENV_WRAPPERS)
 def test_vecenv_custom_calls(vec_env_class, vec_env_wrapper):
@@ -152,6 +153,7 @@ class StepEnv(gym.Env):
         return np.array([prev_step], dtype="int"), 0.0, done, {}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("vec_env_class", VEC_ENV_CLASSES)
 @pytest.mark.parametrize("vec_env_wrapper", VEC_ENV_WRAPPERS)
 def test_vecenv_terminal_obs(vec_env_class, vec_env_wrapper):
@@ -233,6 +235,7 @@ def check_vecenv_obs(obs, space):
         assert space.contains(value)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("vec_env_class,space", itertools.product(VEC_ENV_CLASSES, SPACES.values()))
 def test_vecenv_single_space(vec_env_class, space):
     def obs_assert(obs):
@@ -248,6 +251,7 @@ class _UnorderedDictSpace(spaces.Dict):
         return dict(super().sample())
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("vec_env_class", VEC_ENV_CLASSES)
 def test_vecenv_dict_spaces(vec_env_class):
     """Test dictionary observation spaces with vectorized environments."""
@@ -266,6 +270,7 @@ def test_vecenv_dict_spaces(vec_env_class):
     check_vecenv_spaces(vec_env_class, unordered_space, obs_assert)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("vec_env_class", VEC_ENV_CLASSES)
 def test_vecenv_tuple_spaces(vec_env_class):
     """Test tuple observation spaces with vectorized environments."""
@@ -280,6 +285,7 @@ def test_vecenv_tuple_spaces(vec_env_class):
     return check_vecenv_spaces(vec_env_class, space, obs_assert)
 
 
+@pytest.mark.slow
 def test_subproc_start_method():
     start_methods = [None]
     # Only test thread-safe methods. Others may deadlock tests! (gh/428)

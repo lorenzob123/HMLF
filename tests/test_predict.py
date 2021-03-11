@@ -20,6 +20,7 @@ MODEL_LIST = [
 ]
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
 def test_auto_wrap(model_class, policy_class):
     # test auto wrapping of env into a VecEnv

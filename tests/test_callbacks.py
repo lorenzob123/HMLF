@@ -28,6 +28,7 @@ from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 N_STEPS_SMALL = 100
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [

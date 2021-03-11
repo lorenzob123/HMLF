@@ -16,6 +16,7 @@ from hmlf.environments.vec_env import DummyVecEnv
 DIM = 4
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [
@@ -44,6 +45,7 @@ def test_discrete(model_class, policy_class, env):
     assert np.shape(model.predict(obs)[0]) == np.shape(obs)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [(A2C, MlpPolicyA2C), (PPO, MlpPolicyPPO), (SAC, MlpPolicySAC), (TD3, MlpPolicyTD3), (DDPG, MlpPolicyDDPG)],

@@ -60,6 +60,7 @@ def select_env(model_class: BaseAlgorithm) -> gym.Env:
         return IdentityEnvBox(10)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
 def test_save_load(tmp_path, model_class, policy_class):
     """
@@ -192,6 +193,7 @@ def test_save_load(tmp_path, model_class, policy_class):
     os.remove(tmp_path / "test_save.zip")
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("model_class,policy_class", MODEL_LIST)
 def test_set_env(model_class, policy_class):
     """
@@ -257,6 +259,7 @@ def test_exclude_include_saved_params(tmp_path, model_class, policy_class):
     os.remove(tmp_path / "test_save.zip")
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [
@@ -319,6 +322,7 @@ def test_save_load_replay_buffer(tmp_path, model_class, policy_class):
     )
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [
@@ -365,6 +369,7 @@ def test_warn_buffer(recwarn, model_class, policy_class, optimize_memory_usage):
         assert len(recwarn) == 0
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("model_class,policy_class", MODEL_LIST + MODEL_LIST_CNN)
 def test_save_load_policy(
     tmp_path,
