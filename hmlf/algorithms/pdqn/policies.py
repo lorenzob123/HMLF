@@ -57,8 +57,7 @@ class PDQNPolicy(BasePolicy):
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
     ):
-
-        assert isinstance(action_space, SimpleHybrid)
+        assert type(action_space) is SimpleHybrid
 
         self.action_space_parameter = Box(action_space.continuous_low, action_space.continuous_high)
         self.observation_space_q = build_state_parameter_space(observation_space, action_space)
