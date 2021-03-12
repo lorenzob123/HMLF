@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
+
+from hmlf.algorithms.sddpg import SDDPG, MlpPolicy
 from hmlf.environments import DummyHybrid, SequenceWrapper
-from hmlf.algorithms.sddpg import MlpPolicy, SDDPG
 
 
 @pytest.fixture

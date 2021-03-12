@@ -1,9 +1,10 @@
-import pytest
-from hmlf.environments.wrapper import *
-from hmlf.spaces import OneHotHybrid, SimpleHybrid, ContinuousParameters
-from hmlf.environments import DummyEnv, DummyHybrid
 import gym
 import numpy as np
+import pytest
+
+from hmlf.environments import DummyEnv, DummyHybrid
+from hmlf.environments.wrapper import OneHotWrapper, SequenceWrapper, SimpleHybridWrapper
+from hmlf.spaces import ContinuousParameters, OneHotHybrid, SimpleHybrid
 
 
 @pytest.fixture
