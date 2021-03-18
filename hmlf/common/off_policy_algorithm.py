@@ -318,6 +318,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             # We store the scaled action in the buffer
             buffer_action = scaled_action
             action = self.policy.unscale_action(scaled_action)
+        elif isinstance(self.action_space, spaces.ContinuousParameters):
+            action = unscaled_action
+            buffer_action = np.hstack(unscaled_action[0])
         else:
             # Discrete case, no need to normalize or clip
             buffer_action = unscaled_action
