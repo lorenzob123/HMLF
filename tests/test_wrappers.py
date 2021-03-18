@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from hmlf.environments import DummyEnv, DummyHybrid
-from hmlf.environments.stage_controller import OneStepPerStageController
+from hmlf.environments.stage_controller import OneStepPerStageController, StateDependentStageController
 from hmlf.environments.wrapper import OneHotWrapper, SequenceWrapper, SimpleHybridWrapper
 from hmlf.spaces import ContinuousParameters, OneHotHybrid, SimpleHybrid
 
@@ -16,6 +16,11 @@ def simple_env():
 @pytest.fixture
 def simple_hybrid_env():
     return DummyHybrid([2, 7, 3, 10])
+
+
+@pytest.fixture
+def dummy_reward_function():
+    return lambda x: 0.1
 
 
 @pytest.mark.parametrize(
@@ -99,6 +104,21 @@ def test_onehot_hybrid_step_sample(wrapper, simple_hybrid_env):
         assert np.all(
             (sample[i] < simple_hybrid_env.action_space[i].high) * (sample[i] > simple_hybrid_env.action_space[i].low)
         )
+
+
+@pytest.mark.parametrize(
+    "sequence",
+    [
+        [0, 1, 3, 2],
+        [1, 1, 1, 3],
+    ],
+)
+def test_init_sequence(sequence, simple_hybrid_env):
+    wrapped_env = SequenceWrapper(simple_hybrid_env, sequence)
+    assert isinstance(wrapped_env.stage_controller, OneStepPerStageController)
+
+    wrapped_env = SequenceWrapper(simple_hybrid_env, sequence, StateDependentStageController([lambda x: True]))
+    assert isinstance(wrapped_env.stage_controller, StateDependentStageController)
 
 
 @pytest.mark.parametrize(

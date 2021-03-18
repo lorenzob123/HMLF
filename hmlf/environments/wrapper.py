@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 import numpy as np
 from gym import Wrapper
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from hmlf.common.type_aliases import GymEnv
 
 from hmlf.environments.sequence_curator import SequenceCurator
-from hmlf.environments.stage_controller import BaseStageController
+from hmlf.environments.stage_controller import BaseStageController, OneStepPerStageController
 from hmlf.spaces import ContinuousParameters, OneHotHybrid, SimpleHybrid
 
 
@@ -32,7 +32,7 @@ class SimpleHybridWrapper(Wrapper):
 
 
 class SequenceWrapper(Wrapper):
-    def __init__(self, env: "GymEnv", sequence: List[int], stage_controller: BaseStageController):
+    def __init__(self, env: "GymEnv", sequence: List[int], stage_controller: Optional[BaseStageController] = None):
         super().__init__(env)
         self.env = env
 
@@ -40,6 +40,8 @@ class SequenceWrapper(Wrapper):
         self._set_up_observation_space()
 
         self.sequence_curator = SequenceCurator(sequence)
+        if stage_controller is None:
+            stage_controller = OneStepPerStageController()
         self.stage_controller = stage_controller
 
     def _set_up_action_space(self) -> None:
@@ -64,6 +66,9 @@ class SequenceWrapper(Wrapper):
     def step(self, action):
         current_sequence_part = self.sequence_curator.get_current()
         obs, r, done, info = self.env.step((current_sequence_part, *action))
+
+        if self.stage_controller.can_calculate_reward():
+            r = self.stage_controller.calculate_reward(obs, current_sequence_part)
 
         current_stage_is_done = self.stage_controller.current_stage_is_done(obs, current_sequence_part)
         if current_stage_is_done:

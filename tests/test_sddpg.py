@@ -3,7 +3,6 @@ import pytest
 
 from hmlf.algorithms.sddpg import SDDPG, MlpPolicy
 from hmlf.environments import DummyHybrid, SequenceWrapper
-from hmlf.environments.stage_controller import OneStepPerStageController
 
 
 @pytest.fixture
@@ -20,7 +19,7 @@ def simple_env():
     ],
 )
 def test_init(sequence, simple_env):
-    env = SequenceWrapper(simple_env, sequence, OneStepPerStageController())
+    env = SequenceWrapper(simple_env, sequence)
     alg = SDDPG(MlpPolicy, env)
 
     assert alg.action_space == env.action_space
@@ -38,7 +37,7 @@ def test_init(sequence, simple_env):
     ],
 )
 def test_predict_format(sequence, simple_env):
-    env = SequenceWrapper(simple_env, sequence, OneStepPerStageController())
+    env = SequenceWrapper(simple_env, sequence)
     alg = SDDPG(MlpPolicy, env)
     n_actions = len(sequence) - 1
     env.reset()
@@ -69,7 +68,7 @@ def test_predict_format(sequence, simple_env):
     ],
 )
 def test_is_running(sequence: list, simple_env: DummyHybrid):
-    env = SequenceWrapper(simple_env, sequence, OneStepPerStageController())
+    env = SequenceWrapper(simple_env, sequence)
     alg = SDDPG(MlpPolicy, env)
 
     alg.learn(10)
