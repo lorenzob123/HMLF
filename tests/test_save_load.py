@@ -210,7 +210,7 @@ def test_set_env(model_class, policy_class):
     if model_class in {DQN, DDPG, SAC, TD3}:
         kwargs = dict(learning_starts=0)
     elif model_class in {A2C, PPO}:
-        kwargs = dict(n_steps=100)
+        kwargs = dict(n_steps=64)
 
     # create model
     model = model_class(policy_class, env, policy_kwargs=dict(net_arch=[16]), **kwargs)

@@ -48,7 +48,7 @@ def test_squashed_gaussian(model_class, policy_class):
     """
     Test run with squashed Gaussian (notably entropy computation)
     """
-    model = model_class(policy_class, "Pendulum-v0", use_sde=True, n_steps=100, policy_kwargs=dict(squash_output=True))
+    model = model_class(policy_class, "Pendulum-v0", use_sde=True, n_steps=64, policy_kwargs=dict(squash_output=True))
     model.learn(500)
 
     gaussian_mean = th.rand(N_SAMPLES, N_ACTIONS)
