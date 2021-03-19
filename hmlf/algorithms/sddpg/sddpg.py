@@ -1,10 +1,10 @@
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 from torch.nn import functional as F
 
+from hmlf import spaces
 from hmlf.algorithms.sddpg.policies import SDDPGPolicy
 from hmlf.common import logger
 from hmlf.common.noise import ActionNoise
@@ -15,7 +15,7 @@ from hmlf.common.utils import polyak_update
 
 class SDDPG(OffPolicyAlgorithm):
     """
-    Twin Delayed DDPG (SDDPG)
+    Sequential Twin Delayed DDPG (SDDPG)
     Addressing Function Approximation Error in Actor-Critic Methods.
 
     Original implementation: https://github.com/sfujim/SDDPG
@@ -86,7 +86,7 @@ class SDDPG(OffPolicyAlgorithm):
         _init_setup_model: bool = True,
     ):
 
-        super(SDDPG, self).__init__(
+        super().__init__(
             policy,
             env,
             learning_rate,
@@ -107,21 +107,18 @@ class SDDPG(OffPolicyAlgorithm):
             seed=seed,
             sde_support=False,
             optimize_memory_usage=optimize_memory_usage,
-            supported_action_spaces=(gym.spaces.Box, gym.spaces.Tuple),
+            supported_action_spaces=(spaces.Box, spaces.Tuple),
         )
 
         self.policy_delay = policy_delay
         self.target_noise_clip = target_noise_clip
         self.target_policy_noise = target_policy_noise
 
-        if "n_critics" not in self.policy_kwargs:
-            self.policy_kwargs["n_critics"] = 1
-
         if _init_setup_model:
             self._setup_model()
 
     def _setup_model(self) -> None:
-        super(SDDPG, self)._setup_model()
+        super()._setup_model()
         self._create_aliases()
 
     def _create_aliases(self) -> None:
@@ -131,7 +128,6 @@ class SDDPG(OffPolicyAlgorithm):
         self.critic_target = self.policy.critic_target
 
     def train(self, gradient_steps: int, batch_size: int = 100) -> None:
-
         # Update learning rate according to lr schedule
         self._update_learning_rate([self.actor.optimizer, self.critic.optimizer])
 
@@ -147,7 +143,6 @@ class SDDPG(OffPolicyAlgorithm):
                 noise = replay_data.actions.clone().data.normal_(0, self.target_policy_noise)
                 noise = noise.clamp(-self.target_noise_clip, self.target_noise_clip)
                 next_actions = (self.actor_target(replay_data.next_observations) + noise).clamp(-1, 1)
-                # print(replay_data.next_observations, next_actions, noise)
                 # Compute the next Q-values: min over all critics targets
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions), dim=1)
                 next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
@@ -196,7 +191,7 @@ class SDDPG(OffPolicyAlgorithm):
         reset_num_timesteps: bool = True,
     ) -> OffPolicyAlgorithm:
 
-        return super(SDDPG, self).learn(
+        return super().learn(
             total_timesteps=total_timesteps,
             callback=callback,
             log_interval=log_interval,
@@ -209,7 +204,7 @@ class SDDPG(OffPolicyAlgorithm):
         )
 
     def _excluded_save_params(self) -> List[str]:
-        return super(SDDPG, self)._excluded_save_params() + ["actor", "critic", "actor_target", "critic_target"]
+        return super()._excluded_save_params() + ["actor", "critic", "actor_target", "critic_target"]
 
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
         state_dicts = ["policy", "actor.optimizer", "critic.optimizer"]

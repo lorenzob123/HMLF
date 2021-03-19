@@ -213,6 +213,7 @@ def test_normalize_external():
     assert np.all(norm_rewards < 1)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [

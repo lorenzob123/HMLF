@@ -42,7 +42,7 @@ def test_flexible_mlp(model_class, policy_class, net_arch):
     ],
 )
 def test_custom_offpolicy(model_class, policy_class, net_arch):
-    _ = model_class(policy_class, "Pendulum-v0", policy_kwargs=dict(net_arch=net_arch), learning_starts=100).learn(300)
+    _ = model_class(policy_class, "Pendulum-v0", policy_kwargs=dict(net_arch=net_arch), learning_starts=10).learn(100)
 
 
 @pytest.mark.parametrize(

@@ -19,7 +19,7 @@ class SimpleHybridWrapper(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)
         self.env = env
-        self.action_space = SimpleHybrid(env.action_space.spaces)
+        self.action_space = SimpleHybrid(env.action_space.spaces[1:])
 
 
 class SequenceWrapper(gym.Wrapper):

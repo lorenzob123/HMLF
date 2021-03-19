@@ -5,6 +5,20 @@ from hmlf.spaces import Box, SimpleHybrid
 
 
 class ObstacleCourse_v2(gym.Env):
+    """
+    Version of the ObstacleCourse environment, where the agent only sees the next obstacle and can only move forward.
+    Simple environment for benchmarking hybrid methods. It is an obsticle course the agent has to traverse by either
+    jumping of running. When running you move longer distances but you get blocked by obstacles, when jumping with the
+    correct height you can skip over an obstacle. The objective for the agent is to traverse this obstacle course in
+    the least time possible, while getting over 3 obstacles. These are placed randomly between the agent's starting position
+    and the goal.
+    The action space includes 2 tasks (jump, run) and one parameter for each task (jump height, run distance).
+    The observation space includes :
+        - current position
+        - goal position
+        - goal target height
+    """
+
     def __init__(self):
 
         self.max_move = np.float32(0.4)
@@ -24,12 +38,15 @@ class ObstacleCourse_v2(gym.Env):
         self.obstacle_target_height = np.zeros(self.n_obstacles)
 
     def reset(self):
+        # Set up obstacle course
         self.obstacle_position, self.obstacle_target_height = self._build_obstacles()
         self.position = 0
         self.time = 0
         return self.get_observation()
 
     def _build_obstacles(self):
+        # Choose obstacle position at random within `[max_jump, goal_position - 2 max_jump] `
+        # Discard obstacle positions if two obstacles are within a max jump from each other
         obstacle_position = np.zeros(3)
         while np.any(np.diff(obstacle_position) < self.max_jump):
             obstacle_position = np.random.rand(3) * (self.goal_position - 2 * self.max_jump) + self.max_jump
@@ -48,6 +65,16 @@ class ObstacleCourse_v2(gym.Env):
         return observation, r, done, {}
 
     def _move(self, movement):
+        """Performs the move action
+
+        Args:
+            movement (float): how far the agent plans to move
+
+        Returns:
+            observations (np.ndarray): observations after performing move
+        """
+        # If the relative position to an obstacle would change if the agent moved with a step of `movement`, then
+        # stop agent right before the obstacle
         pre_relative_position = self.obstacle_position - self.position
         post_relative_position = self.obstacle_position - self.position - movement
         change = np.any((pre_relative_position * post_relative_position) < 0)
@@ -64,6 +91,16 @@ class ObstacleCourse_v2(gym.Env):
         return self.get_observation()
 
     def _jump(self, height):
+        """Performs the jump action
+
+        Args:
+            movement (float): how height the agent jumps
+
+        Returns:
+            observations (np.ndarray): observations after performing jump
+        """
+        # If the jump would cause a change in the relative poision to an obstacle, this function
+        # checks if the height parameter is close enough to the obstacle's height target.
         pre_relative_position = self.obstacle_position - self.position
         post_relative_position = self.obstacle_position - self.position - self.max_jump
         change = np.any((pre_relative_position * post_relative_position) < 0)

@@ -136,7 +136,6 @@ class PDQN(OffPolicyAlgorithm):
             self._setup_model()
 
     def _setup_model(self) -> None:
-        # _setup_model from super
         # Need to change policy initialization to implement two different learning_rates
         self._setup_lr_schedule()
         self.set_random_seed(self.seed)

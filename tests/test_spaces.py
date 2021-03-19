@@ -39,6 +39,7 @@ class DummyMultiBinary(gym.Env):
         return self.observation_space.sample(), 0.0, False, {}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [

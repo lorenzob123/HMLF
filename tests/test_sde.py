@@ -62,6 +62,7 @@ def test_sde_check():
         PPO("MlpPolicy", "CartPole-v1", use_sde=True)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [
