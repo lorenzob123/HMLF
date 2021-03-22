@@ -1,7 +1,7 @@
 # Hmlf Project
 <img src="docs/\_static/img/hmlf.png" align="right" width="40%"/>
 This library is a fork of StableBaselines3 with the focus on parametrized action spaces.
-The objective of this work is to make it easier to work with environments where the tasks to perform have a discrete components and a continuos ones, while maintaing state of the art implementations and user freindliness. 
+The objective of this work is to make it easier to work with environments where the tasks to perform have a discrete components and a continuos ones, while maintaing state of the art implementations and user friendliness. 
 
 # Algorithms available
 
