@@ -111,6 +111,10 @@ def test_features_extractor_target_net(model_class, policy_class, share_features
     if model_class != DQN:
         kwargs["policy_kwargs"]["share_features_extractor"] = share_features_extractor
 
+    # No delay for TD3 (changes when the actor and polyak update take place)
+    if model_class == TD3:
+        kwargs["policy_delay"] = 1
+
     model = model_class(policy_class, env, seed=0, **kwargs)
 
     patch_dqn_names_(model)

@@ -15,6 +15,7 @@ from hmlf.algorithms.her.goal_selection_strategy import GoalSelectionStrategy
 from hmlf.algorithms.her.her import get_time_limit
 from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
 from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
+from hmlf.common.noise import NormalActionNoise
 from hmlf.environments.bit_flipping_env import BitFlippingEnv
 from hmlf.environments.vec_env import DummyVecEnv
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
@@ -40,8 +41,7 @@ def test_her(model_class, policy_class, online_sampling):
         goal_selection_strategy="future",
         online_sampling=online_sampling,
         gradient_steps=1,
-        train_freq=1,
-        n_episodes_rollout=-1,
+        train_freq=4,
         max_episode_length=n_bits,
         policy_kwargs=dict(net_arch=[64]),
         learning_starts=0,
@@ -67,6 +67,7 @@ def test_goal_selection_strategy(goal_selection_strategy, online_sampling):
     Test different goal strategies.
     """
     env = BitFlippingEnv(continuous=True)
+    normal_action_noise = NormalActionNoise(np.zeros(1), 0.1 * np.ones(1))
 
     model = HER(
         MlpPolicySAC,
@@ -76,11 +77,12 @@ def test_goal_selection_strategy(goal_selection_strategy, online_sampling):
         online_sampling=online_sampling,
         gradient_steps=1,
         train_freq=1,
-        n_episodes_rollout=-1,
         max_episode_length=10,
         policy_kwargs=dict(net_arch=[64]),
         learning_starts=0,
+        action_noise=normal_action_noise,
     )
+    assert model.action_noise is not None
     model.learn(total_timesteps=N_STEPS_SMALL)
 
 
@@ -119,7 +121,6 @@ def test_save_load(tmp_path, model_class, policy_class, use_sde, online_sampling
         gradient_steps=1,
         train_freq=4,
         learning_starts=0,
-        n_episodes_rollout=-1,
         max_episode_length=n_bits,
         **kwargs,
     )
@@ -182,7 +183,7 @@ def test_save_load(tmp_path, model_class, policy_class, use_sde, online_sampling
     os.remove(tmp_path / "test_save.zip")
 
 
-@pytest.mark.parametrize("online_sampling, truncate_last_trajectory", [(False, None), (True, True), (True, False)])
+@pytest.mark.parametrize("online_sampling, truncate_last_trajectory", [(False, False), (True, True), (True, False)])
 def test_save_load_replay_buffer(tmp_path, recwarn, online_sampling, truncate_last_trajectory):
     """
     Test if 'save_replay_buffer' and 'load_replay_buffer' works correctly
@@ -201,8 +202,7 @@ def test_save_load_replay_buffer(tmp_path, recwarn, online_sampling, truncate_la
         goal_selection_strategy="future",
         online_sampling=online_sampling,
         gradient_steps=1,
-        train_freq=1,
-        n_episodes_rollout=-1,
+        train_freq=4,
         max_episode_length=4,
         buffer_size=int(2e4),
         policy_kwargs=dict(net_arch=[64]),
@@ -276,8 +276,7 @@ def test_full_replay_buffer():
         goal_selection_strategy="future",
         online_sampling=True,
         gradient_steps=1,
-        train_freq=1,
-        n_episodes_rollout=-1,
+        train_freq=4,
         max_episode_length=n_bits,
         policy_kwargs=dict(net_arch=[64]),
         learning_starts=1,

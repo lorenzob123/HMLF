@@ -1,5 +1,4 @@
 """Common aliases for type hints"""
-
 from typing import Any, Callable, Dict, List, NamedTuple, Tuple, Union
 
 import gym
