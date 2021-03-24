@@ -208,7 +208,7 @@ def test_set_env(model_class, policy_class):
 
     kwargs = {}
     if model_class in {DQN, DDPG, SAC, TD3}:
-        kwargs = dict(learning_starts=0)
+        kwargs = dict(learning_starts=0, train_freq=4)
     elif model_class in {A2C, PPO}:
         kwargs = dict(n_steps=64)
 
@@ -277,12 +277,12 @@ def test_save_load_env_cnn(tmp_path, model_class, policy_class):
     env = FakeImageEnv(screen_height=40, screen_width=40, n_channels=2, discrete=False)
     kwargs = dict(policy_kwargs=dict(net_arch=[32]))
     if model_class == TD3:
-        kwargs.update(dict(buffer_size=100, learning_starts=50))
+        kwargs.update(dict(buffer_size=100, learning_starts=50, train_freq=4))
 
     model = model_class(policy_class, env, **kwargs).learn(100)
     model.save(tmp_path / "test_save")
     # Test loading with env and continuing training
-    model = model_class.load(str(tmp_path / "test_save.zip"), env=env).learn(100)
+    model = model_class.load(str(tmp_path / "test_save.zip"), env=env, **kwargs).learn(100)
     # clear file from os
     os.remove(tmp_path / "test_save.zip")
 

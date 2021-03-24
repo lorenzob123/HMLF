@@ -131,15 +131,8 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         # see https://github.com/hill-a/stable-baselines/issues/863
         self.remove_time_limit_termination = remove_time_limit_termination
 
-        if isinstance(train_freq, int):
-            train_freq = (train_freq, "step")
-
-        try:
-            train_freq = (train_freq[0], TrainFrequencyUnit(train_freq[1]))
-        except ValueError:
-            raise ValueError(f"The unit of the `train_freq` must be either 'step' or 'episode' not '{train_freq[1]}'!")
-
-        self.train_freq = TrainFreq(*train_freq)
+        # Save train freq parameter, will be converted later to TrainFreq object
+        self.train_freq = train_freq
 
         self.actor = None  # type: Optional[th.nn.Module]
         self.replay_buffer = None  # type: Optional[ReplayBuffer]
@@ -166,6 +159,29 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             **self.policy_kwargs,
         )
         self.policy = self.policy.to(self.device)
+        self._convert_train_freq()
+
+    def _convert_train_freq(self) -> None:
+        """
+        Convert `train_freq` parameter (int or tuple)
+        to a TrainFreq object.
+        """
+        if not isinstance(self.train_freq, TrainFreq):
+            train_freq = self.train_freq
+
+            # The value of the train frequency will be checked later
+            if not isinstance(train_freq, tuple):
+                train_freq = (train_freq, "step")
+
+            try:
+                train_freq = (train_freq[0], TrainFrequencyUnit(train_freq[1]))
+            except ValueError:
+                raise ValueError(f"The unit of the `train_freq` must be either 'step' or 'episode' not '{train_freq[1]}'!")
+
+            if not isinstance(train_freq[0], int):
+                raise ValueError(f"The frequency of `train_freq` must be an integer and not {train_freq[0]}")
+
+            self.train_freq = TrainFreq(*train_freq)
 
     def save_replay_buffer(self, path: Union[str, pathlib.Path, io.BufferedIOBase]) -> None:
         """
