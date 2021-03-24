@@ -8,6 +8,7 @@ from hmlf import spaces
 from hmlf.algorithms.dqn.policies import DQNPolicy
 from hmlf.common import logger
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
+from hmlf.common.preprocessing import maybe_transpose
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import get_linear_fn, is_vectorized_observation, polyak_update
 
@@ -200,7 +201,7 @@ class DQN(OffPolicyAlgorithm):
             (used in recurrent policies)
         """
         if not deterministic and np.random.rand() < self.exploration_rate:
-            if is_vectorized_observation(observation, self.observation_space):
+            if is_vectorized_observation(maybe_transpose(observation, self.observation_space), self.observation_space):
                 n_batch = observation.shape[0]
                 action = np.array([self.action_space.sample() for _ in range(n_batch)])
             else:

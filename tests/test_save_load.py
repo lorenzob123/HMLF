@@ -47,7 +47,7 @@ MODEL_LIST_CNN = [
     (DDPG, CnnPolicyDDPG),
 ]
 
-N_STEPS_SMALL = 120
+N_STEPS_SMALL = 128
 
 
 def select_env(model_class: BaseAlgorithm) -> gym.Env:
@@ -251,7 +251,14 @@ def test_exclude_include_saved_params(tmp_path, model_class, policy_class):
     model.verbose = 2
     # Check if include works
     model.save(tmp_path / "test_save", exclude=["verbose"], include=["verbose"])
-    del model
+    # Load with custom objects
+    custom_objects = dict(learning_rate=2e-5, dummy=1.0)
+    model = model_class.load(str(tmp_path / "test_save.zip"), custom_objects=custom_objects)
+    assert model.verbose == 2
+    # Check that the custom object was taken into account
+    assert model.learning_rate == custom_objects["learning_rate"]
+    # Check that only parameters that are here already are replaced
+    assert not hasattr(model, "dummy")
     model = model_class.load(str(tmp_path / "test_save.zip"))
     assert model.verbose == 2
 
