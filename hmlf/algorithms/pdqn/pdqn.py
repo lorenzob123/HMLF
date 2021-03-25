@@ -156,6 +156,7 @@ class PDQN(OffPolicyAlgorithm):
         self.exploration_schedule = get_linear_fn(
             self.exploration_initial_eps, self.exploration_final_eps, self.exploration_fraction
         )
+        self._convert_train_freq()
 
     def _create_aliases(self) -> None:
         self.q_net = self.policy.q_net
