@@ -76,7 +76,7 @@ In the following example, we will train, save and load a DQN model on the Lunar 
   del model  # delete trained model to demonstrate loading
 
   # Load the trained agent
-  model = DQN.load("dqn_lunar")
+  model = DQN.load("dqn_lunar", env=env)
 
   # Evaluate the agent
   # NOTE: If you use wrappers with your environment that modify rewards,
@@ -312,6 +312,7 @@ will compute a running average and standard deviation of input features (it can 
 
 .. code-block:: python
 
+  import os
   import gym
   import pybullet_envs
 
@@ -335,9 +336,6 @@ will compute a running average and standard deviation of input features (it can 
   # To demonstrate loading
   del model, env
 
-  # Load the agent
-  model = PPO.load(log_dir + "ppo_halfcheetah")
-
   # Load the saved statistics
   env = DummyVecEnv([lambda: gym.make("HalfCheetahBulletEnv-v0")])
   env = VecNormalize.load(stats_path, env)
@@ -346,6 +344,8 @@ will compute a running average and standard deviation of input features (it can 
   # reward normalization is not needed at test time
   env.norm_reward = False
 
+  # Load the agent
+  model = PPO.load(log_dir + "ppo_halfcheetah", env=env)
 
 Hindsight Experience Replay (HER)
 ---------------------------------
@@ -477,12 +477,20 @@ By default, the replay buffer is not saved when calling ``model.save()``, in ord
 However, SB3 provides a ``save_replay_buffer()`` and ``load_replay_buffer()`` method to save it separately.
 
 
-.. image:: ../_static/img/colab-badge.svg
-   :target: https://colab.research.google.com/github/Stable-Baselines-Team/rl-colab-notebooks/blob/sb3/advanced_saving_loading.ipynb
-
 Stable-Baselines3 automatic creation of an environment for evaluation.
 For that, you only need to specify ``create_eval_env=True`` when passing the Gym ID of the environment while creating the agent.
 Behind the scene, SB3 uses an :ref:`EvalCallback <callbacks>`.
+
+.. note::
+
+	For training model after loading it, we recommend loading the replay buffer to ensure stable learning (for off-policy algorithms).
+	You also need to pass ``reset_num_timesteps=True`` to ``learn`` function which initializes the environment
+	and agent for training if a new environment was created since saving the model.
+
+
+.. image:: ../_static/img/colab-badge.svg
+   :target: https://colab.research.google.com/github/Stable-Baselines-Team/rl-colab-notebooks/blob/sb3/advanced_saving_loading.ipynb
+
 
 .. code-block:: python
 
@@ -519,7 +527,7 @@ Behind the scene, SB3 uses an :ref:`EvalCallback <callbacks>`.
   # Note: if you don't save the complete model with `model.save()`
   # you cannot continue training afterward
   policy = model.policy
-  policy.save("sac_policy_pendulum.pkl")
+  policy.save("sac_policy_pendulum")
 
   # Retrieve the environment
   env = model.get_env()

@@ -7,6 +7,7 @@ from hmlf.algorithms.ddpg import MlpPolicy as MlpPolicyDDPG
 from hmlf.algorithms.dqn import MlpPolicy as MlpPolicyDQN
 from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
 from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
+from hmlf.algorithms.sac.policies import SACPolicy
 from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
 from hmlf.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
@@ -110,3 +111,39 @@ def test_dqn():
         create_eval_env=True,
     )
     model.learn(total_timesteps=100, eval_freq=75)
+
+
+@pytest.mark.parametrize("train_freq", [4, (4, "step"), (1, "episode")])
+def test_train_freq(tmp_path, train_freq):
+
+    model = SAC(
+        SACPolicy,
+        "Pendulum-v0",
+        policy_kwargs=dict(net_arch=[64, 64], n_critics=1),
+        learning_starts=100,
+        buffer_size=10000,
+        verbose=1,
+        train_freq=train_freq,
+    )
+    model.learn(total_timesteps=150)
+    model.save(tmp_path / "test_save.zip")
+    env = model.get_env()
+    model = SAC.load(tmp_path / "test_save.zip", env=env)
+    model.learn(total_timesteps=150)
+    model = SAC.load(tmp_path / "test_save.zip", train_freq=train_freq, env=env)
+    model.learn(total_timesteps=150)
+
+
+@pytest.mark.parametrize("train_freq", ["4", ("1", "episode"), "non_sense", (1, "close")])
+def test_train_freq_fail(train_freq):
+    with pytest.raises(ValueError):
+        model = SAC(
+            SACPolicy,
+            "Pendulum-v0",
+            policy_kwargs=dict(net_arch=[64, 64], n_critics=1),
+            learning_starts=0,
+            buffer_size=10000,
+            verbose=1,
+            train_freq=train_freq,
+        )
+        model.learn(total_timesteps=100)

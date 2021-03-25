@@ -174,8 +174,8 @@ class PDQNPolicy(BasePolicy):
         q_values = self.forward(obs)
         return q_values.argmax(dim=1).reshape(-1)
 
-    def _get_data(self) -> Dict[str, Any]:
-        data = super()._get_data()
+    def _get_constructor_parameters(self) -> Dict[str, Any]:
+        data = super()._get_constructor_parameters()
 
         data.update(
             dict(

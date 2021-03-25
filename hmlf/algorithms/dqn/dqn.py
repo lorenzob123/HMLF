@@ -8,6 +8,7 @@ from hmlf import spaces
 from hmlf.algorithms.dqn.policies import DQNPolicy
 from hmlf.common import logger
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
+from hmlf.common.preprocessing import maybe_transpose
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import get_linear_fn, is_vectorized_observation, polyak_update
 
@@ -29,13 +30,11 @@ class DQN(OffPolicyAlgorithm):
     :param batch_size: Minibatch size for each gradient update
     :param tau: the soft update coefficient ("Polyak update", between 0 and 1) default 1 for hard update
     :param gamma: the discount factor
-    :param train_freq: Update the model every ``train_freq`` steps. Set to `-1` to disable.
-    :param gradient_steps: How many gradient steps to do after each rollout
-        (see ``train_freq`` and ``n_episodes_rollout``)
+    :param train_freq: Update the model every ``train_freq`` steps. Alternatively pass a tuple of frequency and unit
+        like ``(5, "step")`` or ``(2, "episode")``.
+    :param gradient_steps: How many gradient steps to do after each rollout (see ``train_freq``)
         Set to ``-1`` means to do as many gradient steps as steps done in the environment
         during the rollout.
-    :param n_episodes_rollout: Update the model every ``n_episodes_rollout`` episodes.
-        Note that this cannot be used at the same time as ``train_freq``. Set to `-1` to disable.
     :param optimize_memory_usage: Enable a memory efficient variant of the replay buffer
         at a cost of more complexity.
         See https://github.com/DLR-RM/stable-baselines3/issues/37#issuecomment-637501195
@@ -66,9 +65,8 @@ class DQN(OffPolicyAlgorithm):
         batch_size: Optional[int] = 32,
         tau: float = 1.0,
         gamma: float = 0.99,
-        train_freq: int = 4,
+        train_freq: Union[int, Tuple[int, str]] = 4,
         gradient_steps: int = 1,
-        n_episodes_rollout: int = -1,
         optimize_memory_usage: bool = False,
         target_update_interval: int = 10000,
         exploration_fraction: float = 0.1,
@@ -95,7 +93,6 @@ class DQN(OffPolicyAlgorithm):
             gamma,
             train_freq,
             gradient_steps,
-            n_episodes_rollout,
             action_noise=None,  # No action noise
             policy_kwargs=policy_kwargs,
             tensorboard_log=tensorboard_log,
@@ -204,7 +201,7 @@ class DQN(OffPolicyAlgorithm):
             (used in recurrent policies)
         """
         if not deterministic and np.random.rand() < self.exploration_rate:
-            if is_vectorized_observation(observation, self.observation_space):
+            if is_vectorized_observation(maybe_transpose(observation, self.observation_space), self.observation_space):
                 n_batch = observation.shape[0]
                 action = np.array([self.action_space.sample() for _ in range(n_batch)])
             else:

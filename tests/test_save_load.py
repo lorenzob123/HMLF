@@ -47,7 +47,7 @@ MODEL_LIST_CNN = [
     (DDPG, CnnPolicyDDPG),
 ]
 
-N_STEPS_SMALL = 120
+N_STEPS_SMALL = 128
 
 
 def select_env(model_class: BaseAlgorithm) -> gym.Env:
@@ -208,9 +208,9 @@ def test_set_env(model_class, policy_class):
 
     kwargs = {}
     if model_class in {DQN, DDPG, SAC, TD3}:
-        kwargs = dict(learning_starts=0)
+        kwargs = dict(learning_starts=0, train_freq=4)
     elif model_class in {A2C, PPO}:
-        kwargs = dict(n_steps=100)
+        kwargs = dict(n_steps=64)
 
     # create model
     model = model_class(policy_class, env, policy_kwargs=dict(net_arch=[16]), **kwargs)
@@ -251,7 +251,14 @@ def test_exclude_include_saved_params(tmp_path, model_class, policy_class):
     model.verbose = 2
     # Check if include works
     model.save(tmp_path / "test_save", exclude=["verbose"], include=["verbose"])
-    del model
+    # Load with custom objects
+    custom_objects = dict(learning_rate=2e-5, dummy=1.0)
+    model = model_class.load(str(tmp_path / "test_save.zip"), custom_objects=custom_objects)
+    assert model.verbose == 2
+    # Check that the custom object was taken into account
+    assert model.learning_rate == custom_objects["learning_rate"]
+    # Check that only parameters that are here already are replaced
+    assert not hasattr(model, "dummy")
     model = model_class.load(str(tmp_path / "test_save.zip"))
     assert model.verbose == 2
 
@@ -277,12 +284,12 @@ def test_save_load_env_cnn(tmp_path, model_class, policy_class):
     env = FakeImageEnv(screen_height=40, screen_width=40, n_channels=2, discrete=False)
     kwargs = dict(policy_kwargs=dict(net_arch=[32]))
     if model_class == TD3:
-        kwargs.update(dict(buffer_size=100, learning_starts=50))
+        kwargs.update(dict(buffer_size=100, learning_starts=50, train_freq=4))
 
     model = model_class(policy_class, env, **kwargs).learn(100)
     model.save(tmp_path / "test_save")
     # Test loading with env and continuing training
-    model = model_class.load(str(tmp_path / "test_save.zip"), env=env).learn(100)
+    model = model_class.load(str(tmp_path / "test_save.zip"), env=env, **kwargs).learn(100)
     # clear file from os
     os.remove(tmp_path / "test_save.zip")
 

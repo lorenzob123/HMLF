@@ -119,14 +119,15 @@ Discrete Actions
 Discrete Actions - Single Process
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-DQN with extensions (double DQN, prioritized replay, ...) are the recommended algorithms.
-We notably provide QR-DQN in our :ref:`contrib repo <sb3_contrib>`.
-DQN is usually slower to train (regarding wall clock time) but is the most sample efficient (because of its replay buffer).
+``DQN`` with extensions (double DQN, prioritized replay, ...) are the recommended algorithms.
+We notably provide ``QR-DQN`` in our :ref:`contrib repo <sb3_contrib>`.
+``DQN`` is usually slower to train (regarding wall clock time) but is the most sample efficient (because of its replay buffer).
+
 
 Discrete Actions - Multiprocessed
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You should give a try to PPO or A2C.
+You should give a try to ``PPO`` or ``A2C``.
 
 
 Continuous Actions
@@ -142,7 +143,7 @@ Please use the hyperparameters in the `RL zoo <https://github.com/DLR-RM/rl-base
 Continuous Actions - Multiprocessed
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Take a look at PPO, TRPO or A2C. Again, don't forget to take the hyperparameters from the `RL zoo <https://github.com/DLR-RM/rl-baselines3-zoo>`_
+Take a look at ``PPO`` or ``A2C``. Again, don't forget to take the hyperparameters from the `RL zoo <https://github.com/DLR-RM/rl-baselines3-zoo>`_
 for continuous actions problems (cf *Bullet* envs).
 
 .. note::

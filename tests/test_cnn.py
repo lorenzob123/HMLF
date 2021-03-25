@@ -36,17 +36,28 @@ def test_cnn(tmp_path, model_class, policy_class):
     # to check that the network handle it automatically
     env = FakeImageEnv(screen_height=40, screen_width=40, n_channels=1, discrete=model_class not in {SAC, TD3})
     if model_class in {A2C, PPO}:
-        kwargs = dict(n_steps=100)
+        kwargs = dict(n_steps=64)
     else:
         # Avoid memory error when using replay buffer
         # Reduce the size of the features
-        kwargs = dict(buffer_size=250, policy_kwargs=dict(features_extractor_kwargs=dict(features_dim=32)))
+        kwargs = dict(
+            buffer_size=250,
+            policy_kwargs=dict(features_extractor_kwargs=dict(features_dim=32)),
+            seed=1,
+        )
     model = model_class(policy_class, env, **kwargs).learn(250)
 
     # FakeImageEnv is channel last by default and should be wrapped
     assert is_vecenv_wrapped(model.get_env(), VecTransposeImage)
 
     obs = env.reset()
+
+    # Test stochastic predict with channel last input
+    if model_class == DQN:
+        model.exploration_rate = 0.9
+
+    for _ in range(10):
+        model.predict(obs, deterministic=False)
 
     action, _ = model.predict(obs, deterministic=True)
 
@@ -110,6 +121,10 @@ def test_features_extractor_target_net(model_class, policy_class, share_features
     kwargs = dict(buffer_size=250, learning_starts=100, policy_kwargs=dict(features_extractor_kwargs=dict(features_dim=32)))
     if model_class != DQN:
         kwargs["policy_kwargs"]["share_features_extractor"] = share_features_extractor
+
+    # No delay for TD3 (changes when the actor and polyak update take place)
+    if model_class == TD3:
+        kwargs["policy_delay"] = 1
 
     model = model_class(policy_class, env, seed=0, **kwargs)
 

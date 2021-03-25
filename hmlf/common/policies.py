@@ -20,11 +20,10 @@ from hmlf.common.distributions import (
     StateDependentNoiseDistribution,
     make_proba_distribution,
 )
-from hmlf.common.preprocessing import get_action_dim, is_image_space, preprocess_obs
+from hmlf.common.preprocessing import get_action_dim, maybe_transpose, preprocess_obs
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, MlpExtractor, NatureCNN, create_mlp
 from hmlf.common.type_aliases import Schedule
 from hmlf.common.utils import get_device, is_vectorized_observation
-from hmlf.environments.vec_env import VecTransposeImage
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 from hmlf.spaces import ContinuousParameters, SimpleHybrid
 
@@ -84,7 +83,7 @@ class BaseModel(nn.Module, ABC):
 
     @abstractmethod
     def forward(self, *args, **kwargs):
-        del args, kwargs
+        pass
 
     def _update_features_extractor(
         self, net_kwargs: Dict[str, Any], features_extractor: Optional[BaseFeaturesExtractor] = None
@@ -121,12 +120,11 @@ class BaseModel(nn.Module, ABC):
         preprocessed_obs = preprocess_obs(obs, self.observation_space, normalize_images=self.normalize_images)
         return self.features_extractor(preprocessed_obs)
 
-    def _get_data(self) -> Dict[str, Any]:
+    def _get_constructor_parameters(self) -> Dict[str, Any]:
         """
-        Get data that need to be saved in order to re-create the model.
-        This corresponds to the arguments of the constructor.
+        Get data that need to be saved in order to re-create the model when loading it from disk.
 
-        :return:
+        :return: The dictionary to pass to the as kwargs constructor when reconstruction this model.
         """
         return dict(
             observation_space=self.observation_space,
@@ -153,7 +151,7 @@ class BaseModel(nn.Module, ABC):
 
         :param path:
         """
-        th.save({"state_dict": self.state_dict(), "data": self._get_data()}, path)
+        th.save({"state_dict": self.state_dict(), "data": self._get_constructor_parameters()}, path)
 
     @classmethod
     def load(cls, path: str, device: Union[th.device, str] = "auto") -> "BaseModel":
@@ -269,17 +267,7 @@ class BasePolicy(BaseModel):
 
         # Handle the different cases for images
         # as PyTorch use channel first format
-        if is_image_space(self.observation_space):
-            if not (
-                observation.shape == self.observation_space.shape or observation.shape[1:] == self.observation_space.shape
-            ):
-                # Try to re-order the channels
-                transpose_obs = VecTransposeImage.transpose_image(observation)
-                if (
-                    transpose_obs.shape == self.observation_space.shape
-                    or transpose_obs.shape[1:] == self.observation_space.shape
-                ):
-                    observation = transpose_obs
+        observation = maybe_transpose(observation, self.observation_space)
 
         vectorized_env = is_vectorized_observation(observation, self.observation_space)
 
@@ -440,8 +428,8 @@ class ActorCriticPolicy(BasePolicy):
 
         self._build(lr_schedule)
 
-    def _get_data(self) -> Dict[str, Any]:
-        data = super()._get_data()
+    def _get_constructor_parameters(self) -> Dict[str, Any]:
+        data = super()._get_constructor_parameters()
 
         default_none_kwargs = self.dist_kwargs or collections.defaultdict(lambda: None)
 
