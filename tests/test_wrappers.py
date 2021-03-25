@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from hmlf.environments import DummyEnv, DummyHybrid
+from hmlf.environments.stage_controller import OneStepPerStageController, StateDependentStageController
 from hmlf.environments.wrapper import OneHotWrapper, SequenceWrapper, SimpleHybridWrapper
 from hmlf.spaces import ContinuousParameters, OneHotHybrid, SimpleHybrid
 
@@ -15,6 +16,11 @@ def simple_env():
 @pytest.fixture
 def simple_hybrid_env():
     return DummyHybrid([2, 7, 3, 10])
+
+
+@pytest.fixture
+def dummy_reward_function():
+    return lambda x: 0.1
 
 
 @pytest.mark.parametrize(
@@ -41,7 +47,7 @@ def test_init_hybrid_simple(wrapper, action_space, simple_env):
 )
 def test_init_hybrid_advanced(wrapper, action_space, simple_hybrid_env):
     if wrapper == SequenceWrapper:
-        wrapped_env = wrapper(simple_hybrid_env, [0, 1, 0])
+        wrapped_env = wrapper(simple_hybrid_env, [0, 1, 0], OneStepPerStageController())
     else:
         wrapped_env = wrapper(simple_hybrid_env)
         assert wrapped_env.observation_space == simple_hybrid_env.observation_space
@@ -101,14 +107,29 @@ def test_onehot_hybrid_step_sample(wrapper, simple_hybrid_env):
 
 
 @pytest.mark.parametrize(
-    "wrapper, sequence",
+    "sequence",
     [
-        (SequenceWrapper, [0, 1, 3, 2]),
-        (SequenceWrapper, [1, 1, 1, 3]),
+        [0, 1, 3, 2],
+        [1, 1, 1, 3],
     ],
 )
-def test_sequence_hybrid_step_sample(wrapper, sequence, simple_hybrid_env):
-    wrapped_env = wrapper(simple_hybrid_env, sequence)
+def test_init_sequence(sequence, simple_hybrid_env):
+    wrapped_env = SequenceWrapper(simple_hybrid_env, sequence)
+    assert isinstance(wrapped_env.stage_controller, OneStepPerStageController)
+
+    wrapped_env = SequenceWrapper(simple_hybrid_env, sequence, StateDependentStageController([lambda x: True]))
+    assert isinstance(wrapped_env.stage_controller, StateDependentStageController)
+
+
+@pytest.mark.parametrize(
+    "sequence",
+    [
+        [0, 1, 3, 2],
+        [1, 1, 1, 3],
+    ],
+)
+def test_sequence_hybrid_step_sample(sequence, simple_hybrid_env):
+    wrapped_env = SequenceWrapper(simple_hybrid_env, sequence, OneStepPerStageController())
     for i in range(2):
         obs = wrapped_env.reset()
         for action in sequence:
