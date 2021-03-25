@@ -12,7 +12,11 @@ def simple_env():
 
 @pytest.mark.parametrize(
     "sequence",
-    [([0, 0, 0, 0, 0]), ([0, 1, 3, 2]), ([1]), ([])],
+    [
+        ([0, 0, 0, 0, 0]),
+        ([0, 1, 3, 2]),
+        ([1]),
+    ],
 )
 def test_init(sequence, simple_env):
     env = SequenceWrapper(simple_env, sequence)

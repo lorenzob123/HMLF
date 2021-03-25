@@ -18,10 +18,6 @@ class SDDPG(OffPolicyAlgorithm):
     Sequential Twin Delayed DDPG (SDDPG)
     Addressing Function Approximation Error in Actor-Critic Methods.
 
-    Original implementation: https://github.com/sfujim/SDDPG
-    Paper: https://arxiv.org/abs/1802.09477
-    Introduction to SDDPG: https://spinningup.openai.com/en/latest/algorithms/sddpg.html
-
     :param policy: The policy model to use (MlpPolicy, CnnPolicy, ...)
     :param env: The environment to learn from (if registered in Gym, can be str)
     :param learning_rate: learning rate for adam optimizer,
