@@ -1,7 +1,7 @@
-from hmlf import SDDPG
+from hmlf.algorithms import SDDPG
+from hmlf.algorithms.sddpg import MlpPolicy
 from hmlf.common.callbacks import EvalCallback
 from hmlf.environments import ObstacleCourse_v2, SequenceWrapper
-from hmlf.sddpg import MlpPolicy
 
 env = SequenceWrapper(ObstacleCourse_v2(), [0, 1, 0, 1, 0, 1, 0])
 obs = env.reset()

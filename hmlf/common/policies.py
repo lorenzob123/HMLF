@@ -290,6 +290,8 @@ class BasePolicy(BaseModel):
         if isinstance(self.action_space, SimpleHybrid):
             actions = self.action_space.format_action(actions)
         if isinstance(self.action_space, ContinuousParameters):
+            actions = np.clip(actions, -1, self.action_space.high)
+            actions = self.unscale_action(actions)
             actions = self.action_space.build_action(observation[:, 0], actions)
 
         if not vectorized_env:
