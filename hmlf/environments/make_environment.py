@@ -11,8 +11,8 @@ if TYPE_CHECKING:
 
 
 def make_environment(
-    env: "GymEnv",
     algorithm: Union[str, Type["BaseAlgorithm"]],
+    env: "GymEnv",
     sequence: Optional[List[int]] = None,
     stage_controller: Optional[BaseStageController] = None,
 ) -> "GymEnv":
