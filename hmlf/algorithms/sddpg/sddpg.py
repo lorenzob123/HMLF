@@ -236,16 +236,19 @@ class SDDPG(OffPolicyAlgorithm):
         if self.num_timesteps < learning_starts and not (self.use_sde and self.use_sde_at_warmup):
             # Warmup phase
             action = self.action_space.sample()
-            # ! Debug
             buffer_action = np.hstack(action)
             action = [action]
         else:
-            # Note: when using continuous actions,
-            # we assume that the policy uses tanh to scale the action
-            # We use non-deterministic action in the case of SAC, for TD3, it does not matter
-            action, _ = self.predict(self._last_obs, deterministic=False)
-            buffer_action = np.hstack(action[0])
+            observation = th.as_tensor(self._last_obs).to(self.device)
+            with th.no_grad():
+                actions = self.policy._predict(observation, deterministic=False)
+            # Already scaled by default
+            scaled_action = actions.cpu().numpy()
 
-        # Rescale the action from [low, high] to [-1, 1]
+            if action_noise is not None:
+                scaled_action = np.clip(scaled_action + action_noise(), -1, 1)
+            action = self.policy.unscale_action(scaled_action)
+            action = self.action_space.build_action(observation[:, 0].detach().cpu(), action)
+            buffer_action = scaled_action
 
         return np.array(action), np.array(buffer_action)

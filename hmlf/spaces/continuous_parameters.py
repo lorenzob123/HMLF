@@ -17,6 +17,8 @@ class ContinuousParameters(HybridBase):
 
     def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
         super().__init__(spaces)
+        self.low = np.hstack([space.low for space in spaces])
+        self.high = np.hstack([space.high for space in spaces])
 
     def _validate_arguments(self) -> None:
         super()._validate_arguments()
