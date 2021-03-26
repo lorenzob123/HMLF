@@ -51,6 +51,8 @@ def get_from_registry(algorithm_name: str) -> Callable:
 def convert_algorithm_to_string(algorithm: Union[str, Type["BaseAlgorithm"]]) -> str:
     if isclass(algorithm):
         algorithm = convert_class_to_string(algorithm)
+    else:
+        algorithm = str(algorithm)
     return algorithm.upper()
 
 

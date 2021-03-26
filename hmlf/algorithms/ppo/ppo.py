@@ -11,7 +11,7 @@ from hmlf.common.on_policy_algorithm import OnPolicyAlgorithm
 from hmlf.common.policies import ActorCriticPolicy
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import explained_variance, get_schedule_fn
-from hmlf.environments.make_environment import (
+from hmlf.environments.wrap_environment import (
     register_algorithm_for_wrap_environment,
     wrap_simple_hybrid_if_tuple_action_space,
 )

@@ -7,7 +7,7 @@ from hmlf.algorithms.td3.td3 import TD3
 from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
-from hmlf.environments.make_environment import register_algorithm_for_wrap_environment, wrap_no_wrap
+from hmlf.environments.wrap_environment import register_algorithm_for_wrap_environment, wrap_no_wrap
 
 
 class DDPG(TD3):

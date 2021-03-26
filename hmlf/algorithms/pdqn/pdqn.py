@@ -12,7 +12,7 @@ from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import get_linear_fn, get_schedule_fn, is_vectorized_observation, polyak_update, update_learning_rate
-from hmlf.environments.make_environment import register_algorithm_for_wrap_environment, wrap_simple_hybrid
+from hmlf.environments.wrap_environment import register_algorithm_for_wrap_environment, wrap_simple_hybrid
 
 
 class PDQN(OffPolicyAlgorithm):

@@ -8,7 +8,7 @@ from hmlf.algorithms.pdqn import PDQN
 if TYPE_CHECKING:
     from hmlf.common.type_aliases import GymEnv, Schedule
 
-from hmlf.environments.make_environment import register_algorithm_for_wrap_environment, wrap_simple_hybrid
+from hmlf.environments.wrap_environment import register_algorithm_for_wrap_environment, wrap_simple_hybrid
 
 
 class MPDQN(PDQN):
