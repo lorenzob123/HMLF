@@ -10,12 +10,15 @@ from hmlf.environments.wrapper import OneHotWrapper, SequenceWrapper, SimpleHybr
     "algorithm",
     [
         "A2C",
+        "a2C",
         algorithms.A2C,
         "DQN",
+        "dqn",
         algorithms.DQN,
         "DDPG",
         algorithms.DDPG,
         "TD3",
+        "td3",
         algorithms.TD3,
         "PPO",
         algorithms.PPO,
@@ -44,10 +47,12 @@ def dummy_hybrid_env():
     "algorithm",
     [
         "MPDQN",
+        "MpdqN",
         algorithms.MPDQN,
         "PDQN",
         algorithms.PDQN,
         "PPO",
+        "Ppo",
         algorithms.PPO,
     ],
 )

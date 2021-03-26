@@ -10,15 +10,15 @@ if TYPE_CHECKING:
     from hmlf.common.type_aliases import GymEnv
 
 
-_algorithm_wrappers = {}
+_algorithm_wrapper_registry = {}
 
 
 def register_algorithm_for_make_environment(
     algorithm: Union[str, Type["BaseAlgorithm"]], wrapper_function: Callable[["GymEnv"], "GymEnv"]
 ) -> None:
-    global _algorithm_wrappers
+    global _algorithm_wrapper_registry
     algorithm_name = convert_algorithm_to_string(algorithm)
-    _algorithm_wrappers[algorithm_name] = wrapper_function
+    _algorithm_wrapper_registry[algorithm_name] = wrapper_function
 
 
 def make_environment(
@@ -38,21 +38,20 @@ def make_environment(
 
 
 def algorithm_is_registered(algorithm_name: str) -> bool:
-    return algorithm_name in _algorithm_wrappers
+    return algorithm_name in _algorithm_wrapper_registry
 
 
 def get_from_registry(algorithm_name: str) -> Callable:
-    if algorithm_name in _algorithm_wrappers:
-        return _algorithm_wrappers[algorithm_name]
+    if algorithm_name in _algorithm_wrapper_registry:
+        return _algorithm_wrapper_registry[algorithm_name]
     else:
         raise ValueError(f"Algorithm name {algorithm_name} not found in registry.")
 
 
 def convert_algorithm_to_string(algorithm: Union[str, Type["BaseAlgorithm"]]) -> str:
     if isclass(algorithm):
-        return convert_class_to_string(algorithm)
-    else:
-        return algorithm
+        algorithm = convert_class_to_string(algorithm)
+    return algorithm.upper()
 
 
 def convert_class_to_string(algorithm: Type["BaseAlgorithm"]) -> str:
