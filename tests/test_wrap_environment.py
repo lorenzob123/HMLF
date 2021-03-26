@@ -2,7 +2,7 @@ import gym
 import pytest
 
 from hmlf import algorithms, spaces
-from hmlf.environments import DummyHybrid, make_environment
+from hmlf.environments import DummyHybrid, wrap_environment
 from hmlf.environments.wrapper import OneHotWrapper, SequenceWrapper, SimpleHybridWrapper
 
 
@@ -34,7 +34,7 @@ from hmlf.environments.wrapper import OneHotWrapper, SequenceWrapper, SimpleHybr
     ],
 )
 def test_no_wrapper(algorithm, env):
-    wrapped_env = make_environment(algorithm, env)
+    wrapped_env = wrap_environment(algorithm, env)
     assert wrapped_env is env
 
 
@@ -57,7 +57,7 @@ def dummy_hybrid_env():
     ],
 )
 def test_simple_hybrid_wrapper(algorithm, dummy_hybrid_env):
-    wrapped_env = make_environment(algorithm, dummy_hybrid_env)
+    wrapped_env = wrap_environment(algorithm, dummy_hybrid_env)
     assert isinstance(wrapped_env, SimpleHybridWrapper)
 
 
@@ -69,7 +69,7 @@ def test_simple_hybrid_wrapper(algorithm, dummy_hybrid_env):
     ],
 )
 def test_one_hot_wrapper(algorithm, dummy_hybrid_env):
-    wrapped_env = make_environment(algorithm, dummy_hybrid_env)
+    wrapped_env = wrap_environment(algorithm, dummy_hybrid_env)
     assert isinstance(wrapped_env, OneHotWrapper)
 
 
@@ -82,15 +82,15 @@ def test_one_hot_wrapper(algorithm, dummy_hybrid_env):
 )
 def test_sequence_wrapper(algorithm, dummy_hybrid_env):
     sequence = [1, 0, 0, 1]
-    wrapped_env = make_environment(algorithm, dummy_hybrid_env, sequence)
+    wrapped_env = wrap_environment(algorithm, dummy_hybrid_env, sequence)
     assert isinstance(wrapped_env, SequenceWrapper)
     assert wrapped_env.sequence_curator.sequence == sequence
 
     with pytest.raises(AssertionError):
-        make_environment(algorithm, dummy_hybrid_env, [])
+        wrap_environment(algorithm, dummy_hybrid_env, [])
 
     with pytest.raises(AssertionError):
-        make_environment(algorithm, dummy_hybrid_env, "abc")
+        wrap_environment(algorithm, dummy_hybrid_env, "abc")
 
 
 @pytest.mark.parametrize(
@@ -104,4 +104,4 @@ def test_sequence_wrapper(algorithm, dummy_hybrid_env):
 )
 def test_unknown(algorithm, dummy_hybrid_env):
     with pytest.raises(NotImplementedError):
-        make_environment(algorithm, dummy_hybrid_env)
+        wrap_environment(algorithm, dummy_hybrid_env)

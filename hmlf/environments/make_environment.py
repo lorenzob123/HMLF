@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 _algorithm_wrapper_registry = {}
 
 
-def register_algorithm_for_make_environment(
+def register_algorithm_for_wrap_environment(
     algorithm: Union[str, Type["BaseAlgorithm"]], wrapper_function: Callable[["GymEnv"], "GymEnv"]
 ) -> None:
     global _algorithm_wrapper_registry
@@ -21,7 +21,7 @@ def register_algorithm_for_make_environment(
     _algorithm_wrapper_registry[algorithm_name] = wrapper_function
 
 
-def make_environment(
+def wrap_environment(
     algorithm: Union[str, Type["BaseAlgorithm"]],
     env: "GymEnv",
     sequence: Optional[List[int]] = None,

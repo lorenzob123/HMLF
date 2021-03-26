@@ -11,7 +11,7 @@ from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import polyak_update
-from hmlf.environments.make_environment import register_algorithm_for_make_environment, wrap_no_wrap
+from hmlf.environments.make_environment import register_algorithm_for_wrap_environment, wrap_no_wrap
 
 
 class SAC(OffPolicyAlgorithm):
@@ -304,4 +304,4 @@ class SAC(OffPolicyAlgorithm):
         return state_dicts, saved_pytorch_variables
 
 
-register_algorithm_for_make_environment(SAC, wrap_no_wrap)
+register_algorithm_for_wrap_environment(SAC, wrap_no_wrap)

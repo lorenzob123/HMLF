@@ -11,7 +11,7 @@ from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import polyak_update
-from hmlf.environments.make_environment import register_algorithm_for_make_environment, wrap_sequence
+from hmlf.environments.make_environment import register_algorithm_for_wrap_environment, wrap_sequence
 
 
 class SDDPG(OffPolicyAlgorithm):
@@ -242,4 +242,4 @@ class SDDPG(OffPolicyAlgorithm):
         return np.array(action), np.array(buffer_action)
 
 
-register_algorithm_for_make_environment(SDDPG, wrap_sequence)
+register_algorithm_for_wrap_environment(SDDPG, wrap_sequence)

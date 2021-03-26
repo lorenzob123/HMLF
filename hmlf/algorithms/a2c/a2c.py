@@ -9,7 +9,7 @@ from hmlf.common.on_policy_algorithm import OnPolicyAlgorithm
 from hmlf.common.policies import ActorCriticPolicy
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import explained_variance
-from hmlf.environments.make_environment import register_algorithm_for_make_environment, wrap_no_wrap
+from hmlf.environments.make_environment import register_algorithm_for_wrap_environment, wrap_no_wrap
 
 
 class A2C(OnPolicyAlgorithm):
@@ -201,4 +201,4 @@ class A2C(OnPolicyAlgorithm):
         )
 
 
-register_algorithm_for_make_environment(A2C, wrap_no_wrap)
+register_algorithm_for_wrap_environment(A2C, wrap_no_wrap)
