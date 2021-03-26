@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import gym
 import numpy as np
 import torch as th
 from torch import nn
@@ -8,10 +7,10 @@ from torch import nn
 from hmlf.common.policies import BaseModel, BasePolicy, ContinuousCritic
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
-from hmlf.spaces.simple_hybrid import SimpleHybrid
+from hmlf.spaces.simple_hybrid import Box, SimpleHybrid, Space
 
 
-class Actor(BasePolicy):
+class MetaActor(BasePolicy):
     """
     Actor network (policy) for TD3.
 
@@ -28,7 +27,7 @@ class Actor(BasePolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
+        observation_space: Space,
         action_space: SimpleHybrid,
         net_arch: List[int],
         features_extractor: nn.Module,
@@ -36,7 +35,7 @@ class Actor(BasePolicy):
         activation_fn: Type[nn.Module] = nn.ReLU,
         normalize_images: bool = True,
     ):
-        super(Actor, self).__init__(
+        super().__init__(
             observation_space,
             action_space,
             features_extractor=features_extractor,
@@ -50,15 +49,15 @@ class Actor(BasePolicy):
         self.features_dim = features_dim
         self.activation_fn = activation_fn
 
-        action_dim = self.action_space._get_dimensions_of_continuous_spaces()
+        self.continuous_action_dims = self.action_space._get_dimensions_of_continuous_spaces()
         actor_list = []
-        for action_param_dim in action_dim:
+        for action_param_dim in self.continuous_action_dims:
             actor_net = create_mlp(features_dim - 1, action_param_dim, net_arch, activation_fn, squash_output=True)
             actor_list.append(nn.Sequential(*actor_net))
         self.mu_list = nn.ModuleList(actor_list)
 
-    def _get_data(self) -> Dict[str, Any]:
-        data = super()._get_data()
+    def _get_constructor_parameters(self) -> Dict[str, Any]:
+        data = super()._get_constructor_parameters()
 
         data.update(
             dict(
@@ -76,14 +75,12 @@ class Actor(BasePolicy):
         # features = self.extract_features(obs)
 
         # TODO: this is pseudo code and it will not work because of the batched env
-        actions = [
-            th.zeros(obs.shape[0], dim).to(self.device) for dim in self.action_space._get_dimensions_of_continuous_spaces()
-        ]
+        actions = [th.zeros(obs.shape[0], dim).to(self.device) for dim in self.continuous_action_dims]
 
         for i in range(obs.shape[0]):
-            discrete_i = int(obs[i, 0].item())
-            param_i = self.mu_list[discrete_i](obs[i, 1:])
-            actions[discrete_i][i, :] = param_i
+            current_stage = int(obs[i, 0].item())
+            predicted_parameters = self.mu_list[current_stage](obs[i, 1:])
+            actions[current_stage][i, :] = predicted_parameters
 
         return th.cat(actions, dim=1)
 
@@ -92,24 +89,44 @@ class Actor(BasePolicy):
 
 
 class MetaCritic(BaseModel):
-    def __init__(self, critic_kwargs):
+    def __init__(
+        self,
+        observation_space: Space,
+        action_space: SimpleHybrid,
+        net_arch: List[int],
+        features_extractor: nn.Module,
+        features_dim: int,
+        activation_fn: Type[nn.Module] = nn.ReLU,
+        normalize_images: bool = True,
+        n_critics: int = 1,
+    ):
 
         super().__init__(
-            critic_kwargs["observation_space"],
-            critic_kwargs["action_space"],
-            features_extractor=critic_kwargs["features_extractor"],
-            normalize_images=critic_kwargs["normalize_images"],
+            observation_space,
+            action_space,
+            features_extractor=features_extractor,
+            normalize_images=normalize_images,
         )
         critic_list = []
-        # action_dim = self.action_space._get_continous_dims()
-        critic_kwargs["observation_space"] = gym.spaces.Box(
-            critic_kwargs["observation_space"].low[1:], critic_kwargs["observation_space"].high[1:]
-        )
-        critic_kwargs["features_dim"] -= 1
+        observation_space = Box(observation_space.low[1:], observation_space.high[1:])
+        features_dim -= 1
+
+        dims_continous = self.action_space._get_dimensions_of_continuous_spaces()
+        self.split_indices = np.hstack((np.array([0]), np.cumsum(dims_continous)))
 
         for param_space in self.action_space.spaces:
-            critic_kwargs["action_space"] = param_space
-            critic_list.append(ContinuousCritic(**critic_kwargs).to(self.device))
+            critic_list.append(
+                ContinuousCritic(
+                    observation_space=observation_space,
+                    action_space=param_space,
+                    net_arch=net_arch,
+                    features_extractor=features_extractor,
+                    features_dim=features_dim,
+                    activation_fn=activation_fn,
+                    normalize_images=normalize_images,
+                    n_critics=n_critics,
+                ).to(self.device)
+            )
         self.critic_list = nn.ModuleList(critic_list)
 
     def forward(self, obs: th.Tensor, actions: th.Tensor) -> Tuple[th.Tensor, ...]:
@@ -121,18 +138,17 @@ class MetaCritic(BaseModel):
         # features = self.extract_features(obs)
 
         # TODO: this is pseudo code and it will not work because of the batched env
-        dims_continous = self.action_space._get_dimensions_of_continuous_spaces()
-        indices = np.hstack((np.array([0]), np.cumsum(dims_continous)))
-        q = []
+        q_values = []
 
         if len(obs.shape) == 1:
             obs = obs.view(1, -1)
         for i in range(obs.shape[0]):
-            discrete_i = int(obs[i, 0].item())
-            param_slice = slice(indices[discrete_i], indices[discrete_i + 1])
+            current_stage = int(obs[i, 0].item())
+            param_slice = slice(self.split_indices[current_stage], self.split_indices[current_stage + 1])
             # qvalue_input = th.cat((obs[[i], 1:], actions[[i], param_slice]), dim=1)
-            q.append(self.critic_list[discrete_i](obs[[i], 1:], actions[[i], param_slice])[0])
-        return (th.cat(q),)
+            predicted_values = self.critic_list[current_stage](obs[[i], 1:], actions[[i], param_slice])[0]
+            q_values.append(predicted_values)
+        return (th.cat(q_values),)
 
     def q1_forward(self, obs: th.Tensor, actions: th.Tensor) -> th.Tensor:
         """
@@ -170,8 +186,8 @@ class SDDPGPolicy(BasePolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: Space,
+        action_space: Space,
         lr_schedule: Schedule,
         net_arch: Optional[Union[List[int], Dict[str, List[int]]]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
@@ -180,10 +196,10 @@ class SDDPGPolicy(BasePolicy):
         normalize_images: bool = True,
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
-        n_critics: int = 2,
         share_features_extractor: bool = True,
+        n_critics: int = 1,
     ):
-        super(SDDPGPolicy, self).__init__(
+        super().__init__(
             observation_space,
             action_space,
             features_extractor_class,
@@ -215,9 +231,8 @@ class SDDPGPolicy(BasePolicy):
         self.critic_kwargs = self.net_args.copy()
         self.critic_kwargs.update(
             {
-                "n_critics": n_critics,
                 "net_arch": critic_arch,
-                "share_features_extractor": share_features_extractor,
+                "n_critics": n_critics,
             }
         )
 
@@ -253,8 +268,8 @@ class SDDPGPolicy(BasePolicy):
         self.critic_target.load_state_dict(self.critic.state_dict())
         self.critic.optimizer = self.optimizer_class(self.critic.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
 
-    def _get_data(self) -> Dict[str, Any]:
-        data = super()._get_data()
+    def _get_constructor_parameters(self) -> Dict[str, Any]:
+        data = super()._get_constructor_parameters()
 
         data.update(
             dict(
@@ -271,14 +286,14 @@ class SDDPGPolicy(BasePolicy):
         )
         return data
 
-    def make_actor(self, features_extractor: Optional[BaseFeaturesExtractor] = None) -> Actor:
+    def make_actor(self, features_extractor: Optional[BaseFeaturesExtractor] = None) -> MetaActor:
         actor_kwargs = self._update_features_extractor(self.actor_kwargs, features_extractor)
-        return Actor(**actor_kwargs).to(self.device)
+        return MetaActor(**actor_kwargs).to(self.device)
 
     def make_critic(self, features_extractor: Optional[BaseFeaturesExtractor] = None) -> ContinuousCritic:
 
         critic_kwargs = self._update_features_extractor(self.critic_kwargs, features_extractor)
-        return MetaCritic(critic_kwargs).to(self.device)
+        return MetaCritic(**critic_kwargs).to(self.device)
 
     def forward(self, observation: th.Tensor, deterministic: bool = False) -> th.Tensor:
         return self._predict(observation, deterministic=deterministic)
@@ -304,7 +319,7 @@ class CnnPolicy(SDDPGPolicy):
         to pass to the features extractor.
     :param normalize_images: Whether to normalize images or not,
          dividing by 255.0 (True by default)
-    :param optimizer_class: The optimizer to use,
+    :param optimizer_class: The optimizer to use,M
         ``th.optim.Adam`` by default
     :param optimizer_kwargs: Additional keyword arguments,
         excluding the learning rate, to pass to the optimizer
@@ -315,8 +330,8 @@ class CnnPolicy(SDDPGPolicy):
 
     def __init__(
         self,
-        observation_space: gym.spaces.Space,
-        action_space: gym.spaces.Space,
+        observation_space: Space,
+        action_space: Space,
         lr_schedule: Schedule,
         net_arch: Optional[Union[List[int], Dict[str, List[int]]]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
@@ -325,10 +340,9 @@ class CnnPolicy(SDDPGPolicy):
         normalize_images: bool = True,
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
-        n_critics: int = 2,
         share_features_extractor: bool = True,
     ):
-        super(CnnPolicy, self).__init__(
+        super().__init__(
             observation_space,
             action_space,
             lr_schedule,
@@ -339,6 +353,5 @@ class CnnPolicy(SDDPGPolicy):
             normalize_images,
             optimizer_class,
             optimizer_kwargs,
-            n_critics,
             share_features_extractor,
         )

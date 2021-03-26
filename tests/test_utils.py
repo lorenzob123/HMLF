@@ -194,6 +194,7 @@ class AlwaysDoneWrapper(gym.Wrapper):
         return self.last_obs
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("vec_env_class", [None, DummyVecEnv, SubprocVecEnv])
 def test_evaluate_policy_monitors(vec_env_class):
     # Test that results are correct with monitor environments.
@@ -321,12 +322,6 @@ def test_zip_strict():
     # same length, should not raise an error
     for _, _ in zip_strict(list_a, list_b[: len(list_a)]):
         pass
-
-
-def test_cmd_util_rename():
-    """Test that importing cmd_util still works but raises warning"""
-    with pytest.warns(FutureWarning):
-        from hmlf.common.cmd_util import make_vec_env  # noqa: F401
 
 
 def test_is_wrapped():

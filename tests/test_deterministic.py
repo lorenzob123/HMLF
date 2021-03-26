@@ -8,10 +8,11 @@ from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
 from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
 from hmlf.common.noise import NormalActionNoise
 
-N_STEPS_TRAINING = 3000
+N_STEPS_TRAINING = 100
 SEED = 0
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [
@@ -29,11 +30,11 @@ def test_deterministic_training_common(model_class, policy_class):
     kwargs = {"policy_kwargs": dict(net_arch=[64])}
     if model_class in [TD3, SAC]:
         env_id = "Pendulum-v0"
-        kwargs.update({"action_noise": NormalActionNoise(0.0, 0.1), "learning_starts": 100})
+        kwargs.update({"action_noise": NormalActionNoise(0.0, 0.1), "learning_starts": 10})
     else:
         env_id = "CartPole-v1"
         if model_class == DQN:
-            kwargs.update({"learning_starts": 100})
+            kwargs.update({"learning_starts": 10})
 
     for i in range(2):
         model = model_class(policy_class, env_id, seed=SEED, **kwargs)

@@ -1,5 +1,4 @@
 """Common aliases for type hints"""
-
 from typing import Any, Callable, Dict, List, NamedTuple, Tuple, Union
 
 import gym
@@ -18,6 +17,8 @@ MaybeCallback = Union[None, Callable, List[callbacks.BaseCallback], callbacks.Ba
 # A schedule takes the remaining progress as input
 # and ouputs a scalar (e.g. learning rate, clip range, ...)
 Schedule = Callable[[float], float]
+StageFunction = Callable[[np.ndarray], bool]
+RewardFunction = Callable[[np.ndarray], float]
 
 
 class RolloutBufferSamples(NamedTuple):

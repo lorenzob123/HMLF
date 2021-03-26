@@ -30,7 +30,7 @@ from hmlf.common.sb2_compat.rmsprop_tf_like import RMSpropTFLike
     ],
 )
 def test_flexible_mlp(model_class, policy_class, net_arch):
-    _ = model_class(policy_class, "CartPole-v1", policy_kwargs=dict(net_arch=net_arch), n_steps=100).learn(300)
+    _ = model_class(policy_class, "CartPole-v1", policy_kwargs=dict(net_arch=net_arch), n_steps=64).learn(300)
 
 
 @pytest.mark.parametrize("net_arch", [[], [4], [4, 4], dict(qf=[8], pi=[8, 4])])
@@ -42,7 +42,7 @@ def test_flexible_mlp(model_class, policy_class, net_arch):
     ],
 )
 def test_custom_offpolicy(model_class, policy_class, net_arch):
-    _ = model_class(policy_class, "Pendulum-v0", policy_kwargs=dict(net_arch=net_arch), learning_starts=100).learn(300)
+    _ = model_class(policy_class, "Pendulum-v0", policy_kwargs=dict(net_arch=net_arch), learning_starts=10).learn(100)
 
 
 @pytest.mark.parametrize(

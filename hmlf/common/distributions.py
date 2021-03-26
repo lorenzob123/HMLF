@@ -311,8 +311,10 @@ class HybridDistribution(Distribution):
         self.distribution = None
         self.action_space = action_space
         self.discrete_dim = action_space.get_n_discrete_options()
-        self.continuous_dim = action_space.continuous_dim
+        self.continuous_dim = action_space.get_n_continuous_options()
+        # param_idx keeps track where the parameters are in the logits/mean_actions
         self.param_idx = slice(self.discrete_dim, self.discrete_dim + self.continuous_dim)
+        # action_idx keeps track where the parameters are in the logits/mean_actions
         self.action_idx = slice(self.discrete_dim)
         self.action_dist = None
         self.param_dist = None
@@ -691,7 +693,7 @@ class TanhBijector(object):
         """
         Inverse of Tanh
 
-        Taken from pyro: https://github.com/pyro-ppl/pyro
+        Taken from Pyro: https://github.com/pyro-ppl/pyro
         0.5 * torch.log((1 + x ) / (1 - x))
         """
         return 0.5 * (x.log1p() - (-x).log1p())

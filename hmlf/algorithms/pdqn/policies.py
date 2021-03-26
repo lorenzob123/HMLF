@@ -57,8 +57,7 @@ class PDQNPolicy(BasePolicy):
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
     ):
-
-        assert isinstance(action_space, SimpleHybrid)
+        assert type(action_space) is SimpleHybrid
 
         self.action_space_parameter = Box(action_space.continuous_low, action_space.continuous_high)
         self.observation_space_q = build_state_parameter_space(observation_space, action_space)
@@ -175,8 +174,8 @@ class PDQNPolicy(BasePolicy):
         q_values = self.forward(obs)
         return q_values.argmax(dim=1).reshape(-1)
 
-    def _get_data(self) -> Dict[str, Any]:
-        data = super()._get_data()
+    def _get_constructor_parameters(self) -> Dict[str, Any]:
+        data = super()._get_constructor_parameters()
 
         data.update(
             dict(

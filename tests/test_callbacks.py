@@ -25,7 +25,10 @@ from hmlf.environments.bit_flipping_env import BitFlippingEnv
 from hmlf.environments.vec_env import DummyVecEnv
 from hmlf.environments.vec_env.obs_dict_wrapper import ObsDictWrapper
 
+N_STEPS_SMALL = 100
 
+
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [
@@ -46,7 +49,7 @@ def test_callbacks(tmp_path, model_class, policy_class):
     # Small network for fast test
     model = model_class(policy_class, env_name, policy_kwargs=dict(net_arch=[32]))
 
-    checkpoint_callback = CheckpointCallback(save_freq=1000, save_path=log_folder)
+    checkpoint_callback = CheckpointCallback(save_freq=100, save_path=log_folder)
 
     eval_env = gym.make(env_name)
     # Stop training if the performance is good enough
@@ -57,7 +60,7 @@ def test_callbacks(tmp_path, model_class, policy_class):
         callback_on_new_best=callback_on_best,
         best_model_save_path=log_folder,
         log_path=log_folder,
-        eval_freq=100,
+        eval_freq=int(N_STEPS_SMALL / 5),
         warn=False,
     )
     # Equivalent to the `checkpoint_callback`
@@ -70,7 +73,7 @@ def test_callbacks(tmp_path, model_class, policy_class):
     callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=100, verbose=1)
 
     callback = CallbackList([checkpoint_callback, eval_callback, event_callback, callback_max_episodes])
-    model.learn(500, callback=callback)
+    model.learn(N_STEPS_SMALL, callback=callback)
 
     # Check access to local variables
     assert model.env.observation_space.contains(callback.locals["new_obs"][0])
@@ -82,11 +85,11 @@ def test_callbacks(tmp_path, model_class, policy_class):
     assert event_callback.num_timesteps == model.num_timesteps
     assert event_callback.n_calls == model.num_timesteps
 
-    model.learn(500, callback=None)
+    model.learn(N_STEPS_SMALL, callback=None)
     # Transform callback into a callback list automatically
-    model.learn(500, callback=[checkpoint_callback, eval_callback])
+    model.learn(N_STEPS_SMALL, callback=[checkpoint_callback, eval_callback])
     # Automatic wrapping, old way of doing callbacks
-    model.learn(500, callback=lambda _locals, _globals: True)
+    model.learn(N_STEPS_SMALL, callback=lambda _locals, _globals: True)
 
     # Testing models that support multiple envs
     if model_class in [A2C, PPO]:
@@ -100,7 +103,7 @@ def test_callbacks(tmp_path, model_class, policy_class):
 
         callback_max_episodes = StopTrainingOnMaxEpisodes(max_episodes=max_episodes, verbose=1)
         callback = CallbackList([callback_max_episodes])
-        model.learn(1000, callback=callback)
+        model.learn(max_episode_length * 2, callback=callback)
 
         # Check that the actual number of episodes and timesteps per env matches the expected one
         episodes_per_env = callback_max_episodes.n_episodes // n_envs

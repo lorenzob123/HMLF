@@ -10,6 +10,7 @@ from hmlf.algorithms.dqn import MlpPolicy as MlpPolicyDQN
 from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
 from hmlf.algorithms.sac import MlpPolicy as MlpPolicySAC
 from hmlf.algorithms.td3 import MlpPolicy as MlpPolicyTD3
+from hmlf.common.env_util import make_vec_env
 from hmlf.common.evaluation import evaluate_policy
 
 
@@ -39,6 +40,7 @@ class DummyMultiBinary(gym.Env):
         return self.observation_space.sample(), 0.0, False, {}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "model_class,policy_class",
     [
@@ -90,3 +92,16 @@ def test_action_spaces(model_class, policy_class, env):
     else:
         with pytest.raises(AssertionError):
             model_class(policy_class, env)
+
+
+@pytest.mark.parametrize(
+    "model_class,policy_class",
+    [
+        (A2C, MlpPolicyA2C),
+        (PPO, MlpPolicyPPO),
+    ],
+)
+@pytest.mark.parametrize("env", ["Taxi-v3"])
+def test_discrete_obs_space(model_class, policy_class, env):
+    env = make_vec_env(env, n_envs=2, seed=0)
+    model_class(policy_class, env, n_steps=256).learn(100)

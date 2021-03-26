@@ -2,7 +2,7 @@ import io
 import pathlib
 import time
 import warnings
-from typing import Any, Dict, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import torch as th
@@ -15,8 +15,9 @@ from hmlf.common.callbacks import BaseCallback
 from hmlf.common.noise import ActionNoise
 from hmlf.common.policies import BasePolicy
 from hmlf.common.save_util import load_from_pkl, save_to_pkl
+from hmlf.common.train_freq import TrainFreq, TrainFrequencyUnit
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, RolloutReturn, Schedule
-from hmlf.common.utils import safe_mean
+from hmlf.common.utils import safe_mean, should_collect_more_steps
 from hmlf.environments.vec_env import VecEnv
 
 
@@ -34,13 +35,13 @@ class OffPolicyAlgorithm(BaseAlgorithm):
     :param batch_size: Minibatch size for each gradient update
     :param tau: the soft update coefficient ("Polyak update", between 0 and 1)
     :param gamma: the discount factor
-    :param train_freq: Update the model every ``train_freq`` steps. Set to `-1` to disable.
+    :param train_freq: Update the model every ``train_freq`` steps. Alternatively pass a tuple of frequency and unit
+        like ``(5, "step")`` or ``(2, "episode")``.
+    :param gradient_steps: How many gradient steps to do after each rollout (see ``train_freq``)
     :param gradient_steps: How many gradient steps to do after each rollout
         (see ``train_freq`` and ``n_episodes_rollout``)
         Set to ``-1`` means to do as many gradient steps as steps done in the environment
         during the rollout.
-    :param n_episodes_rollout: Update the model every ``n_episodes_rollout`` episodes.
-        Note that this cannot be used at the same time as ``train_freq``. Set to `-1` to disable.
     :param action_noise: the action noise type (None by default), this can help
         for hard exploration problem. Cf common.noise for the different action noise type.
     :param optimize_memory_usage: Enable a memory efficient variant of the replay buffer
@@ -81,9 +82,8 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         batch_size: int = 256,
         tau: float = 0.005,
         gamma: float = 0.99,
-        train_freq: int = 1,
+        train_freq: Union[int, Tuple[int, str]] = (1, "step"),
         gradient_steps: int = 1,
-        n_episodes_rollout: int = -1,
         action_noise: Optional[ActionNoise] = None,
         optimize_memory_usage: bool = False,
         policy_kwargs: Dict[str, Any] = None,
@@ -123,9 +123,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         self.learning_starts = learning_starts
         self.tau = tau
         self.gamma = gamma
-        self.train_freq = train_freq
         self.gradient_steps = gradient_steps
-        self.n_episodes_rollout = n_episodes_rollout
         self.action_noise = action_noise
         self.optimize_memory_usage = optimize_memory_usage
 
@@ -133,15 +131,8 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         # see https://github.com/hill-a/stable-baselines/issues/863
         self.remove_time_limit_termination = remove_time_limit_termination
 
-        if train_freq > 0 and n_episodes_rollout > 0:
-            warnings.warn(
-                "You passed a positive value for `train_freq` and `n_episodes_rollout`."
-                "Please make sure this is intended. "
-                "The agent will collect data by stepping in the environment "
-                "until both conditions are true: "
-                "`number of steps in the env` >= `train_freq` and "
-                "`number of episodes` > `n_episodes_rollout`"
-            )
+        # Save train freq parameter, will be converted later to TrainFreq object
+        self.train_freq = train_freq
 
         self.actor = None  # type: Optional[th.nn.Module]
         self.replay_buffer = None  # type: Optional[ReplayBuffer]
@@ -168,6 +159,29 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             **self.policy_kwargs,
         )
         self.policy = self.policy.to(self.device)
+        self._convert_train_freq()
+
+    def _convert_train_freq(self) -> None:
+        """
+        Convert `train_freq` parameter (int or tuple)
+        to a TrainFreq object.
+        """
+        if not isinstance(self.train_freq, TrainFreq):
+            train_freq = self.train_freq
+
+            # The value of the train frequency will be checked later
+            if not isinstance(train_freq, tuple):
+                train_freq = (train_freq, "step")
+
+            try:
+                train_freq = (train_freq[0], TrainFrequencyUnit(train_freq[1]))
+            except ValueError:
+                raise ValueError(f"The unit of the `train_freq` must be either 'step' or 'episode' not '{train_freq[1]}'!")
+
+            if not isinstance(train_freq[0], int):
+                raise ValueError(f"The frequency of `train_freq` must be an integer and not {train_freq[0]}")
+
+            self.train_freq = TrainFreq(*train_freq)
 
     def save_replay_buffer(self, path: Union[str, pathlib.Path, io.BufferedIOBase]) -> None:
         """
@@ -250,8 +264,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
             rollout = self.collect_rollouts(
                 self.env,
-                n_episodes=self.n_episodes_rollout,
-                n_steps=self.train_freq,
+                train_freq=self.train_freq,
                 action_noise=self.action_noise,
                 callback=callback,
                 learning_starts=self.learning_starts,
@@ -318,6 +331,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             # We store the scaled action in the buffer
             buffer_action = scaled_action
             action = self.policy.unscale_action(scaled_action)
+        elif isinstance(self.action_space, spaces.ContinuousParameters):
+            action = unscaled_action
+            buffer_action = np.hstack(unscaled_action[0])
         else:
             # Discrete case, no need to normalize or clip
             buffer_action = unscaled_action
@@ -352,40 +368,88 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         """
         pass
 
+    def _store_transition(
+        self,
+        replay_buffer: ReplayBuffer,
+        buffer_action: np.ndarray,
+        new_obs: np.ndarray,
+        reward: np.ndarray,
+        done: np.ndarray,
+        infos: List[Dict[str, Any]],
+    ) -> None:
+        """
+        Store transition in the replay buffer.
+        We store the normalized action and the unnormalized observation.
+        It also handles terminal observations (because VecEnv resets automatically).
+        :param replay_buffer: Replay buffer object where to store the transition.
+        :param buffer_action: normalized action
+        :param new_obs: next observation in the current episode
+            or first observation of the episode (when done is True)
+        :param reward: reward for the current transition
+        :param done: Termination signal
+        :param infos: List of additional information about the transition.
+            It contains the terminal observations.
+        """
+        # Store only the unnormalized version
+        if self._vec_normalize_env is not None:
+            new_obs_ = self._vec_normalize_env.get_original_obs()
+            reward_ = self._vec_normalize_env.get_original_reward()
+        else:
+            # Avoid changing the original ones
+            self._last_original_obs, new_obs_, reward_ = self._last_obs, new_obs, reward
+
+        # As the VecEnv resets automatically, new_obs is already the
+        # first observation of the next episode
+        if done and infos[0].get("terminal_observation") is not None:
+            next_obs = infos[0]["terminal_observation"]
+            # VecNormalize normalizes the terminal observation
+            if self._vec_normalize_env is not None:
+                next_obs = self._vec_normalize_env.unnormalize_obs(next_obs)
+        else:
+            next_obs = new_obs_
+
+        replay_buffer.add(self._last_original_obs, next_obs, buffer_action, reward_, done)
+
+        self._last_obs = new_obs
+        # Save the unnormalized observation
+        if self._vec_normalize_env is not None:
+            self._last_original_obs = new_obs_
+
     def collect_rollouts(
         self,
         env: VecEnv,
         callback: BaseCallback,
-        n_episodes: int = 1,
-        n_steps: int = -1,
+        train_freq: TrainFreq,
+        replay_buffer: ReplayBuffer,
         action_noise: Optional[ActionNoise] = None,
         learning_starts: int = 0,
-        replay_buffer: Optional[ReplayBuffer] = None,
         log_interval: Optional[int] = None,
     ) -> RolloutReturn:
         """
-        Collect experiences and store them into a ``ReplayBuffer``.
+         Collect experiences and store them into a ``ReplayBuffer``.
 
-        :param env: The training environment
-        :param callback: Callback that will be called at each step
-            (and at the beginning and end of the rollout)
-        :param n_episodes: Number of episodes to use to collect rollout data
-            You can also specify a ``n_steps`` instead
-        :param n_steps: Number of steps to use to collect rollout data
-            You can also specify a ``n_episodes`` instead.
-        :param action_noise: Action noise that will be used for exploration
-            Required for deterministic policy (e.g. TD3). This can also be used
-            in addition to the stochastic policy for SAC.
-        :param learning_starts: Number of steps before learning for the warm-up phase.
-        :param replay_buffer:
-        :param log_interval: Log data every ``log_interval`` episodes
-        :return:
+         :param env: The training environment
+         :param callback: Callback that will be called at each step
+             (and at the beginning and end of the rollout)
+        :param train_freq: How much experience to collect
+             by doing rollouts of current policy.
+             Either ``TrainFreq(<n>, TrainFrequencyUnit.STEP)``
+             or ``TrainFreq(<n>, TrainFrequencyUnit.EPISODE)``
+             with ``<n>`` being an integer greater than 0.
+         :param action_noise: Action noise that will be used for exploration
+             Required for deterministic policy (e.g. TD3). This can also be used
+             in addition to the stochastic policy for SAC.
+         :param learning_starts: Number of steps before learning for the warm-up phase.
+         :param replay_buffer:
+         :param log_interval: Log data every ``log_interval`` episodes
+         :return:
         """
         episode_rewards, total_timesteps = [], []
-        total_steps, total_episodes = 0, 0
+        num_collected_steps, num_collected_episodes = 0, 0
 
         assert isinstance(env, VecEnv), "You must pass a VecEnv"
         assert env.num_envs == 1, "OffPolicyAlgorithm only support single environment"
+        assert train_freq.frequency > 0, "Should at least collect one step or episode."
 
         if self.use_sde:
             self.actor.reset_noise()
@@ -393,13 +457,13 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         callback.on_rollout_start()
         continue_training = True
 
-        while total_steps < n_steps or total_episodes < n_episodes:
+        while should_collect_more_steps(train_freq, num_collected_steps, num_collected_episodes):
             done = False
             episode_reward, episode_timesteps = 0.0, 0
 
             while not done:
 
-                if self.use_sde and self.sde_sample_freq > 0 and total_steps % self.sde_sample_freq == 0:
+                if self.use_sde and self.sde_sample_freq > 0 and num_collected_steps % self.sde_sample_freq == 0:
                     # Sample a new noise matrix
                     self.actor.reset_noise()
 
@@ -411,34 +475,21 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
                 self.num_timesteps += 1
                 episode_timesteps += 1
-                total_steps += 1
+                num_collected_steps += 1
 
                 # Give access to local variables
                 callback.update_locals(locals())
                 # Only stop training if return value is False, not when it is None.
                 if callback.on_step() is False:
-                    return RolloutReturn(0.0, total_steps, total_episodes, continue_training=False)
+                    return RolloutReturn(0.0, num_collected_steps, num_collected_episodes, continue_training=False)
 
                 episode_reward += reward
 
                 # Retrieve reward and episode length if using Monitor wrapper
                 self._update_info_buffer(infos, done)
 
-                # Store data in replay buffer
-                if replay_buffer is not None:
-                    # Store only the unnormalized version
-                    if self._vec_normalize_env is not None:
-                        new_obs_ = self._vec_normalize_env.get_original_obs()
-                        reward_ = self._vec_normalize_env.get_original_reward()
-                    else:
-                        # Avoid changing the original ones
-                        self._last_original_obs, new_obs_, reward_ = self._last_obs, new_obs, reward
-                    replay_buffer.add(self._last_original_obs, new_obs_, buffer_action, reward_, done)
-
-                self._last_obs = new_obs
-                # Save the unnormalized observation
-                if self._vec_normalize_env is not None:
-                    self._last_original_obs = new_obs_
+                # Store data in replay buffer (normalized action and unnormalized observation)
+                self._store_transition(replay_buffer, buffer_action, new_obs, reward, done, infos)
 
                 self._update_current_progress_remaining(self.num_timesteps, self._total_timesteps)
 
@@ -448,11 +499,11 @@ class OffPolicyAlgorithm(BaseAlgorithm):
                 # see https://github.com/hill-a/stable-baselines/issues/900
                 self._on_step()
 
-                if 0 < n_steps <= total_steps:
+                if not should_collect_more_steps(train_freq, num_collected_steps, num_collected_episodes):
                     break
 
             if done:
-                total_episodes += 1
+                num_collected_episodes += 1
                 self._episode_num += 1
                 episode_rewards.append(episode_reward)
                 total_timesteps.append(episode_timesteps)
@@ -464,8 +515,8 @@ class OffPolicyAlgorithm(BaseAlgorithm):
                 if log_interval is not None and self._episode_num % log_interval == 0:
                     self._dump_logs()
 
-        mean_reward = np.mean(episode_rewards) if total_episodes > 0 else 0.0
+        mean_reward = np.mean(episode_rewards) if num_collected_episodes > 0 else 0.0
 
         callback.on_rollout_end()
 
-        return RolloutReturn(mean_reward, total_steps, total_episodes, continue_training)
+        return RolloutReturn(mean_reward, num_collected_steps, num_collected_episodes, continue_training)

@@ -139,7 +139,7 @@ class BaseAlgorithm(ABC):
         # Buffers for logging
         self.ep_info_buffer = None  # type: Optional[deque]
         self.ep_success_buffer = None  # type: Optional[deque]
-        # For logging
+        # For logging (and TD3 delayed updates)
         self._n_updates = 0  # type: int
 
         # Create and wrap the env if needed
@@ -373,7 +373,7 @@ class BaseAlgorithm(ABC):
         # Avoid resetting the environment when calling ``.learn()`` consecutive times
         if reset_num_timesteps or self._last_obs is None:
             self._last_obs = self.env.reset()
-            self._last_dones = np.zeros((self.env.num_envs,), dtype=np.bool)
+            self._last_dones = np.zeros((self.env.num_envs,), dtype=bool)
             # Retrieve unnormalized observation for saving into the buffer
             if self._vec_normalize_env is not None:
                 self._last_original_obs = self._vec_normalize_env.get_original_obs()
@@ -393,10 +393,12 @@ class BaseAlgorithm(ABC):
 
     def _update_info_buffer(self, infos: List[Dict[str, Any]], dones: Optional[np.ndarray] = None) -> None:
         """
-        Retrieve reward and episode length and update the buffer
-        if using Monitor wrapper.
+         Retrieve reward, episode length, episode success and update the buffer
+        if using Monitor wrapper or a GoalEnv.
 
         :param infos:
+        :param infos: List of additional information about the transition.
+        :param dones: Termination signals
         """
         if dones is None:
             dones = np.array([False] * len(infos))
@@ -581,6 +583,7 @@ class BaseAlgorithm(ABC):
         path: Union[str, pathlib.Path, io.BufferedIOBase],
         env: Optional["GymEnv"] = None,
         device: Union[th.device, str] = "auto",
+        custom_objects: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> "BaseAlgorithm":
         """
@@ -591,9 +594,15 @@ class BaseAlgorithm(ABC):
         :param env: the new environment to run the loaded model on
             (can be None if you only need prediction from a trained model) has priority over any saved environment
         :param device: Device on which the code should run.
+        :param custom_objects: Dictionary of objects to replace
+            upon loading. If a variable is present in this dictionary as a
+            key, it will not be deserialized and the corresponding item
+            will be used instead. Similar to custom_objects in
+            ``keras.models.load_model``. Useful when you have an object in
+            file that can not be deserialized.
         :param kwargs: extra arguments to change the model when loading
         """
-        data, params, pytorch_variables = load_from_zip_file(path, device=device)
+        data, params, pytorch_variables = load_from_zip_file(path, device=device, custom_objects=custom_objects)
 
         # Remove stored device information and replace with ours
         if "policy_kwargs" in data:

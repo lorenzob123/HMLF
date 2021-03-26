@@ -14,9 +14,10 @@ MODEL_LIST = [
     ("sac", SAC, MlpPolicySAC, "Pendulum-v0"),
     ("td3", TD3, MlpPolicyTD3, "Pendulum-v0"),
 ]
-N_STEPS = 100
+N_STEPS = 50
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("model_name,model_class,policy_class,env_name", MODEL_LIST)
 def test_tensorboard(tmp_path, model_name, model_class, policy_class, env_name):
     # Skip if no tensorboard installed
