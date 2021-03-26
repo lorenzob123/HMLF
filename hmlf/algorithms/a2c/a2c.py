@@ -9,6 +9,7 @@ from hmlf.common.on_policy_algorithm import OnPolicyAlgorithm
 from hmlf.common.policies import ActorCriticPolicy
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import explained_variance
+from hmlf.environments.make_environment import register_algorithm_for_make_environment, wrap_no_wrap
 
 
 class A2C(OnPolicyAlgorithm):
@@ -198,3 +199,6 @@ class A2C(OnPolicyAlgorithm):
             eval_log_path=eval_log_path,
             reset_num_timesteps=reset_num_timesteps,
         )
+
+
+register_algorithm_for_make_environment(A2C, wrap_no_wrap)

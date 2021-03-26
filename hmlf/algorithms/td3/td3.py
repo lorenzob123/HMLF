@@ -11,6 +11,7 @@ from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import polyak_update
+from hmlf.environments.make_environment import register_algorithm_for_make_environment, wrap_no_wrap
 
 
 class TD3(OffPolicyAlgorithm):
@@ -208,3 +209,6 @@ class TD3(OffPolicyAlgorithm):
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
         state_dicts = ["policy", "actor.optimizer", "critic.optimizer"]
         return state_dicts, []
+
+
+register_algorithm_for_make_environment(TD3, wrap_no_wrap)

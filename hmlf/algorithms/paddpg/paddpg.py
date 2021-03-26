@@ -1,7 +1,5 @@
 from typing import Any, Callable, Dict, Optional, Tuple, Type, Union
 
-##################################
-# self._sample_actions
 import numpy as np
 import torch as th
 
@@ -11,8 +9,7 @@ from hmlf.algorithms.td3.td3 import TD3
 from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback
-
-####################################
+from hmlf.environments.make_environment import register_algorithm_for_make_environment, wrap_one_hot
 
 
 class PADDPG(TD3):
@@ -195,3 +192,6 @@ class PADDPG(TD3):
             action = buffer_action
 
         return action, buffer_action
+
+
+register_algorithm_for_make_environment(PADDPG, wrap_one_hot)

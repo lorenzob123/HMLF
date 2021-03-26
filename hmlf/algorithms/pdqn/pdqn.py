@@ -12,6 +12,7 @@ from hmlf.common.noise import ActionNoise
 from hmlf.common.off_policy_algorithm import OffPolicyAlgorithm
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import get_linear_fn, get_schedule_fn, is_vectorized_observation, polyak_update, update_learning_rate
+from hmlf.environments.make_environment import register_algorithm_for_make_environment, wrap_simple_hybrid
 
 
 class PDQN(OffPolicyAlgorithm):
@@ -354,3 +355,6 @@ class PDQN(OffPolicyAlgorithm):
 
         update_learning_rate(optimizer_q, self.lr_schedule_q(self._current_progress_remaining))
         update_learning_rate(optimizer_parameter, self.lr_schedule_parameter(self._current_progress_remaining))
+
+
+register_algorithm_for_make_environment(PDQN, wrap_simple_hybrid)

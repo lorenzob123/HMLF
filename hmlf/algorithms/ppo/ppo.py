@@ -11,6 +11,10 @@ from hmlf.common.on_policy_algorithm import OnPolicyAlgorithm
 from hmlf.common.policies import ActorCriticPolicy
 from hmlf.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from hmlf.common.utils import explained_variance, get_schedule_fn
+from hmlf.environments.make_environment import (
+    register_algorithm_for_make_environment,
+    wrap_simple_hybrid_if_tuple_action_space,
+)
 
 
 class PPO(OnPolicyAlgorithm):
@@ -283,3 +287,6 @@ class PPO(OnPolicyAlgorithm):
             eval_log_path=eval_log_path,
             reset_num_timesteps=reset_num_timesteps,
         )
+
+
+register_algorithm_for_make_environment(PPO, wrap_simple_hybrid_if_tuple_action_space)
