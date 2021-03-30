@@ -1,10 +1,14 @@
-from typing import Any, Dict, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type, Union
 
 import torch as th
 
 from hmlf.algorithms.mpdqn.policies import MPDQNPolicy
 from hmlf.algorithms.pdqn import PDQN
-from hmlf.common.type_aliases import GymEnv, Schedule
+
+if TYPE_CHECKING:
+    from hmlf.common.type_aliases import GymEnv, Schedule
+
+from hmlf.environments.wrap_environment import register_algorithm_for_wrap_environment, wrap_simple_hybrid
 
 
 class MPDQN(PDQN):
@@ -54,9 +58,9 @@ class MPDQN(PDQN):
     def __init__(
         self,
         policy: Type[MPDQNPolicy],
-        env: Union[GymEnv, str],
-        learning_rate_q: Union[float, Schedule] = 1e-4,
-        learning_rate_parameter: Union[float, Schedule] = 1e-4,
+        env: Union["GymEnv", str],
+        learning_rate_q: Union[float, "Schedule"] = 1e-4,
+        learning_rate_parameter: Union[float, "Schedule"] = 1e-4,
         buffer_size: int = 1000000,
         learning_starts: int = 50000,
         batch_size: Optional[int] = 32,
@@ -105,3 +109,6 @@ class MPDQN(PDQN):
             device=device,
             _init_setup_model=_init_setup_model,
         )
+
+
+register_algorithm_for_wrap_environment(MPDQN, wrap_simple_hybrid)
