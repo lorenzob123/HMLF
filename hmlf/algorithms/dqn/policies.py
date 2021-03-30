@@ -5,6 +5,7 @@ from torch import nn
 
 from hmlf import spaces
 from hmlf.common.policies import BasePolicy
+from hmlf.common.policy_register import register_policy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp
 from hmlf.common.type_aliases import Schedule
 
@@ -231,3 +232,7 @@ class CnnPolicy(DQNPolicy):
             optimizer_class,
             optimizer_kwargs,
         )
+
+
+register_policy("DQN", "MlpPolicy", MlpPolicy)
+register_policy("DQN", "CnnPolicy", CnnPolicy)

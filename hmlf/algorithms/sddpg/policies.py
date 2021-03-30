@@ -5,6 +5,7 @@ import torch as th
 from torch import nn
 
 from hmlf.common.policies import BaseModel, BasePolicy, ContinuousCritic
+from hmlf.common.policy_register import register_policy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
 from hmlf.spaces.simple_hybrid import Box, SimpleHybrid, Space
@@ -355,3 +356,7 @@ class CnnPolicy(SDDPGPolicy):
             optimizer_kwargs,
             share_features_extractor,
         )
+
+
+register_policy("SDDPG", "MlpPolicy", MlpPolicy)
+register_policy("SDDPG", "CnnPolicy", CnnPolicy)

@@ -2,8 +2,12 @@ import glob
 import os
 import random
 from collections import deque
+from inspect import isclass
 from itertools import zip_longest
-from typing import TYPE_CHECKING, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Iterable, Optional, Type, Union
+
+if TYPE_CHECKING:
+    from hmlf.common.base_class import BaseAlgorithm
 
 import numpy as np
 import torch as th
@@ -349,3 +353,19 @@ def should_collect_more_steps(
             "The unit of the `train_freq` must be either TrainFrequencyUnit.STEP "
             f"or TrainFrequencyUnit.EPISODE not '{train_freq.unit}'!"
         )
+
+
+def convert_algorithm_to_string(algorithm: Union[str, Type["BaseAlgorithm"]]) -> str:
+    if isclass(algorithm):
+        algorithm = convert_class_to_string(algorithm)
+    else:
+        algorithm = str(algorithm)
+    return algorithm.upper()
+
+
+def convert_class_to_string(algorithm: Type["BaseAlgorithm"]) -> str:
+    representation = str(algorithm)
+    sanitized_representation = representation.replace("'", "").replace(">", "")
+    dot_separated_parts = sanitized_representation.split(".")
+    class_name = dot_separated_parts[-1]
+    return class_name

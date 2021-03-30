@@ -18,6 +18,7 @@ from hmlf.common.env_util import is_wrapped
 from hmlf.common.monitor import Monitor
 from hmlf.common.noise import ActionNoise
 from hmlf.common.policies import BasePolicy
+from hmlf.common.policy_register import get_policy_from_registry
 from hmlf.common.preprocessing import is_image_space, is_image_space_channels_first
 from hmlf.common.save_util import load_from_zip_file, recursive_getattr, recursive_setattr, save_to_zip_file
 
@@ -98,7 +99,7 @@ class BaseAlgorithm(ABC):
     ):
 
         if isinstance(policy, str):
-            raise ValueError("Policy needs to be of Type[BasePolicy], not String.")
+            self.policy_class = get_policy_from_registry(self.__class__, policy)
         else:
             self.policy_class = policy
 

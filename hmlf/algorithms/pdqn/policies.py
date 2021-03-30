@@ -8,6 +8,7 @@ from torch import nn
 from hmlf.algorithms.dqn.policies import QNetwork
 from hmlf.algorithms.td3.policies import Actor
 from hmlf.common.policies import BasePolicy
+from hmlf.common.policy_register import register_policy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN
 from hmlf.common.type_aliases import Schedule
 from hmlf.spaces import Box, SimpleHybrid, Space
@@ -267,3 +268,7 @@ class CnnPolicy(PDQNPolicy):
             optimizer_class,
             optimizer_kwargs,
         )
+
+
+register_policy("PDQN", "MlpPolicy", MlpPolicy)
+register_policy("PDQN", "CnnPolicy", CnnPolicy)

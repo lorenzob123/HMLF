@@ -5,6 +5,7 @@ from torch import nn
 
 from hmlf import spaces
 from hmlf.common.policies import BasePolicy, ContinuousCritic
+from hmlf.common.policy_register import register_policy
 from hmlf.common.preprocessing import get_action_dim
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
@@ -272,3 +273,7 @@ class CnnPolicy(TD3Policy):
             n_critics,
             share_features_extractor,
         )
+
+
+register_policy("TD3", "MlpPolicy", MlpPolicy)
+register_policy("TD3", "CnnPolicy", CnnPolicy)

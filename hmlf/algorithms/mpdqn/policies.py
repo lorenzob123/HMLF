@@ -5,6 +5,7 @@ import torch as th
 from torch import nn
 
 from hmlf.algorithms.pdqn import MlpPolicy as PDQNPolicy
+from hmlf.common.policy_register import register_policy
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN
 from hmlf.common.type_aliases import Schedule
 from hmlf.spaces import SimpleHybrid, Space
@@ -164,3 +165,7 @@ class CnnPolicy(MPDQNPolicy):
             optimizer_class,
             optimizer_kwargs,
         )
+
+
+register_policy("MPDQN", "MlpPolicy", MlpPolicy)
+register_policy("MPDQN", "CnnPolicy", CnnPolicy)
