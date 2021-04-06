@@ -356,6 +356,16 @@ def should_collect_more_steps(
 
 
 def convert_algorithm_to_string(algorithm: Union[str, Type["BaseAlgorithm"]]) -> str:
+    """
+    Converts a algorithm class like `DDPG` to the string 'DDPG' or returns the given string.
+
+    Args:
+        algorithm (Union[str, Type['BaseAlgorithm']]): The class to convert.
+            Can be a string or a class that derives from `BaseAlgorithm`.
+
+    Returns:
+        str: The classname.
+    """
     if isclass(algorithm):
         algorithm = convert_class_to_string(algorithm)
     else:
@@ -364,6 +374,15 @@ def convert_algorithm_to_string(algorithm: Union[str, Type["BaseAlgorithm"]]) ->
 
 
 def convert_class_to_string(algorithm: Type["BaseAlgorithm"]) -> str:
+    """
+    Converts a algorithm class like `DDPG` to the string 'DDPG'.
+
+    Args:
+        algorithm (Type['BaseAlgorithm']): The algorithm to be converted. Should be a subclass of `BaseAlgorithm.
+
+    Returns:
+        str: The classname.
+    """
     representation = str(algorithm)
     sanitized_representation = representation.replace("'", "").replace(">", "")
     dot_separated_parts = sanitized_representation.split(".")

@@ -10,11 +10,31 @@ _policy_registry: Dict[str, Dict] = {}
 
 
 def register_policy(algorithm: Union[str, Type["BaseAlgorithm"]], policy_name: str, policy: Type["BasePolicy"]) -> None:
+    """
+    Inserts a policy into the registry.
+
+    Args:
+        algorithm (Union[str, Type['BaseAlgorithm']]): The algorithm to which the policy belongs.
+            Algorithms will be converted to strings.
+        policy_name (str): The name of the policy - e.g. 'MlpPolicy'.
+        policy (Type['BasePolicy']): [description]
+    """
     algorithm_name = convert_algorithm_to_string(algorithm)
     _insert_into_registry(algorithm_name, policy_name, policy)
 
 
 def get_policy_from_registry(algorithm: Union[str, Type["BaseAlgorithm"]], policy_name: str) -> Type["BasePolicy"]:
+    """
+    Returns the policy for a given algorithm (e.g. `DDPG`) and policy name.
+
+    Args:
+        algorithm (Union[str, Type['BaseAlgorithm']]): The algorithm to which the policy belongs.
+            Algorithms will be converted to strings.
+        policy_name (str): The name of the policy - e.g. 'MlpPolicy'.
+
+    Returns:
+        Type['BasePolicy']: The policy class.
+    """
     algorithm_name = convert_algorithm_to_string(algorithm)
     return _get_from_registry(algorithm_name, policy_name)
 
