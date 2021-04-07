@@ -11,9 +11,7 @@ class BaseStageController(metaclass=ABCMeta):
     """
     Abstract baseclass for the stage controller classes.
 
-     Args:
-        reward_functions (Optional[List['RewardFunctions']]): Used to calculate different rewards for each stage.
-            Defaults to None.
+    :param reward_functions: Used to calculate different rewards for each stage. Defaults to None.
     """
 
     def __init__(self, reward_functions: Optional[List["RewardFunction"]] = None) -> None:
@@ -24,12 +22,10 @@ class BaseStageController(metaclass=ABCMeta):
         """
         Calculates if the current stage is done. If so, the controller will move to the next skill in the sequence.
 
-        Args:
-            obs (np.ndarray): Current observation
-            current_stage (int): Current stage/skill.
+        :param obs: Current observation
+        :param current_stage: Current stage/skill.
 
-        Returns:
-            bool: Whether the stage is done.
+        :return: Whether the stage is done.
         """
         pass
 
@@ -44,8 +40,7 @@ class BaseStageController(metaclass=ABCMeta):
         """
         Used to detect if the controller can calculate custom rewards for each stage.
 
-        Returns:
-            bool: Whether the controller can calculate custom rewards for each stage.
+        :return: Whether the controller can calculate custom rewards for each stage.
         """
         return self.reward_functions is not None
 
@@ -53,12 +48,10 @@ class BaseStageController(metaclass=ABCMeta):
         """
         Calculates custom rewards using the provided reward functions.
 
-        Args:
-            obs (np.ndarray): Current observation
-            current_stage (int): Current stage/skill.
+        :param obs: Current observation
+        :param current_stage: Current stage/skill.
 
-        Returns:
-            float: The reward.
+        :return: The reward.
         """
         current_reward_function = self.reward_functions[current_stage]
         return current_reward_function(obs)
@@ -71,11 +64,9 @@ class BaseStageController(metaclass=ABCMeta):
 
 class OneStepPerStageController(BaseStageController):
     """
-    Simple stage controller, that always returns true for `current_stage_is_done`. Thus each skill is executed only one time.
+    Simple stage controller, that always returns true for `current_stage_is_done`. Thus, each skill is executed only one time.
 
-    Args:
-        reward_functions (Optional[List['RewardFunctions']]): Used to calculate different rewards for each stage.
-            Defaults to None.
+    :param reward_functions : Used to calculate different rewards for each stage. Defaults to None.
     """
 
     def __init__(self, reward_functions: Optional[List["RewardFunction"]] = None) -> None:
@@ -97,11 +88,8 @@ class StateDependentStageController(BaseStageController):
     Stage controller, that only moves to the next stage, if the criteria of the `stage_functions` are met
         (e.g. a goal position is reached).
 
-    Args:
-        stage_functions (List['StageFunction']): Used to detect, if a certain stage is done.
-    reward_functions (Optional[List['RewardFunctions']]): Used to calculate different rewards for each stage.
-        Defaults to None.
-
+    :param stage_functions: Used to detect, if a certain stage is done.
+    :param reward_functions: Used to calculate different rewards for each stage. Defaults to None.
     """
 
     def __init__(

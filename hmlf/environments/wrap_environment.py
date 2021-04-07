@@ -19,9 +19,8 @@ def register_algorithm_for_wrap_environment(
     """
     Registers a algorithm for usage with the `wrap_environment` function
 
-    Args:
-        algorithm (Union[str, Type[): The name of the algorithm. Class types are converted to strings.
-        wrapper_function (Callable[['GymEnv'], 'GymEnv']): The function, that will to the actual wrapping. Can take kwargs.
+    :param algorithm: The name of the algorithm. Class types are converted to strings.
+    :param wrapper_function: The function, that will to the actual wrapping. Can take kwargs.
     """
     global _algorithm_wrapper_registry
     algorithm_name = convert_algorithm_to_string(algorithm)
@@ -37,14 +36,12 @@ def wrap_environment(
     """
     Returns a wrapped version of a given environment with the hybrid wrappers needed for the algorithm.
 
-    Args:
-        algorithm (Union[str, Type[): The name of the algorithm. Class types are converted to strings.
-        env GymEnv: The environment to be wrapped.
-        sequence (Optional[List[int]]): Passed to a SequenceWrapper if appropiate.
-        stage_controller Optional[BaseStageController]: Passed to a SequenceWrapper if appropiate.
+    :param algorithm: The name of the algorithm. Class types are converted to strings.
+    :param env: The environment to be wrapped.
+    :param sequence: Passed to a SequenceWrapper if appropiate.
+    :param stage_controller: Passed to a SequenceWrapper if appropiate.
 
-    Returns:
-        GymEnv: The wrapped environment.
+    :return: The wrapped environment.
     """
 
     algorithm_name = convert_algorithm_to_string(algorithm)
@@ -64,11 +61,9 @@ def get_from_algorithm_wrapper_registry(algorithm_name: str) -> Callable:
     """
     Gets a wrapper function from algorithm wrapper registry.
 
-    Args:
-        algorithm_name (str): Algorithm for which the wrapper should be returned.
+    :param algorithm_name: Algorithm for which the wrapper should be returned.
 
-    Returns:
-        Callable: The previously registered wrapper function.
+    :return: The previously registered wrapper function.
     """
     if algorithm_name in _algorithm_wrapper_registry:
         return _algorithm_wrapper_registry[algorithm_name]
@@ -80,11 +75,9 @@ def wrap_one_hot(env: "GymEnv", **kwargs) -> "OneHotWrapper":
     """
     Wraps a environment with a `OneHotWrapper`. Ignores kwargs.
 
-    Args:
-        env (GymEnv): The environment to be wrapped.
+    :param env: The environment to be wrapped.
 
-    Returns:
-        OneHotWrapper: The wrapped environment.
+    :return: The wrapped environment.
     """
     return OneHotWrapper(env)
 
@@ -93,11 +86,9 @@ def wrap_simple_hybrid(env: "GymEnv", **kwargs) -> "SimpleHybridWrapper":
     """
     Wraps a environment with a `SimpleHybridWrapper`. Ignores kwargs.
 
-    Args:
-        env (GymEnv): The environment to be wrapped.
+    :param env: The environment to be wrapped.
 
-    Returns:
-        SimpleHybridWrapper: The wrapped environment.
+    :return: The wrapped environment.
     """
     return SimpleHybridWrapper(env)
 
@@ -107,11 +98,9 @@ def wrap_simple_hybrid_if_tuple_action_space(env: "GymEnv", **kwargs) -> "Simple
     Wraps a environment with a `SimpleHybridWrapper`, it it has an action space of type spaces.Tuple.
         For PPO. Ignores kwargs.
 
-    Args:
-        env (GymEnv): The environment to be wrapped.
+    :param env: The environment to be wrapped.
 
-    Returns:
-        SimpleHybridWrapper: The wrapped environment.
+    :return: The wrapped environment.
     """
     if isinstance(env.action_space, spaces.Tuple):
         return wrap_simple_hybrid(env)
@@ -123,11 +112,9 @@ def wrap_no_wrap(env: "GymEnv", **kwargs) -> "GymEnv":
     """
     Dummy wrapper that returns the given environment.. Ignores kwargs.
 
-    Args:
-        env (GymEnv): The environment to be wrapped.
+    :param env: The environment to be wrapped.
 
-    Returns:
-        GymEnv: The orginal environment.
+    :return: The orginal environment.
     """
     return env
 
@@ -136,13 +123,11 @@ def wrap_sequence(env: "GymEnv", **kwargs) -> "SequenceWrapper":
     """
     Wraps a environment with a `SequenceWrapper`. Needs a sequence kwarg.
 
-    Args:
-        env (GymEnv): The environment to be wrapped.
-        sequence (List[int]): The sequence for the SequenceWrapper.
-        stage_controller (Optional['StageController']): The (optional) StageController for the SequenceWrapper.
+    :param env The environment to be wrapped.
+    :param sequence: The sequence for the SequenceWrapper.
+    :param stage_controller: The (optional) StageController for the SequenceWrapper.
 
-    Returns:
-        SequenceWrapper: The wrapped environment.
+    :return: The wrapped environment.
     """
     assert "sequence" in kwargs, "Sequence must be provided to wrap_sequence."
     sequence = kwargs["sequence"]

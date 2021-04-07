@@ -12,8 +12,7 @@ class OneHotHybrid(SimpleHybrid):
         where the first space is Discrete encoded as hot one econding and the other are of type Box.
         Samples have the form ((0, 0, ..., 1, 0, .., 0), Box1.sample(), ..., BoxN.sample())
 
-    Args:
-        spaces (Union[List[Space], Tuple]): The base action spaces of type Box.
+    :param spaces: The base action spaces of type Box.
     """
 
     def __init__(self, spaces: Union[List[Space], Tuple[Space]]):

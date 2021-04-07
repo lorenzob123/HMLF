@@ -12,8 +12,7 @@ class ContinuousParameters(HybridBase):
     A hybrid action space in the form of a tuple (i.e., product) of simpler space, where all ssubspaces are of type Box.
         Samples have the form (Box1.sample(), ..., BoxN.sample())
 
-    Args:
-        spaces (Union[List[Space], Tuple]): The base action spaces of type Box.
+    :param spaces: The base action spaces of type Box.
     """
 
     def __init__(self, spaces: Union[List[Space], Tuple[Space]]):

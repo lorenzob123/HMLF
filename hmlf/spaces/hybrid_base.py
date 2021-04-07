@@ -12,8 +12,7 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
     """
     Abstract base class for the hybrid action spaces.
 
-    Args:
-        spaces (Union[List[Space], Tuple]): The base action spaces of type Box.
+    :param spaces: The base action spaces of type Box.
     """
 
     def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
@@ -27,21 +26,19 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
     @abstractmethod
     def get_n_discrete_spaces(self) -> int:
         """
-        Returns the number of discrete spaces.
+        Calculates the number of discrete spaces.
 
-        Returns:
-            int: The number of discrete spaces.
+        :return: The number of discrete spaces.
         """
         pass
 
     @abstractmethod
     def get_n_discrete_options(self) -> int:
         """
-        Returns the number of discrete options available to the algorithm.
+        Calculates the number of discrete options available to the algorithm.
             E.g. the number of continuous spaces for a simple hybrid algorithm.
 
-        Returns:
-            int: The number of discrete spaces.
+        return: The number of discrete spaces.
         """
         pass
 
@@ -58,12 +55,11 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
         """ "
         Part of the algorithm template `build_action`.
             Provides to build a single action in the format of the subclass out of the discrete actions and the parameters.
-        Args:
-            current_discrete (int): The discrete part of the action.
-            current_parameters (List): The parameter part of the action.
 
-        Returns:
-            Tuple: The formatted action.
+        :param current_discrete: The discrete part of the action.
+        :param current_parameters: The parameter part of the action.
+
+        :return: The formatted action.
         """
         pass
 
@@ -83,12 +79,10 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
         """
         Builds actions in the format of the `HybridBase` subclass.
 
-        Args:
-            discrete (np.ndarray): The discrete parts of the actions.
-            parameters (np.ndarray): The parameter parts of the action.
+        :param discrete: The discrete parts of the actions.
+        :param parameters: The parameter parts of the action.
 
-        Returns:
-            List[typing.Tuple]: The actions in the format of the respective hybrid space.
+        :return: The actions in the format of the respective hybrid space.
         """
         parameters = self._preprocess_parameters(parameters)
         sample = []
@@ -101,11 +95,9 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
         Part of the algorithm template `build_action`.
             Provides the ability to preprocess the parameters - e.g. clip them.
 
-        Args:
-            parameters (np.ndarray): [description]
+        :param parameters: [description]
 
-        Returns:
-            np.ndarray: [description]
+        :return: [description]
         """
         return parameters
 
@@ -113,8 +105,7 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
         """
         Provides the slice indices for the continuous spaces.
 
-        Returns:
-            np.ndarray: The slice indices.
+        :return: The slice indices.
         """
         return np.cumsum(self._get_dimensions_of_continuous_spaces()[:-1])
 
@@ -122,8 +113,7 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
         """
         Retuns the number of continuous spaces.
 
-        Returns:
-            int: The number of continuous spaces.
+        :return: The number of continuous spaces.
         """
         return len(self._get_continuous_spaces())
 
@@ -132,8 +122,7 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
         Returns the number of continuous options.
             E.g. the sum of continuous action space dimensions.
 
-        Returns:
-            int: [description]
+        :return: The number of continuous options.
         """
         return int(np.sum(self._get_dimensions_of_continuous_spaces()))
 
@@ -141,8 +130,7 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
         """
         Returns the total dimension of the hybrid space.
 
-        Returns:
-            int: The total dimension.
+        :return: The total dimension.
         """
         return self.get_n_discrete_spaces() + self.get_n_continuous_options()
 

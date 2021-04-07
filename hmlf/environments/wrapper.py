@@ -17,8 +17,7 @@ class OneHotWrapper(Wrapper):
     """
     Wraps an environment with an `OneHotHybrid` action space.
 
-    Args:
-        env (GymEnv): The environment to be wrapped.
+    :param env: The environment to be wrapped.
     """
 
     def __init__(self, env: "GymEnv"):
@@ -35,8 +34,7 @@ class SimpleHybridWrapper(Wrapper):
     """
     Wraps an environment with a `SimpleHybrid` action space.
 
-    Args:
-        env (GymEnv): The environment to be wrapped.
+    :param env: The environment to be wrapped.
     """
 
     def __init__(self, env: "GymEnv"):
@@ -51,12 +49,9 @@ class SequenceWrapper(Wrapper):
         The action space will be of type `ContinuousParameters`, because the current skill of the sequence
         is controller by the `SequenceWrapper`.
 
-
-    Args:
-        env (GymEnv): The environment to be wrapped.
-        sequence (List[int]): The sequence of skills.
-        stage_controller (Optional[BaseStageController]): If given, the `stage_controller` controls
-            the transitions between stages. Defaults to None.
+    :param env: The environment to be wrapped.
+    :param sequence: The sequence of skills.
+    :param stage_controller: If given, the `stage_controller` controls the transitions between stages. Defaults to None.
     """
 
     def __init__(self, env: "GymEnv", sequence: List[int], stage_controller: Optional[BaseStageController] = None):

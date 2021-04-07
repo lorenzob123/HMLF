@@ -5,8 +5,7 @@ class SequenceCurator:
     """
     A class that manages the sequence of actions. It is used in the `SequenceWrapper`
 
-        Args:
-            sequence (List[int]): The sequence of the skills.
+    :param: The sequence of the skills.
     """
 
     def __init__(self, sequence: List[int]) -> None:
@@ -29,8 +28,7 @@ class SequenceCurator:
         """
         Returns the current part of the sequence.
 
-        Returns:
-            int: The sequence at the current position.
+        :return: The sequence at the current position.
         """
         return self.sequence[self.current_action_index]
 
@@ -38,8 +36,7 @@ class SequenceCurator:
         """
         Increments the current position.
 
-        Returns:
-            int: The new position.
+        :return: The new position.
         """
         if self.has_next():
             self.current_action_index += 1
@@ -51,7 +48,6 @@ class SequenceCurator:
         """
         Whether the sequence has a next element.
 
-        Returns:
-            bool: Whether the sequence has a next element.
+        :return: Whether the sequence has a next element.
         """
         return self.current_action_index < (len(self.sequence) - 1)

@@ -13,8 +13,7 @@ class SimpleHybrid(HybridBase):
         where the first space is Discrete and the other are Box.
         Samples have the form (int, Box1.sample(), ..., BoxN.sample())
 
-    Args:
-        spaces (Union[List[Space], Tuple]): The base action spaces of type Box.
+    :param spaces: The base action spaces of type Box.
     """
 
     def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
