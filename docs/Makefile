@@ -2,7 +2,7 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    = -W  # make warnings fatal
+# SPHINXOPTS    = -W  # make warnings fatal
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = StableBaselines
 SOURCEDIR     = .

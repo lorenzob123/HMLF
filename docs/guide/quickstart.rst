@@ -4,20 +4,17 @@
 Getting Started
 ===============
 
-Most of the library tries to follow a sklearn-like syntax for the Reinforcement Learning algorithms.
-
-Here is a quick example of how to train and run A2C on a CartPole environment:
+This library tries to keep the API from stablebaselines3, while letting you use hybrid algorithms and parametrized action spaces
 
 .. code-block:: python
 
-  import gym
+  from hmlf.algorithms import SDDPG
+  from hmlf.environments import wrap_environment, ObstacleCourse_v2
 
-  from hmlf import A2C
+  env = wrap_environment(SDDPG, ObstacleCourse_v2(), [0, 1, 0, 1, 0, 1, 0])
 
-  env = gym.make('CartPole-v1')
-
-  model = A2C('MlpPolicy', env, verbose=1)
-  model.learn(total_timesteps=10000)
+  model = SDDPG("MlpPolicy", env=env,  learning_rate=1e-1, verbose=1, learning_starts=10000)
+  model.learn(1e5, callback=callback)
 
   obs = env.reset()
   for i in range(1000):
@@ -27,13 +24,3 @@ Here is a quick example of how to train and run A2C on a CartPole environment:
       if done:
         obs = env.reset()
 
-
-Or just train a model with a one liner if
-`the environment is registered in Gym <https://github.com/openai/gym/wiki/Environments>`_ and if
-the policy is registered:
-
-.. code-block:: python
-
-    from hmlf import A2C
-
-    model = A2C('MlpPolicy', 'CartPole-v1').learn(10000)

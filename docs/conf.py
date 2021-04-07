@@ -51,9 +51,9 @@ with open(version_file, "r") as file_handler:
 
 # -- Project information -----------------------------------------------------
 
-project = "Stable Baselines3"
-copyright = "2020, Stable Baselines3"
-author = "Stable Baselines3 Contributors"
+project = "HMLF"
+copyright = "2021, HMLF"
+author = "HMLF Contributors"
 
 # The short X.Y version
 version = "master (" + __version__ + " )"
@@ -124,7 +124,7 @@ if on_rtd:
 else:
     html_theme = "sphinx_rtd_theme"
 
-html_logo = "_static/img/logo.png"
+html_logo = "_static/img/hmlf.png"
 
 
 def setup(app):
@@ -156,7 +156,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "StableBaselines3doc"
+htmlhelp_basename = "HMLFdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -180,7 +180,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "StableBaselines3.tex", "Stable Baselines3 Documentation", "Stable Baselines3 Contributors", "manual"),
+    (master_doc, "HMLF.tex", "HMLF Documentation", "HMLF Contributors", "manual"),
 ]
 
 
@@ -188,7 +188,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "stablebaselines3", "Stable Baselines3 Documentation", [author], 1)]
+man_pages = [(master_doc, "HMLF", "HMLF Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -199,10 +199,10 @@ man_pages = [(master_doc, "stablebaselines3", "Stable Baselines3 Documentation",
 texinfo_documents = [
     (
         master_doc,
-        "StableBaselines3",
-        "Stable Baselines3 Documentation",
+        "HMLF",
+        "HMLF Documentation",
         author,
-        "StableBaselines3",
+        "HMLF",
         "One line description of project.",
         "Miscellaneous",
     ),
