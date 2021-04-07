@@ -8,14 +8,12 @@ from hmlf.spaces.simple_hybrid import SimpleHybrid
 
 class OneHotHybrid(SimpleHybrid):
     """
-    A tuple (i.e., product) of simpler spaces, where the first space is Discrete encoded as hot one econding
-     and the other are Box. Samples have the form ((0, 0, ..., 1, 0, .., 0), Box1.sample(), ..., BoxN.sample())
-    Example usage:
-    action_space = OneHotHybrid(spaces.Tuple((spaces.Discrete(2), hmlf.spaces.Box(np.array((0, 1)), np.array((2, 3)))
-                                hmlf.spaces.Box(0, 1, shape=(2,)))))
-    action_space.sample() -> np.array([0, 1, .2, 21.3, .3, .6])
+    A hybrid action space in the form of a tuple (i.e., product) of simpler space,
+        where the first space is Discrete encoded as hot one econding and the other are of type Box.
+        Samples have the form ((0, 0, ..., 1, 0, .., 0), Box1.sample(), ..., BoxN.sample())
 
-    :param tuple of spaces, where the first is a Discrete space and the rest Box(es) spaces
+    Args:
+        spaces (Union[List[Space], Tuple]): The base action spaces of type Box.
     """
 
     def __init__(self, spaces: Union[List[Space], Tuple[Space]]):

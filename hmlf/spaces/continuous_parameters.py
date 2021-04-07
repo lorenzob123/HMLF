@@ -9,10 +9,11 @@ from hmlf.spaces.hybrid_base import HybridBase
 
 class ContinuousParameters(HybridBase):
     """
-    A tuple (i.e., product) of simpler spaces, where the first space is Discrete and the other are Box.
-    Samples have the form (int, Box1.sample(), ..., BoxN.sample())
-    Example usage:
-    self.observation_space = spaces.Tuple((spaces.Discrete(2), gym.spaces.Box(np.array((0, 1)), np.array((2, 3)))))
+    A hybrid action space in the form of a tuple (i.e., product) of simpler space, where all ssubspaces are of type Box.
+        Samples have the form (Box1.sample(), ..., BoxN.sample())
+
+    Args:
+        spaces (Union[List[Space], Tuple]): The base action spaces of type Box.
     """
 
     def __init__(self, spaces: Union[List[Space], Tuple[Space]]):

@@ -9,7 +9,14 @@ from hmlf.spaces.gym import Tuple as GymTuple
 
 
 class HybridBase(GymTuple, metaclass=ABCMeta):
-    def __init__(self, spaces: Union[List[Space], Tuple]):
+    """
+    Abstract base class for the hybrid action spaces.
+
+    Args:
+        spaces (Union[List[Space], Tuple]): The base action spaces of type Box.
+    """
+
+    def __init__(self, spaces: Union[List[Space], Tuple[Space]]):
         if isinstance(spaces, tuple):
             spaces = list(spaces)
         self.spaces = spaces
@@ -19,10 +26,23 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
 
     @abstractmethod
     def get_n_discrete_spaces(self) -> int:
+        """
+        Returns the number of discrete spaces.
+
+        Returns:
+            int: The number of discrete spaces.
+        """
         pass
 
     @abstractmethod
     def get_n_discrete_options(self) -> int:
+        """
+        Returns the number of discrete options available to the algorithm.
+            E.g. the number of continuous spaces for a simple hybrid algorithm.
+
+        Returns:
+            int: The number of discrete spaces.
+        """
         pass
 
     @abstractmethod
@@ -35,6 +55,16 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
 
     @abstractmethod
     def _build_single_action(self, current_discrete: int, current_parameters: List) -> Tuple:
+        """ "
+        Part of the algorithm template `build_action`.
+            Provides to build a single action in the format of the subclass out of the discrete actions and the parameters.
+        Args:
+            current_discrete (int): The discrete part of the action.
+            current_parameters (List): The parameter part of the action.
+
+        Returns:
+            Tuple: The formatted action.
+        """
         pass
 
     @abstractmethod
@@ -50,27 +80,70 @@ class HybridBase(GymTuple, metaclass=ABCMeta):
             assert isinstance(space, Space), "Elements of spaces argument have to be subclasses of hmlf.spaces.Space"
 
     def build_action(self, discrete: np.ndarray, parameters: np.ndarray) -> List[typing.Tuple]:
-        # We clip the parameters
+        """
+        Builds actions in the format of the `HybridBase` subclass.
+
+        Args:
+            discrete (np.ndarray): The discrete parts of the actions.
+            parameters (np.ndarray): The parameter parts of the action.
+
+        Returns:
+            List[typing.Tuple]: The actions in the format of the respective hybrid space.
+        """
         parameters = self._preprocess_parameters(parameters)
-        # We format the full action for each environment
         sample = []
         for i in range(discrete.shape[0]):
             sample.append(self._build_single_action(discrete[i], parameters[i]))
         return sample
 
     def _preprocess_parameters(self, parameters: np.ndarray) -> np.ndarray:
+        """
+        Part of the algorithm template `build_action`.
+            Provides the ability to preprocess the parameters - e.g. clip them.
+
+        Args:
+            parameters (np.ndarray): [description]
+
+        Returns:
+            np.ndarray: [description]
+        """
         return parameters
 
     def _get_split_indices_for_continuous_spaces(self) -> np.ndarray:
+        """
+        Provides the slice indices for the continuous spaces.
+
+        Returns:
+            np.ndarray: The slice indices.
+        """
         return np.cumsum(self._get_dimensions_of_continuous_spaces()[:-1])
 
     def get_n_continuous_spaces(self) -> int:
+        """
+        Retuns the number of continuous spaces.
+
+        Returns:
+            int: The number of continuous spaces.
+        """
         return len(self._get_continuous_spaces())
 
     def get_n_continuous_options(self) -> int:
+        """
+        Returns the number of continuous options.
+            E.g. the sum of continuous action space dimensions.
+
+        Returns:
+            int: [description]
+        """
         return int(np.sum(self._get_dimensions_of_continuous_spaces()))
 
     def get_dimension(self) -> int:
+        """
+        Returns the total dimension of the hybrid space.
+
+        Returns:
+            int: The total dimension.
+        """
         return self.get_n_discrete_spaces() + self.get_n_continuous_options()
 
     def _get_dimensions_of_continuous_spaces(self) -> List[int]:
