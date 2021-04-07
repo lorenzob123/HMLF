@@ -40,7 +40,7 @@ def wrap_environment(
     Args:
         algorithm (Union[str, Type[): The name of the algorithm. Class types are converted to strings.
         env GymEnv: The environment to be wrapped.
-        sequence Optional[List[int]]: Passed to a SequenceWrapper if appropiate.
+        sequence (Optional[List[int]]): Passed to a SequenceWrapper if appropiate.
         stage_controller Optional[BaseStageController]: Passed to a SequenceWrapper if appropiate.
 
     Returns:
@@ -138,8 +138,8 @@ def wrap_sequence(env: "GymEnv", **kwargs) -> "SequenceWrapper":
 
     Args:
         env (GymEnv): The environment to be wrapped.
-        sequence List[int]: The sequence for the SequenceWrapper.
-        stage_controller Optional['StageController']: The (optional) StageController for the SequenceWrapper.
+        sequence (List[int]): The sequence for the SequenceWrapper.
+        stage_controller (Optional['StageController']): The (optional) StageController for the SequenceWrapper.
 
     Returns:
         SequenceWrapper: The wrapped environment.

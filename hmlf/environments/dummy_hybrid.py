@@ -7,6 +7,16 @@ from hmlf.spaces import Box, SimpleHybrid
 
 
 class DummyHybrid(gym.Env):
+    """
+        Dummy environment for testing of with SimpleHybrid action spaces.
+        The 'goal' of the environment is to provide parameters that sum to 0.
+
+    Args:
+        parameter_dimensions (List[int]): Dimensions of the parameter spaces.
+        observation_dimension (int, optional): Dimension of the observations. Observations are normal samples. Defaults to 3.
+        reward_bias (Optional[np.ndarray], optional): Defaults to None. If given, values are added to the reward.
+    """
+
     def __init__(
         self,
         parameter_dimensions: List[int],

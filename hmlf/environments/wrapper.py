@@ -14,6 +14,13 @@ from hmlf.spaces import ContinuousParameters, OneHotHybrid, SimpleHybrid
 
 
 class OneHotWrapper(Wrapper):
+    """
+    Wraps an environment with an `OneHotHybrid` action space.
+
+    Args:
+        env (GymEnv): The environment to be wrapped.
+    """
+
     def __init__(self, env: "GymEnv"):
         super().__init__(env)
         self.env = env
@@ -25,6 +32,13 @@ class OneHotWrapper(Wrapper):
 
 
 class SimpleHybridWrapper(Wrapper):
+    """
+    Wraps an environment with a `SimpleHybrid` action space.
+
+    Args:
+        env (GymEnv): The environment to be wrapped.
+    """
+
     def __init__(self, env: "GymEnv"):
         super().__init__(env)
         self.env = env
@@ -32,6 +46,19 @@ class SimpleHybridWrapper(Wrapper):
 
 
 class SequenceWrapper(Wrapper):
+    """
+    Wraps an environment with a sequence of skills for use with algorithms like SDDPG.
+        The action space will be of type `ContinuousParameters`, because the current skill of the sequence
+        is controller by the `SequenceWrapper`.
+
+
+    Args:
+        env (GymEnv): The environment to be wrapped.
+        sequence (List[int]): The sequence of skills.
+        stage_controller (Optional[BaseStageController]): If given, the `stage_controller` controls
+            the transitions between stages. Defaults to None.
+    """
+
     def __init__(self, env: "GymEnv", sequence: List[int], stage_controller: Optional[BaseStageController] = None):
         super().__init__(env)
         self.env = env
