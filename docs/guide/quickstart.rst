@@ -3,8 +3,8 @@
 ===============
 Getting Started
 ===============
-
-This library tries to keep the API from stablebaselines3, while letting you use hybrid algorithms and parametrized action spaces
+The HMLF is a fork of stablebaselines3. As such we try to keep the API of the algorithms as close as possible to its original counterpart, while granting the use of hybrid algorithms.
+The major change form stablebaselines3 is the necessary step requiered to wrap the environment for the different hybrid algorithms. The function ``wrap_environment`` is used to do exaclty that. 
 
 .. code-block:: python
 

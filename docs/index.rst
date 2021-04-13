@@ -37,11 +37,6 @@ Main Features
    guide/custom_env
    guide/custom_policy
    guide/callbacks
-   guide/tensorboard
-   guide/rl_zoo
-   guide/sb3_contrib
-   guide/imitation
-   guide/migration
    guide/checking_nan
    guide/developer
    guide/save_format
@@ -57,9 +52,12 @@ Main Features
   modules/ddpg
   modules/dqn
   modules/her
+  modules/mpdqn
   modules/paddpg
+  modules/pdqn
   modules/ppo
   modules/sac
+  modules/sddpg
   modules/td3
 
 .. toctree::
@@ -75,13 +73,6 @@ Main Features
   common/logger
   common/noise
   common/utils
-
-.. toctree::
-  :maxdepth: 1
-  :caption: Misc
-
-  misc/changelog
-  misc/projects
 
 
 Citing HMLF

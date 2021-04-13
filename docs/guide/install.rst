@@ -42,3 +42,11 @@ To contribute to HMLF, with support for running tests and building the documenta
 
 Using Docker Images
 -------------------
+
+To use the docker image you will need an access token or a valid login and then running.
+
+.. code-block:: bash
+
+	docker build --build-arg GIT_ACCESS_TOKEN=<your-access-token> -t hmlf .
+
+This is an image that uses the gpu acceleration by default.

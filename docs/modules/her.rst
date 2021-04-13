@@ -1,6 +1,6 @@
 .. _her:
 
-.. automodule:: hmlf.her
+.. automodule:: hmlf.algorithms.her
 
 
 HER

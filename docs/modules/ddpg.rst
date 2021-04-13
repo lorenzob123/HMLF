@@ -1,6 +1,6 @@
 .. _ddpg:
 
-.. automodule:: hmlf.ddpg
+.. automodule:: hmlf.algorithms.ddpg
 
 
 DDPG
@@ -161,7 +161,7 @@ DDPG Policies
   :members:
   :inherited-members:
 
-.. autoclass:: hmlf.td3.policies.TD3Policy
+.. autoclass:: hmlf.algorithms.td3.policies.TD3Policy
   :members:
   :noindex:
 

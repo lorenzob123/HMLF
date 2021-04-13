@@ -1,11 +1,11 @@
 .. _rl:
 
 ================================
-Reinforcement Learning Resources
+Hybrid Reinforcement Learning Resources
 ================================
 
 
-Stable-Baselines3 assumes that you already understand the basic concepts of Reinforcement Learning (RL).
+HMLF assumes you are familiar with reinforcement learning and in particular with the parametrized action literature
 
 However, if you want to learn about RL, there are several good resources to get started:
 
@@ -15,3 +15,11 @@ However, if you want to learn about RL, there are several good resources to get 
 - `Berkeley's Deep RL Bootcamp <https://sites.google.com/view/deep-rl-bootcamp/lectures>`_
 - `Berkeley's Deep Reinforcement Learning course <http://rail.eecs.berkeley.edu/deeprlcourse/>`_
 - `More resources <https://github.com/dennybritz/reinforcement-learning>`_
+
+
+For the main papers on the parametrized actions in reinforcement learning
+
+- `Deep Reinforcement Learning in Parameterized Action Space <https://arxiv.org/abs/1511.04143>`_
+- `Hybrid Actor-Critic Reinforcement Learning in Parameterized Action Space <https://arxiv.org/abs/1903.01344>`_
+- `Hierarchical Approaches for Reinforcement Learning in Parameterized Action Space <https://arxiv.org/abs/1810.09656>`_
+- `Multi-Pass Q-Networks for Deep Reinforcement Learning with Parameterised Action Spaces <https://arxiv.org/abs/1905.04388>`_

@@ -47,11 +47,18 @@ Parameters
   :inherited-members:
 
 
-.. PADDPG Policies
-.. -------------
+PADDPG Policies
+-------------
 
-.. .. autoclass:: MlpPolicy
-..   :members:
-..   :inherited-members:
+.. autoclass:: MlpPolicy
+  :members:
+  :inherited-members:
+
+.. autoclass:: hmlf.algorithms.td3.policies.TD3Policy
+  :members:
+  :noindex:
+
+.. autoclass:: CnnPolicy
+  :members:
 
 

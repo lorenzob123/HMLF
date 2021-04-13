@@ -1,6 +1,6 @@
 .. _td3:
 
-.. automodule:: hmlf.td3
+.. automodule:: hmlf.algorithms.td3
 
 
 TD3
@@ -160,7 +160,7 @@ TD3 Policies
   :members:
   :inherited-members:
 
-.. autoclass:: hmlf.td3.policies.TD3Policy
+.. autoclass:: hmlf.algorithms.td3.policies.TD3Policy
   :members:
   :noindex:
 
