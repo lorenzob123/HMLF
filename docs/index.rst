@@ -6,8 +6,7 @@
 HMLF Docs - Hybrid Machine Learning Framework
 ========================================================================
 
-`Hybrid Machine Learning Framework (HMLF) <https://github.tik.uni-stuttgart.de/IFF/HMLF>`_ is a library focuse on parameterized action spaces,
- with state of the art implementation of all major algorithms in the literature.
+`Hybrid Machine Learning Framework (HMLF) <https://github.tik.uni-stuttgart.de/IFF/HMLF>`_ is a library focused on parametrized action spaces with state of the art implementation of all major algorithms in the literature.
 
 
 Github repository: https://github.tik.uni-stuttgart.de/IFF/HMLF
@@ -17,7 +16,7 @@ Github repository: https://github.tik.uni-stuttgart.de/IFF/HMLF
 Main Features
 --------------
 
-- Paramterized action spaces support
+- Parametrized action spaces support
 - PEP8 compliant (unified code style)
 - Documented functions and classes
 - Tests, high code coverage and type hints

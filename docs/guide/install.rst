@@ -47,6 +47,6 @@ To use the docker image you will need an access token or a valid login and then 
 
 .. code-block:: bash
 
-	docker build --build-arg GIT_ACCESS_TOKEN=<your-access-token> -t hmlf .
+	docker build --build-arg GIT_ACCESS_TOKEN=<your-access-token> -dt hmlf .
 
-This is an image that uses the gpu acceleration by default.
+This image uses the gpu acceleration by default.
