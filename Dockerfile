@@ -39,3 +39,4 @@ RUN \
     rm -rf $HOME/.cache/pip
 
 CMD /bin/bash
+RUN pytest tests
