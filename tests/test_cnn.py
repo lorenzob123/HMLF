@@ -52,7 +52,7 @@ def test_cnn(tmp_path, model_class, policy_class):
 
     obs = env.reset()
 
-    # Test stochastic predict with channel last input
+    # Test stochastic predict with channel as last input
     if model_class == DQN:
         model.exploration_rate = 0.9
 
