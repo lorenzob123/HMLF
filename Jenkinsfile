@@ -4,7 +4,6 @@ pipeline {
     stage('build') {
       steps {
         sh 'pip install -e .[extra]'
-'
       }
     }
     stage('test') {
