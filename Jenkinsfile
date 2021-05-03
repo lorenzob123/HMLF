@@ -3,7 +3,8 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh 'pip install --e .'
+        sh 'pip install -e .[extra]
+'
       }
     }
     stage('test') {
