@@ -1,6 +1,3 @@
-arch:
- - arm64
-  
 env:
  - IMGNAME=hmlf
 
