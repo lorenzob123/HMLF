@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.com/lorenzob123/HMLF.svg?branch=master)](https://www.travis-ci.com/lorenzob123/HMLF)
+[![codestyle](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 # Hmlf Project
 <img src="docs/\_static/img/hmlf.png" align="right" width="40%"/>
 This library is a fork of StableBaselines3 with the focus on parametrized action spaces.
