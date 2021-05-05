@@ -1,6 +1,6 @@
 .. _sac:
 
-.. automodule:: hmlf.sac
+.. automodule:: hmlf.algorithms.sac
 
 
 SAC
@@ -164,7 +164,7 @@ SAC Policies
   :members:
   :inherited-members:
 
-.. autoclass:: hmlf.sac.policies.SACPolicy
+.. autoclass:: hmlf.algorithms.sac.policies.SACPolicy
   :members:
   :noindex:
 

@@ -1,6 +1,6 @@
 .. _a2c:
 
-.. automodule:: hmlf.a2c
+.. automodule:: hmlf.algorithms.a2c
 
 
 A2C

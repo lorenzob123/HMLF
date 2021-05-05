@@ -1,6 +1,6 @@
 .. _ppo2:
 
-.. automodule:: hmlf.ppo
+.. automodule:: hmlf.algorithms.ppo
 
 PPO
 ===

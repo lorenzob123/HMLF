@@ -1,35 +1,26 @@
-.. Stable Baselines3 documentation master file, created by
+.. HMLF documentation master file, created by
    sphinx-quickstart on Thu Sep 26 11:06:54 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Stable-Baselines3 Docs - Reliable Reinforcement Learning Implementations
+HMLF Docs - Hybrid Machine Learning Framework
 ========================================================================
 
-`Stable Baselines3 (SB3) <https://github.com/DLR-RM/stable-baselines3>`_ is a set of reliable implementations of reinforcement learning algorithms in PyTorch.
-It is the next major version of `Stable Baselines <https://github.com/hill-a/stable-baselines>`_.
+`Hybrid Machine Learning Framework (HMLF) <https://github.tik.uni-stuttgart.de/IFF/HMLF>`_ is a library focused on parametrized action spaces with state of the art implementation of all major algorithms in the literature.
 
 
-Github repository: https://github.com/DLR-RM/stable-baselines3
+Github repository: https://github.tik.uni-stuttgart.de/IFF/HMLF
 
-RL Baselines3 Zoo (collection of pre-trained agents): https://github.com/DLR-RM/rl-baselines3-zoo
-
-RL Baselines3 Zoo also offers a simple interface to train, evaluate agents and do hyperparameter tuning.
-
-SB3 Contrib (experimental RL code, latest algorithms): https://github.com/Stable-Baselines-Team/stable-baselines3-contrib
 
 
 Main Features
 --------------
 
-- Unified structure for all algorithms
+- Parametrized action spaces support
 - PEP8 compliant (unified code style)
 - Documented functions and classes
 - Tests, high code coverage and type hints
 - Clean code
-- Tensorboard support
-- **The performance of each algorithm was tested** (see *Results* section in their respective page)
-
 
 .. toctree::
    :maxdepth: 2
@@ -45,11 +36,6 @@ Main Features
    guide/custom_env
    guide/custom_policy
    guide/callbacks
-   guide/tensorboard
-   guide/rl_zoo
-   guide/sb3_contrib
-   guide/imitation
-   guide/migration
    guide/checking_nan
    guide/developer
    guide/save_format
@@ -65,8 +51,12 @@ Main Features
   modules/ddpg
   modules/dqn
   modules/her
+  modules/mpdqn
+  modules/paddpg
+  modules/pdqn
   modules/ppo
   modules/sac
+  modules/sddpg
   modules/td3
 
 .. toctree::
@@ -83,27 +73,20 @@ Main Features
   common/noise
   common/utils
 
-.. toctree::
-  :maxdepth: 1
-  :caption: Misc
 
-  misc/changelog
-  misc/projects
-
-
-Citing Stable Baselines3
+Citing HMLF
 ------------------------
 To cite this project in publications:
 
 .. code-block:: bibtex
 
-    @misc{stable-baselines3,
-      author = {Raffin, Antonin and Hill, Ashley and Ernestus, Maximilian and Gleave, Adam and Kanervisto, Anssi and Dormann, Noah},
-      title = {Stable Baselines3},
-      year = {2019},
+    @misc{hmlf,
+      author = {-},
+      title = {HMLF - Hybrid Machine Learning Framework},
+      year = {2021},
       publisher = {GitHub},
       journal = {GitHub repository},
-      howpublished = {\url{https://github.com/DLR-RM/stable-baselines3}},
+      howpublished = {\url{https://github.tik.uni-stuttgart.de/IFF/HMLF}},
     }
 
 Contributing
@@ -111,9 +94,9 @@ Contributing
 
 To any interested in making the rl baselines better, there are still some improvements
 that need to be done.
-You can check issues in the `repo <https://github.com/DLR-RM/stable-baselines3/issues>`_.
+You can check issues in the `repo <https://github.tik.uni-stuttgart.de/IFF/HMLF>`_.
 
-If you want to contribute, please read `CONTRIBUTING.md <https://github.com/DLR-RM/stable-baselines3/blob/master/CONTRIBUTING.md>`_ first.
+If you want to contribute, please read `CONTRIBUTING.md <https://github.tik.uni-stuttgart.de/IFF/HMLF/blob/master/CONTRIBUTING.md>`_ first.
 
 Indices and tables
 -------------------

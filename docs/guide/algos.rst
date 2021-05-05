@@ -5,40 +5,35 @@ This table displays the rl algorithms that are implemented in the Stable Baselin
 along with some useful characteristics: support for discrete/continuous actions, multiprocessing.
 
 
-============ =========== ============ ================= =============== ================
-Name         ``Box``     ``Discrete`` ``MultiDiscrete`` ``MultiBinary`` Multi Processing
-============ =========== ============ ================= =============== ================
-A2C          ✔️           ✔️            ✔️                 ✔️               ✔️
-DDPG         ✔️          ❌            ❌                ❌              ❌
-DQN          ❌           ✔️           ❌                ❌              ❌
-HER          ✔️            ✔️           ❌                ❌              ❌
-PPO          ✔️           ✔️            ✔️                 ✔️               ✔️
-SAC          ✔️          ❌            ❌                ❌              ❌
-TD3          ✔️          ❌            ❌                ❌              ❌
-============ =========== ============ ================= =============== ================
+============ =========== =========== ============ ================= =============== ================
+Name         ``Hybrid``  ``Box``     ``Discrete`` ``MultiDiscrete`` ``MultiBinary`` Multi Processing
+============ =========== =========== ============ ================= =============== ================
+A2C          ✔️           ✔️           ✔️            ✔️                 ✔️               ✔️
+DDPG         ❌           ✔️          ❌            ❌                ❌              ❌
+DQN          ❌           ❌           ✔️           ❌                ❌              ❌
+HER          ❌           ✔️            ✔️           ❌                ❌              ❌
+MPDQN        ✔️           ❌            ❌           ❌                ❌              ❌
+PADDPG       ✔️           ❌            ❌           ❌                ❌              ❌
+PDQN         ✔️           ❌            ❌           ❌                ❌              ❌
+PPO          ✔️           ✔️           ✔️            ✔️                 ✔️               ✔️
+SAC          ❌           ✔️          ❌            ❌                ❌              ❌
+SDDPG        ✔️           ❌            ❌           ❌                ❌              ❌
+TD3          ❌           ✔️          ❌            ❌                ❌              ❌
+============ =========== =========== ============ ================= =============== ================
 
 
-.. note::
-    Non-array spaces such as ``Dict`` or ``Tuple`` are not currently supported by any algorithm.
 
 Actions ``hmlf.spaces``:
 
+-  ``Hybrid``: a Tuple encoding hybrid actions. The first entry is the
+   discrete action executed and the remaining entries are the parameters
+   for each of the discrete actions
 -  ``Box``: A N-dimensional box that contains every point in the action
    space.
 -  ``Discrete``: A list of possible actions, where each timestep only
    one of the actions can be used.
 -  ``MultiDiscrete``: A list of possible actions, where each timestep only one action of each discrete set can be used.
 - ``MultiBinary``: A list of possible actions, where each timestep any of the actions can be used in any combination.
-
-
-.. note::
-
-  More algorithms (like QR-DQN or TQC) are implemented in our :ref:`contrib repo <sb3_contrib>`.
-
-.. note::
-
-  Some logging values (like ``ep_rew_mean``, ``ep_len_mean``) are only available when using a ``Monitor`` wrapper
-  See `Issue #339 <https://github.com/hill-a/stable-baselines/issues/339>`_ for more info.
 
 
 Reproducibility

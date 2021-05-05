@@ -1,6 +1,6 @@
 .. _dqn:
 
-.. automodule:: hmlf.dqn
+.. automodule:: hmlf.algorithms.dqn
 
 
 DQN
@@ -128,7 +128,7 @@ DQN Policies
   :members:
   :inherited-members:
 
-.. autoclass:: hmlf.dqn.policies.DQNPolicy
+.. autoclass:: hmlf.algorithms.dqn.policies.DQNPolicy
   :members:
   :noindex:
 
