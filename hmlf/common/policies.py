@@ -292,7 +292,7 @@ class BasePolicy(BaseModel):
         if isinstance(self.action_space, ContinuousParameters):
             actions = np.clip(actions, -1, self.action_space.high)
             actions = self.unscale_action(actions)
-            actions = self.action_space.build_action(observation[:, 0], actions)
+            actions = self.action_space.format_action(actions)
 
         if not vectorized_env:
             if state is not None:
