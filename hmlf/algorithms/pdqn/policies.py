@@ -213,7 +213,7 @@ class PDQNPolicy(BasePolicy):
         return net_kwargs
 
     def make_features_extractor(self, observation_space: Space) -> BaseFeaturesExtractor:
-        """ Helper method to create a features extractor."""
+        """Helper method to create a features extractor."""
         return self.features_extractor_class(observation_space, **self.features_extractor_kwargs)
 
 
