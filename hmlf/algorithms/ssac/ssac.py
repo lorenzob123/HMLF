@@ -134,8 +134,9 @@ class SSAC(OffPolicyAlgorithm):
         # Target entropy is used when learning the entropy coefficient
         if self.target_entropy == "auto":
             # automatically set target entropy if needed
-            self.target_entropy = sum(-np.prod(self.env.action_space[i].shape).astype(np.float32)
-                                      for i in range(1, len(self.env.action_space)))
+            self.target_entropy = sum(
+                -np.prod(self.env.action_space[i].shape).astype(np.float32) for i in range(1, len(self.env.action_space))
+            )
         else:
             # Force conversion
             # this will also throw an error for unexpected string

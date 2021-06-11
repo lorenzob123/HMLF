@@ -89,7 +89,7 @@ class MetaActor(BasePolicy):
         self.log_std_list = []
 
         for action_param_dim in self.continuous_action_dims:
-            actor_net = create_mlp(features_dim - 1, - 1, net_arch, activation_fn)
+            actor_net = create_mlp(features_dim - 1, -1, net_arch, activation_fn)
             actor_list.append(nn.Sequential(*actor_net))
             last_layer_dim = net_arch[-1] if len(net_arch) > 0 else features_dim
             self.action_dist_list.append(SquashedDiagGaussianDistribution(action_param_dim))
@@ -158,7 +158,8 @@ class MetaActor(BasePolicy):
             ii = [i]
             current_stage = int(obs[i, 0].item())
             actions[current_stage][i, :] = self.action_dist_list[current_stage].actions_from_params(
-                mean_actions[current_stage][ii], log_std[current_stage][ii], deterministic=deterministic, **kwargs)
+                mean_actions[current_stage][ii], log_std[current_stage][ii], deterministic=deterministic, **kwargs
+            )
         # Note: the action is squashed
         return th.cat(actions, dim=1)
 
@@ -173,7 +174,8 @@ class MetaActor(BasePolicy):
             ii = [i]
             current_stage = int(obs[i, 0].item())
             a, std = self.action_dist_list[current_stage].log_prob_from_params(
-                mean_actions[current_stage][ii], log_std[current_stage][ii], **kwargs)
+                mean_actions[current_stage][ii], log_std[current_stage][ii], **kwargs
+            )
             actions[current_stage][i, :] = a
             list_std.append(std.view(1, -1))
         # Note: the action is squashed
