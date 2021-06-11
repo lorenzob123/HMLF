@@ -8,4 +8,5 @@ from hmlf.algorithms.pdqn import PDQN
 from hmlf.algorithms.ppo import PPO
 from hmlf.algorithms.sac import SAC
 from hmlf.algorithms.sddpg import SDDPG
+from hmlf.algorithms.ssac import SSAC
 from hmlf.algorithms.td3 import TD3
