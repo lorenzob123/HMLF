@@ -9,7 +9,6 @@ import torch as th
 from hmlf.algorithms import A2C, PPO
 from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
 from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
-from hmlf.common.atari_wrappers import ClipRewardEnv
 from hmlf.common.env_util import is_wrapped, make_atari_env, make_vec_env, unwrap_wrapper
 from hmlf.common.evaluation import evaluate_policy
 from hmlf.common.monitor import Monitor
@@ -37,34 +36,6 @@ def test_make_vec_env(env_id, n_envs, vec_env_cls, wrapper_class):
         assert isinstance(env, SubprocVecEnv)
     # Kill subprocesses
     env.close()
-
-
-@pytest.mark.parametrize("env_id", ["BreakoutNoFrameskip-v4"])
-@pytest.mark.parametrize("n_envs", [1, 2])
-@pytest.mark.parametrize("wrapper_kwargs", [None, dict(clip_reward=False, screen_size=60)])
-def test_make_atari_env(env_id, n_envs, wrapper_kwargs):
-    env_id = "BreakoutNoFrameskip-v4"
-    env = make_atari_env(env_id, n_envs, wrapper_kwargs=wrapper_kwargs, monitor_dir=None, seed=0)
-
-    assert env.num_envs == n_envs
-
-    obs = env.reset()
-
-    new_obs, reward, _, _ = env.step([env.action_space.sample() for _ in range(n_envs)])
-
-    assert obs.shape == new_obs.shape
-
-    # Wrapped into DummyVecEnv
-    wrapped_atari_env = env.envs[0]
-    if wrapper_kwargs is not None:
-        assert obs.shape == (n_envs, 60, 60, 1)
-        assert wrapped_atari_env.observation_space.shape == (60, 60, 1)
-        assert not isinstance(wrapped_atari_env.env, ClipRewardEnv)
-    else:
-        assert obs.shape == (n_envs, 84, 84, 1)
-        assert wrapped_atari_env.observation_space.shape == (84, 84, 1)
-        assert isinstance(wrapped_atari_env.env, ClipRewardEnv)
-        assert np.max(np.abs(reward)) < 1.0
 
 
 def test_vec_env_kwargs():
