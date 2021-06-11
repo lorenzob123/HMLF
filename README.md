@@ -39,4 +39,8 @@ and now you can already use the library. If you want extra functionalities for t
 ```pip install -e .[extra]```
 
 
-## Examples
+## Documentation
+
+To build the documentation simply run the following commmand in the main folder
+``` make doc```
+This will create the html files for the documentation, that can be found in `docs/_build/html`.
