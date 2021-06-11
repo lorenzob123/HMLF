@@ -9,7 +9,7 @@ import torch as th
 from hmlf.algorithms import A2C, PPO
 from hmlf.algorithms.a2c import MlpPolicy as MlpPolicyA2C
 from hmlf.algorithms.ppo import MlpPolicy as MlpPolicyPPO
-from hmlf.common.env_util import is_wrapped, make_atari_env, make_vec_env, unwrap_wrapper
+from hmlf.common.env_util import is_wrapped, make_vec_env, unwrap_wrapper
 from hmlf.common.evaluation import evaluate_policy
 from hmlf.common.monitor import Monitor
 from hmlf.common.noise import ActionNoise, OrnsteinUhlenbeckActionNoise, VectorizedActionNoise
@@ -41,7 +41,6 @@ def test_make_vec_env(env_id, n_envs, vec_env_cls, wrapper_class):
 def test_vec_env_kwargs():
     env = make_vec_env("MountainCarContinuous-v0", n_envs=1, seed=0, env_kwargs={"goal_velocity": 0.11})
     assert env.get_attr("goal_velocity")[0] == 0.11
-
 
 
 def test_env_auto_monitor_wrap():
