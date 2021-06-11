@@ -4,14 +4,13 @@ import torch as th
 from torch import nn
 
 from hmlf import spaces
-from hmlf.common.distributions import SquashedDiagGaussianDistribution, StateDependentNoiseDistribution
-from hmlf.common.policies import BasePolicy, ContinuousCritic, create_sde_features_extractor
+from hmlf.algorithms.sddpg.policies import MetaCritic
+from hmlf.common.distributions import SquashedDiagGaussianDistribution
+from hmlf.common.policies import BasePolicy, ContinuousCritic
 from hmlf.common.policy_register import register_policy
 from hmlf.common.preprocessing import get_action_dim
 from hmlf.common.torch_layers import BaseFeaturesExtractor, FlattenExtractor, NatureCNN, create_mlp, get_actor_critic_arch
 from hmlf.common.type_aliases import Schedule
-
-from hmlf.algorithms.sddpg.policies import MetaCritic
 
 # CAP the standard deviation of the actor
 LOG_STD_MAX = 2
