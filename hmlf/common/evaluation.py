@@ -7,7 +7,7 @@ import numpy as np
 if TYPE_CHECKING:
     from hmlf.common import base_class
 
-from hmlf.environments.vec_env import VecEnv
+from hmlf.environments.vec_env import DummyVecEnv, VecEnv, VecMonitor, is_vecenv_wrapped
 
 
 def evaluate_policy(
@@ -23,7 +23,10 @@ def evaluate_policy(
 ) -> Union[Tuple[float, float], Tuple[List[float], List[int]]]:
     """
     Runs policy for ``n_eval_episodes`` episodes and returns average reward.
-    This is made to work only with one env.
+    If a vector env is passed in, this divides the episodes to evaluate onto the
+    different elements of the vector env. This static division of work is done to
+    remove bias. See https://github.com/DLR-RM/stable-baselines3/issues/402 for more
+    details and discussion.
 
     .. note::
         If environment has not been wrapped with ``Monitor`` wrapper, reward and
@@ -34,8 +37,7 @@ def evaluate_policy(
         wrapper before anything else.
 
     :param model: The RL agent you want to evaluate.
-    :param env: The gym environment. In the case of a ``VecEnv``
-        this must contain only one environment.
+    :param env: The gym environment or ``VecEnv`` environment.
     :param n_eval_episodes: Number of episode to evaluate the agent
     :param deterministic: Whether to use deterministic or stochastic actions
     :param render: Whether to render the environment or not
@@ -54,14 +56,12 @@ def evaluate_policy(
     """
     is_monitor_wrapped = False
     # Avoid circular import
-    from hmlf.common.env_util import is_wrapped
     from hmlf.common.monitor import Monitor
 
-    if isinstance(env, VecEnv):
-        assert env.num_envs == 1, "You must pass only one environment when using this function"
-        is_monitor_wrapped = env.env_is_wrapped(Monitor)[0]
-    else:
-        is_monitor_wrapped = is_wrapped(env, Monitor)
+    if not isinstance(env, VecEnv):
+        env = DummyVecEnv([lambda: env])
+
+    is_monitor_wrapped = is_vecenv_wrapped(env, VecMonitor) or env.env_is_wrapped(Monitor)[0]
 
     if not is_monitor_wrapped and warn:
         warnings.warn(
@@ -71,41 +71,58 @@ def evaluate_policy(
             UserWarning,
         )
 
-    episode_rewards, episode_lengths = [], []
-    not_reseted = True
-    while len(episode_rewards) < n_eval_episodes:
-        # Number of loops here might differ from true episodes
-        # played, if underlying wrappers modify episode lengths.
-        # Avoid double reset, as VecEnv are reset automatically.
-        if not isinstance(env, VecEnv) or not_reseted:
-            obs = env.reset()
-            not_reseted = False
-        done, state = False, None
-        episode_reward = 0.0
-        episode_length = 0
-        while not done:
-            action, state = model.predict(obs, state=state, deterministic=deterministic)
-            obs, reward, done, info = env.step(action)
-            episode_reward += reward
-            if callback is not None:
-                callback(locals(), globals())
-            episode_length += 1
-            if render:
-                env.render()
+    n_envs = env.num_envs
+    episode_rewards = []
+    episode_lengths = []
 
-        if is_monitor_wrapped:
-            # Do not trust "done" with episode endings.
-            # Remove vecenv stacking (if any)
-            if isinstance(env, VecEnv):
-                info = info[0]
-            if "episode" in info.keys():
-                # Monitor wrapper includes "episode" key in info if environment
-                # has been wrapped with it. Use those rewards instead.
-                episode_rewards.append(info["episode"]["r"])
-                episode_lengths.append(info["episode"]["l"])
-        else:
-            episode_rewards.append(episode_reward)
-            episode_lengths.append(episode_length)
+    episode_counts = np.zeros(n_envs, dtype="int")
+    # Divides episodes among different sub environments in the vector as evenly as possible
+    episode_count_targets = np.array([(n_eval_episodes + i) // n_envs for i in range(n_envs)], dtype="int")
+
+    current_rewards = np.zeros(n_envs)
+    current_lengths = np.zeros(n_envs, dtype="int")
+    observations = env.reset()
+    states = None
+    while (episode_counts < episode_count_targets).any():
+        actions, states = model.predict(observations, state=states, deterministic=deterministic)
+        observations, rewards, dones, infos = env.step(actions)
+        current_rewards += rewards
+        current_lengths += 1
+        for i in range(n_envs):
+            if episode_counts[i] < episode_count_targets[i]:
+
+                # unpack values so that the callback can access the local variables
+                reward = rewards[i]
+                done = dones[i]
+                info = infos[i]
+
+                if callback is not None:
+                    callback(locals(), globals())
+
+                if dones[i]:
+                    if is_monitor_wrapped:
+                        # Atari wrapper can send a "done" signal when
+                        # the agent loses a life, but it does not correspond
+                        # to the true end of episode
+                        if "episode" in info.keys():
+                            # Do not trust "done" with episode endings.
+                            # Monitor wrapper includes "episode" key in info if environment
+                            # has been wrapped with it. Use those rewards instead.
+                            episode_rewards.append(info["episode"]["r"])
+                            episode_lengths.append(info["episode"]["l"])
+                            # Only increment at the real end of an episode
+                            episode_counts[i] += 1
+                    else:
+                        episode_rewards.append(current_rewards[i])
+                        episode_lengths.append(current_lengths[i])
+                        episode_counts[i] += 1
+                    current_rewards[i] = 0
+                    current_lengths[i] = 0
+                    if states is not None:
+                        states[i] *= 0
+
+        if render:
+            env.render()
 
     mean_reward = np.mean(episode_rewards)
     std_reward = np.std(episode_rewards)
